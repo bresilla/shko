@@ -6,10 +6,6 @@ import (
 	term "github.com/nsf/termbox-go"
 )
 
-func reset() {
-	term.Sync()
-}
-
 func Run() {
 	err := term.Init()
 	ErrorCheck(err)
@@ -19,26 +15,25 @@ keyPressListenerLoop:
 	for {
 		switch ev := term.PollEvent(); ev.Type {
 		case term.EventKey:
-			switch ev.Key {
-			case term.KeyEsc | term.KeySpace:
+			if ev.Key == term.KeySpace {
+				fmt.Println("SPACEEEEE")
+			} else if ev.Key == term.KeyEsc || ev.Ch == 45 || ev.Ch == 113 {
 				break keyPressListenerLoop
-			case term.KeyArrowUp:
-				reset()
-				fmt.Println("Arrow Up pressed")
-			case term.KeyArrowDown:
-				reset()
-				fmt.Println("Arrow Down pressed")
-			case term.KeyArrowLeft:
-				reset()
-				fmt.Println("Arrow Left pressed")
-			case term.KeyArrowRight:
-				reset()
-				fmt.Println("Arrow Right pressed")
-			case term.KeyEnter:
-				reset()
-				fmt.Println("Enter pressed")
-			default:
-				break keyPressListenerLoop
+			} else if ev.Key == term.KeyArrowUp {
+				term.Sync()
+				fmt.Println(term.KeyArrowUp)
+			} else if ev.Key == term.KeyArrowDown {
+				term.Sync()
+				fmt.Println(term.KeyArrowDown)
+			} else if ev.Key == term.KeyArrowLeft {
+				term.Sync()
+				fmt.Println(term.KeyArrowLeft)
+			} else if ev.Key == term.KeyArrowRight {
+				term.Sync()
+				fmt.Println(term.KeyArrowRight)
+			} else {
+				term.Sync()
+				fmt.Println("ASCII : ", ev.Ch)
 			}
 		case term.EventError:
 			panic(ev.Err)
