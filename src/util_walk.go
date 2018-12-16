@@ -13,15 +13,16 @@ import (
 var ComputeHashes = true
 
 type File struct {
-	Path    string
-	Name    string
-	Parent  string
-	Size    int64
-	Mode    os.FileMode
-	ModTime time.Time
-	IsDir   bool
-	Hash    uint64 `hash:"ignore"`
-	Hidden  bool
+	Path     string
+	Name     string
+	Parent   string
+	IsDir    bool
+	Hidden   bool
+	Size     int64
+	Mode     os.FileMode
+	ModTime  time.Time
+	Hash     uint64 `hash:"ignore"`
+	Children int
 }
 
 func ListRecourFiles(dir string) (files []File, err error) {

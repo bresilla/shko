@@ -1,61 +1,48 @@
 package spejt
 
 import (
-	"errors"
 	"os"
-	"path/filepath"
-	"strconv"
+	"path"
+	"strings"
+
+	"github.com/mitchellh/hashstructure"
 )
 
-func ConfigDir() (string, error) {
-	return buildHome("XDG_CONFIG_HOME", ".config")
+func EnvDir(env string) (file File) {
+	path := os.Getenv(env)
+	file = CurrentDir(path)
+	return
 }
 
-func DataDir() (string, error) {
-	return buildHome("XDG_DATA_HOME", ".local", "share")
-}
-
-func CacheDir() (string, error) {
-	return buildHome("XDG_CACHE_HOME", ".cache")
-}
-
-func RuntimeDir() string {
-	xDir := os.Getenv("XDG_RUNTIME_DIR")
-	if xDir != "" {
-		return xDir
+func CurrentDir(dir string) (file File) {
+	f, err := os.Stat(dir)
+	if err != nil {
+		return file
 	}
-
-	return filepath.Join(os.TempDir(), strconv.Itoa(os.Getuid()))
-}
-
-func buildHome(env string, paths ...string) (string, error) {
-	xdgHome := os.Getenv(env)
-	if xdgHome != "" {
-		return xdgHome, nil
+	parentPath, name := path.Split(dir)
+	parentPath = strings.TrimRight(parentPath, "/")
+	_, parent := path.Split(parentPath)
+	if parent == "" {
+		parent = "root"
 	}
+	file.Path = dir
+	file.Name = name
+	file.Parent = parent
+	file.Size = f.Size()
+	file.Mode = f.Mode()
+	file.ModTime = f.ModTime()
+	file.IsDir = f.IsDir()
 
-	home := homeDir()
-	if home == "" {
-		return "", errors.New("home directory not found")
+	if string(name[0]) == "." {
+		file.Hidden = true
 	}
-
-	elem := make([]string, len(paths)+1)
-	elem[0] = home
-	for i, p := range paths {
-		elem[i+1] = p
+	if ComputeHashes {
+		var h uint64
+		h, err = hashstructure.Hash(file, nil)
+		if err != nil {
+			return file
+		}
+		file.Hash = h
 	}
-	return filepath.Join(elem...), nil
-}
-
-func homeDir() string {
-	home := os.Getenv("HOME")
-	if home != "" {
-		return home
-	}
-	return os.Getenv("USERPROFILE")
-}
-
-func WorkingDir() string {
-	path := os.Getenv("PWD")
-	return path
+	return
 }

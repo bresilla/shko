@@ -6,6 +6,15 @@ import (
 	term "github.com/nsf/termbox-go"
 )
 
+var currentDir = EnvDir("PWD")
+
+func ListDirs(dir string) {
+	list := ListChooseCurrent(true, true, true, dir)
+	for _, d := range list {
+		fmt.Println(d.Name, "\t")
+	}
+}
+
 func Run() {
 	err := term.Init()
 	ErrorCheck(err)
@@ -16,7 +25,7 @@ keyPressListenerLoop:
 		switch ev := term.PollEvent(); ev.Type {
 		case term.EventKey:
 			if ev.Key == term.KeySpace {
-				ListDirs(WorkingDir())
+				ListDirs(currentDir.Path)
 			} else if ev.Key == term.KeyEsc || ev.Ch == 45 || ev.Ch == 113 {
 				break keyPressListenerLoop
 			} else if ev.Key == term.KeyArrowUp {
