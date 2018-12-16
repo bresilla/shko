@@ -2,16 +2,26 @@ package spejt
 
 import (
 	"fmt"
+	"os"
 
 	term "github.com/nsf/termbox-go"
 )
 
-var currentDir = EnvDir("PWD")
+var (
+	incFolder = true
+	incFiles  = true
+	incHidden = false
+)
 
-func ListDirs(dir string) {
-	list := ListChooseCurrent(true, true, true, dir)
-	for _, d := range list {
-		fmt.Println(d.Name, "\t")
+var (
+	currentDir = StringDirToFile(os.Getenv("PWD"))
+	parent     string
+	child      string
+)
+
+func MakeCool(file []File) {
+	for _, f := range file {
+		fmt.Println(f.Name)
 	}
 }
 
@@ -19,13 +29,17 @@ func Run() {
 	err := term.Init()
 	ErrorCheck(err)
 	defer term.Close()
+	children, _ := ListDirs(currentDir)
+	MakeCool(children)
 
 keyPressListenerLoop:
 	for {
 		switch ev := term.PollEvent(); ev.Type {
 		case term.EventKey:
 			if ev.Key == term.KeySpace {
-				ListDirs(currentDir.Path)
+				currentDir = CurrentDir("/home/bresilla/DATA")
+				fmt.Println(currentDir.Path, currentDir.Parent)
+				//StatDir("/")
 			} else if ev.Key == term.KeyEsc || ev.Ch == 45 || ev.Ch == 113 {
 				break keyPressListenerLoop
 			} else if ev.Key == term.KeyArrowUp {
@@ -36,7 +50,10 @@ keyPressListenerLoop:
 				fmt.Println(term.KeyArrowDown)
 			} else if ev.Key == term.KeyArrowLeft {
 				term.Sync()
-				fmt.Println(term.KeyArrowLeft)
+				_, parent := ListDirs(currentDir)
+				children, _ := ListDirs(CurrentDir(parent.Path))
+				MakeCool(children)
+				currentDir = CurrentDir(parent.Path)
 			} else if ev.Key == term.KeyArrowRight {
 				term.Sync()
 				fmt.Println(term.KeyArrowRight)

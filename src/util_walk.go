@@ -13,16 +13,15 @@ import (
 var ComputeHashes = true
 
 type File struct {
-	Path     string
-	Name     string
-	Parent   string
-	IsDir    bool
-	Hidden   bool
-	Size     int64
-	Mode     os.FileMode
-	ModTime  time.Time
-	Hash     uint64 `hash:"ignore"`
-	Children int
+	Path    string
+	Name    string
+	Parent  string
+	IsDir   bool
+	Hidden  bool
+	Size    int64
+	Mode    os.FileMode
+	ModTime time.Time
+	Hash    uint64 `hash:"ignore"`
 }
 
 func ListRecourFiles(dir string) (files []File, err error) {
@@ -94,10 +93,9 @@ func ListCurrentFiles(dir string) (files []File, err error) {
 		if err != nil {
 			return files, err
 		}
-		pathremain := strings.TrimRight(dir, "/")
-		_, parent := path.Split(pathremain)
+		_, parent := path.Split(dir)
 		if parent == "" {
-			parent = "root"
+			parent = "/"
 		}
 		file := File{
 			Path:    thepath,
@@ -165,6 +163,15 @@ func ListChooseCurrent(incFolder, incFiles, incHidden bool, dir string) (list []
 				}
 			}
 		}
+	}
+	return
+}
+
+func ListDirs(dir File) (files []File, parent File) {
+	list := ListChooseCurrent(incFolder, incFiles, incHidden, dir.Path)
+	parent = StringDirToFile(path.Dir(dir.Path))
+	for _, d := range list {
+		files = append(files, d)
 	}
 	return
 }

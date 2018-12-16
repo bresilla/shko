@@ -1,6 +1,7 @@
 package spejt
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -8,10 +9,15 @@ import (
 	"github.com/mitchellh/hashstructure"
 )
 
-func EnvDir(env string) (file File) {
-	path := os.Getenv(env)
+func StringDirToFile(path string) (file File) {
 	file = CurrentDir(path)
 	return
+}
+
+func StatDir(dir string) {
+	f, err := os.Stat(dir)
+	ErrorCheck(err)
+	fmt.Println(f)
 }
 
 func CurrentDir(dir string) (file File) {
@@ -19,12 +25,18 @@ func CurrentDir(dir string) (file File) {
 	if err != nil {
 		return file
 	}
-	parentPath, name := path.Split(dir)
-	parentPath = strings.TrimRight(parentPath, "/")
-	_, parent := path.Split(parentPath)
-	if parent == "" {
-		parent = "root"
+	parent := "/"
+	name := "/"
+	if dir != "/" {
+		dir = path.Clean(dir)
+		parent, name = path.Split(dir)
+		parent = strings.TrimRight(parent, "/")
+		_, parent = path.Split(parent)
+		if parent == "" {
+			parent = "/"
+		}
 	}
+
 	file.Path = dir
 	file.Name = name
 	file.Parent = parent
