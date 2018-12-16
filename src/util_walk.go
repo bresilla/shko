@@ -21,9 +21,10 @@ type File struct {
 	ModTime time.Time
 	IsDir   bool
 	Hash    uint64 `hash:"ignore"`
+	Hidden  bool
 }
 
-func ListFiles(dir string) (files []File, err error) {
+func ListRecourFiles(dir string) (files []File, err error) {
 	files = []File{}
 	err = godirwalk.Walk(dir, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) (err error) {
@@ -43,6 +44,9 @@ func ListFiles(dir string) (files []File, err error) {
 				ModTime: f.ModTime(),
 				IsDir:   f.IsDir(),
 			}
+			if string(name[0]) == "." {
+				file.Hidden = true
+			}
 			if ComputeHashes {
 				var h uint64
 				h, err = hashstructure.Hash(file, nil)
@@ -60,16 +64,105 @@ func ListFiles(dir string) (files []File, err error) {
 	return
 }
 
-func ListPathsNFiles(dir string) (paths []File, files []File) {
+func ListRecourPathsNFiles(dir string) (paths []File, files []File) {
 	files = []File{}
 	paths = []File{}
-	list, err := ListFiles(dir)
-	ErrorCheck(err)
+	list, err := ListRecourFiles(dir)
+	if err != nil {
+		return
+	}
 	for _, f := range list {
 		if f.IsDir {
 			paths = append(paths, f)
 		} else {
 			files = append(files, f)
+		}
+	}
+	return
+}
+
+func ListCurrentFiles(dir string) (files []File, err error) {
+	files = []File{}
+	children, err := godirwalk.ReadDirnames(dir, nil)
+	if err != nil {
+		return
+	}
+	for _, child := range children {
+		thepath := path.Join(dir + "/" + child)
+		f, err := os.Stat(thepath)
+		if err != nil {
+			return files, err
+		}
+		pathremain := strings.TrimRight(dir, "/")
+		_, parent := path.Split(pathremain)
+		if parent == "" {
+			parent = "root"
+		}
+		file := File{
+			Path:    thepath,
+			Name:    child,
+			Parent:  parent,
+			Size:    f.Size(),
+			Mode:    f.Mode(),
+			ModTime: f.ModTime(),
+			IsDir:   f.IsDir(),
+		}
+		if string(child[0]) == "." {
+			file.Hidden = true
+		}
+		if ComputeHashes {
+			var h uint64
+			h, err = hashstructure.Hash(file, nil)
+			if err != nil {
+				return files, err
+			}
+			file.Hash = h
+		}
+		files = append(files, file)
+	}
+	return
+}
+
+func ListCurrentPathsNFiles(dir string) (paths []File, files []File) {
+	files = []File{}
+	paths = []File{}
+	list, err := ListCurrentFiles(dir)
+	if err != nil {
+		return
+	}
+	for _, f := range list {
+		if f.IsDir {
+			paths = append(paths, f)
+		} else {
+			files = append(files, f)
+		}
+	}
+	return
+}
+
+func ListChooseCurrent(incFolder, incFiles, incHidden bool, dir string) (list []File) {
+	list = []File{}
+	dirs, files := ListCurrentPathsNFiles(dir)
+	if incFolder {
+		for _, d := range dirs {
+			if incHidden {
+				list = append(list, d)
+			} else {
+				if d.Hidden == false {
+					list = append(list, d)
+				}
+			}
+		}
+	}
+	if incFiles {
+		for _, f := range files {
+			if incHidden {
+				list = append(list, f)
+			} else {
+				if f.Hidden == false {
+					list = append(list, f)
+				}
+			}
 		}
 	}
 	return

@@ -16,7 +16,7 @@ keyPressListenerLoop:
 		switch ev := term.PollEvent(); ev.Type {
 		case term.EventKey:
 			if ev.Key == term.KeySpace {
-				fmt.Println("SPACEEEEE")
+				ListDirs(WorkingDir())
 			} else if ev.Key == term.KeyEsc || ev.Ch == 45 || ev.Ch == 113 {
 				break keyPressListenerLoop
 			} else if ev.Key == term.KeyArrowUp {
