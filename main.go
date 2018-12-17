@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	spejt.Run()
+	spejt.Loop()
 }

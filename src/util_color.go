@@ -18,6 +18,7 @@ const (
 	Magenta
 	Cyan
 	White
+	Grey
 )
 
 const (
