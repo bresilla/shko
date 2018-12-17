@@ -14,12 +14,12 @@ func SelectInList(selected int, file []File) {
 
 func colorList(file File, active bool) {
 	if file.IsDir && active {
-		Print(HighLight, Red, None, "\t ≡  "+file.Name+"/")
+		Print(HighLight, Red, None, "\t »  "+file.Name+"/")
 	} else if file.IsDir && !active {
-		Print(HighLight, White, None, "\t≡  "+file.Name+"/")
+		Print(HighLight, White, None, "\t»  "+file.Name+"/")
 	} else if !file.IsDir && active {
-		Print(HighLight, Red, None, "\t »  "+file.Name)
+		Print(HighLight, Red, None, "\t ♦  "+file.Name)
 	} else if !file.IsDir && !active {
-		Print(Default, Grey, None, "\t»  "+file.Name)
+		Print(Default, Grey, None, "\t♦  "+file.Name)
 	}
 }

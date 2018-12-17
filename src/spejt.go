@@ -1,6 +1,7 @@
 package spejt
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -21,25 +22,49 @@ var (
 	cmd        *exec.Cmd
 	startNr    = 0
 	cursorarr  []int
+	outDir     = "/tmp/spejt"
 )
 
-func ChangeDir(cmd *exec.Cmd, filepath string) {
-	cmd = exec.Command("cd", filepath)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
+func OpenItem(startNr int, children []File, currentDir File, cursorarr *[]int) (file File) {
+	if children[startNr].IsDir {
+		*cursorarr = append(*cursorarr, startNr)
+		file = CurrentDir(children[startNr].Path)
+	} else {
+		OpenInEditor(children[startNr].Path)
+		file = currentDir
+	}
+	return
+}
+
+func WriteTempFile(toWrite string) {
+	file, err := os.OpenFile(outDir, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		fmt.Println("File does not exists or cannot be created")
+		os.Exit(1)
+	}
+	defer file.Close()
+
+	w := bufio.NewWriter(file)
+	fmt.Fprintf(w, toWrite)
+	w.Flush()
+}
+
+func AlterWrite(toWrite string) {
 }
 
 func Loop() {
 	term.MoveCursor(0, 0)
-	term.Clear()
 	term.Flush()
+	term.Clear()
 	for {
 		term.MoveCursor(0, 0)
+		term.Flush()
+		term.Clear()
 		_, parent := ListDirs(currentDir)
 		children, _ := ListDirs(currentDir)
 		SelectInList(startNr, children)
 		ascii, keycode, _ := GetChar()
-		if ascii == 3 || ascii == 45 {
+		if ascii == 3 || ascii == 45 || ascii == 13 {
 			break
 		} else if ascii == shortcut {
 			break
@@ -74,18 +99,13 @@ func Loop() {
 			currentDir = CurrentDir(parent.Path)
 		} else if keycode == 39 {
 			//right
-			cursorarr = append(cursorarr, startNr)
-			if children[startNr].IsDir {
-				currentDir = CurrentDir(children[startNr].Path)
-			} else {
-				OpenInEditor(children[startNr].Path)
-			}
+			currentDir = OpenItem(startNr, children, currentDir, &cursorarr)
 			startNr = 0
 		} else {
 			fmt.Println(ascii, "\t", keycode)
 		}
-		term.Flush()
-		term.Clear()
 	}
 	fmt.Println()
+	file, _ := os.Create(outDir)
+	file.WriteString(currentDir.Path)
 }
