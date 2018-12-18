@@ -54,6 +54,7 @@ func AlterWrite(toWrite string) {
 
 func Loop() {
 	term.MoveCursor(0, 0)
+	fmt.Print("\033[?25l")
 	term.Flush()
 	term.Clear()
 	for {
@@ -106,7 +107,9 @@ func Loop() {
 			fmt.Println(ascii, "\t", keycode)
 		}
 		fmt.Println()
+		fmt.Print("\033[?25l")
 	}
+	fmt.Print("\033[?25h")
 	fmt.Println()
 	file, _ := os.Create(outDir)
 	file.WriteString(currentDir.Path)
