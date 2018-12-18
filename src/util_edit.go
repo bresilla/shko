@@ -6,9 +6,9 @@ import (
 	"os/exec"
 )
 
-func OpenInEditor(filepath string) bool {
+func OpenFile(file File) bool {
 	var cmd *exec.Cmd
-
+	filepath := file.Path
 	editor := os.Getenv("EDITOR")
 
 	if len(editor) > 0 {
