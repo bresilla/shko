@@ -57,12 +57,13 @@ func Loop() {
 	term.Flush()
 	term.Clear()
 	for {
+		children, parent := ListDirs(currentDir)
 		term.MoveCursor(0, 0)
 		term.Flush()
 		term.Clear()
-		_, parent := ListDirs(currentDir)
-		children, _ := ListDirs(currentDir)
+		fmt.Println()
 		SelectInList(startNr, children)
+		fmt.Println()
 		ascii, keycode, _ := GetChar()
 		if ascii == 3 || ascii == 45 || ascii == 13 {
 			break
@@ -104,6 +105,7 @@ func Loop() {
 		} else {
 			fmt.Println(ascii, "\t", keycode)
 		}
+		fmt.Println()
 	}
 	fmt.Println()
 	file, _ := os.Create(outDir)

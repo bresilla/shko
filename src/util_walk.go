@@ -3,6 +3,7 @@ package spejt
 import (
 	"os"
 	"path"
+	"sort"
 	"strings"
 	"time"
 
@@ -87,6 +88,7 @@ func ListCurrentFiles(dir string) (files []File, err error) {
 	if err != nil {
 		return
 	}
+	sort.Strings(children)
 	for _, child := range children {
 		thepath := path.Join(dir + "/" + child)
 		f, err := os.Stat(thepath)
