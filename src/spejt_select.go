@@ -10,6 +10,9 @@ func SelectInList(selected int, file []File) {
 			colorList(el, false)
 		}
 	}
+	if len(file) == 0 {
+		Print(HighLight, Black, Red, "\tthis directory is empty")
+	}
 }
 
 func colorList(file File, active bool) {

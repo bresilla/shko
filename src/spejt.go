@@ -9,8 +9,8 @@ import (
 
 var (
 	incFolder     = true
-	incFiles      = true
-	incHidden     = false
+	incFiles      = false
+	incHidden     = true
 	cursoroll     = true
 	shortcut      = 113
 	currentDir, _ = makeFile(os.Getenv("PWD"))
@@ -81,16 +81,27 @@ func Loop() {
 			number = 0
 		} else {
 			for {
-				fmt.Println()
-				fmt.Println(len(subdirs))
 				//file, _ := ListRecourPathsNFiles(outDir)
 				//println(file)
 				ascii, keycode, _ := GetChar()
+				if ascii == 46 {
+					if incHidden {
+						incHidden = false
+					} else {
+						incHidden = true
+					}
+				} else if ascii == 44 {
+					if incFiles {
+						incFiles = false
+					} else {
+						incFiles = true
+					}
+				}
 				break
 				if ascii == 3 || keycode == 50 {
 					break
 				} else {
-					//fmt.Println(ascii, "\t", keycode)
+					fmt.Println(ascii, "\t", keycode)
 				}
 			}
 		}
