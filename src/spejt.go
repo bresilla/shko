@@ -10,37 +10,46 @@ import (
 var (
 	incFolder     = true
 	incFiles      = false
-	incHidden     = true
+	incHidden     = false
 	cursoroll     = true
 	shortcut      = 113
 	currentDir, _ = makeFile(os.Getenv("PWD"))
-	parent        string
-	child         string
+	foreward      = true
+	backward      = true
 	number        = 0
 	cursorarr     []int
 	outDir        = "/tmp/spejt"
+	track         = 0
 )
 
 func Loop() {
-	term.MoveCursor(0, 0)
 	fmt.Print("\033[?25l")
 	term.Flush()
 	term.Clear()
 	for {
-		subdirs, parent := ListDirs(currentDir)
-		term.MoveCursor(0, 0)
-		term.Flush()
-		term.Clear()
-		fmt.Println()
+		children, parent := ListDirs(currentDir)
+		subdirs := children
+		if len(subdirs) > term.Height()-1 {
+			if track < 0 {
+				track = 0
+			} else if track > len(children)+1-term.Height() {
+				track = len(children) + 1 - term.Height()
+			}
+			subdirs = subdirs[0+track : term.Height()-1+track]
+		}
 		SelectInList(number, subdirs)
 		ascii, keycode, _ := GetChar()
+		//println(ascii, "\t", keycode)
 		if ascii == 3 || ascii == 27 || ascii == 13 {
 			break
-		} else if ascii == shortcut {
+		} else if ascii == shortcut || keycode == shortcut {
 			break
-		} else if keycode == 38 {
-			//up
-			number--
+		} else if keycode == 38 { //up
+			if backward {
+				number--
+			} else {
+				track--
+			}
 			if number < 0 {
 				if cursoroll {
 					number = len(subdirs) - 1
@@ -48,9 +57,12 @@ func Loop() {
 					number = 0
 				}
 			}
-		} else if keycode == 40 {
-			//down
-			number++
+		} else if keycode == 40 { //down
+			if foreward {
+				number++
+			} else {
+				track++
+			}
 			if number > len(subdirs)-1 {
 				if cursoroll {
 					number = 0
@@ -58,8 +70,7 @@ func Loop() {
 					number = len(subdirs) - 1
 				}
 			}
-		} else if keycode == 37 {
-			//left
+		} else if keycode == 37 { //left
 			if len(cursorarr) > 0 {
 				number = cursorarr[len(cursorarr)-1]
 				cursorarr = cursorarr[:len(cursorarr)-1]
@@ -67,8 +78,7 @@ func Loop() {
 				number = 0
 			}
 			currentDir, _ = makeFile(parent.Path)
-		} else if keycode == 39 {
-			//right
+		} else if keycode == 39 { //right
 			if len(subdirs) == 0 {
 				continue
 			}
@@ -81,8 +91,6 @@ func Loop() {
 			number = 0
 		} else {
 			for {
-				//file, _ := ListRecourPathsNFiles(outDir)
-				//println(file)
 				ascii, keycode, _ := GetChar()
 				if ascii == 46 {
 					if incHidden {
@@ -90,23 +98,32 @@ func Loop() {
 					} else {
 						incHidden = true
 					}
+					break
 				} else if ascii == 44 {
 					if incFiles {
 						incFiles = false
 					} else {
 						incFiles = true
 					}
-				}
-				break
-				if ascii == 3 || keycode == 50 {
+					break
+				} else if ascii == 35 {
+					if cursoroll {
+						cursoroll = false
+					} else {
+						cursoroll = true
+					}
+					break
+				} else if ascii == 3 || keycode == 50 {
+					break
+				} else if ascii == 45 {
+					track--
 					break
 				} else {
-					fmt.Println(ascii, "\t", keycode)
+					track++
+					break
 				}
 			}
 		}
-		fmt.Println()
-		fmt.Print("\033[?25l")
 	}
 	fmt.Print("\033[?25h")
 	fmt.Println()
