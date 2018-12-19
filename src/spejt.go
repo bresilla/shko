@@ -14,8 +14,8 @@ var (
 	cursoroll     = true
 	shortcut      = 113
 	currentDir, _ = makeFile(os.Getenv("PWD"))
-	foreward      = true
-	backward      = true
+	foreward      = false
+	backward      = false
 	number        = 0
 	cursorarr     []int
 	outDir        = "/tmp/spejt"
@@ -46,9 +46,9 @@ func Loop() {
 			break
 		} else if keycode == 38 { //up
 			if backward {
-				number--
-			} else {
 				track--
+			} else {
+				number--
 			}
 			if number < 0 {
 				if cursoroll {
@@ -59,9 +59,9 @@ func Loop() {
 			}
 		} else if keycode == 40 { //down
 			if foreward {
-				number++
-			} else {
 				track++
+			} else {
+				number++
 			}
 			if number > len(subdirs)-1 {
 				if cursoroll {
