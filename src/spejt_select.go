@@ -1,6 +1,8 @@
 package spejt
 
 import (
+	"fmt"
+
 	term "github.com/buger/goterm"
 )
 
@@ -18,18 +20,33 @@ func SelectInList(selected int, file []File) {
 		}
 	}
 	if len(file) == 0 {
-		Print(HighLight, Black, Red, "\t nothing to show ")
+		Print(HighLight, Black, Cyan, "\t nothing to show ")
 	}
 }
 
 func colorList(file File, active bool) {
+	var name string
+	if file.IsDir {
+		name = "»  " + file.Name
+	} else {
+		name = "♦  " + file.Name
+	}
 	if file.IsDir && active {
-		Print(HighLight, Black, Red, "\t »  "+file.Name+" / ")
+		SetStyle(HighLight, Black, Cyan)
+		fmt.Println("\t " + name + " / ")
+		ResetStyle()
 	} else if file.IsDir && !active {
-		Print(HighLight, White, None, "\t»  "+file.Name+"/")
+		SetStyle(HighLight, White, None)
+		fmt.Println("\t" + name + "/")
+		ResetStyle()
 	} else if !file.IsDir && active {
-		Print(HighLight, Black, Red, "\t ♦  "+file.Name+" ")
+		SetStyle(HighLight, Black, Cyan)
+		fmt.Println("\t " + name + " ")
+		ResetStyle()
 	} else if !file.IsDir && !active {
-		Print(Default, Grey, None, "\t♦  "+file.Name)
+		SetStyle(HighLight, Grey, None)
+		fmt.Println("\t" + name)
+		ResetStyle()
+
 	}
 }

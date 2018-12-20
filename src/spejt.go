@@ -17,9 +17,9 @@ var (
 	foreward      = false
 	backward      = false
 	number        = 0
+	scroll        = 0
 	cursorarr     []int
 	outDir        = "/tmp/spejt"
-	track         = 0
 )
 
 func Loop() {
@@ -30,12 +30,22 @@ func Loop() {
 		children, parent := ListDirs(currentDir)
 		subdirs := children
 		if len(subdirs) > term.Height()-1 {
-			if track < 0 {
-				track = 0
-			} else if track > len(children)+1-term.Height() {
-				track = len(children) + 1 - term.Height()
+			if number > term.Height()-3 {
+				foreward = true
+				backward = false
 			}
-			subdirs = subdirs[0+track : term.Height()-1+track]
+			if number < 1 {
+				backward = true
+				foreward = false
+			}
+			if scroll < 0 {
+				scroll = 0
+				backward = false
+			} else if scroll > len(children)+1-term.Height() {
+				scroll = len(children) + 1 - term.Height()
+				foreward = false
+			}
+			subdirs = subdirs[0+scroll : term.Height()-1+scroll]
 		}
 		SelectInList(number, subdirs)
 		ascii, keycode, _ := GetChar()
@@ -44,9 +54,11 @@ func Loop() {
 			break
 		} else if ascii == shortcut || keycode == shortcut {
 			break
+		} else if ascii == 50 {
+			scroll--
 		} else if keycode == 38 { //up
 			if backward {
-				track--
+				scroll--
 			} else {
 				number--
 			}
@@ -57,9 +69,11 @@ func Loop() {
 					number = 0
 				}
 			}
+		} else if ascii == 49 {
+			scroll++
 		} else if keycode == 40 { //down
 			if foreward {
-				track++
+				scroll++
 			} else {
 				number++
 			}
@@ -116,10 +130,20 @@ func Loop() {
 				} else if ascii == 3 || keycode == 50 {
 					break
 				} else if ascii == 45 {
-					track--
+					if backward {
+						backward = false
+					} else {
+						backward = true
+					}
 					break
 				} else {
-					track++
+					if foreward || backward {
+						foreward = false
+						backward = false
+					} else {
+						foreward = true
+						backward = true
+					}
 					break
 				}
 			}
