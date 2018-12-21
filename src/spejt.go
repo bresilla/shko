@@ -31,18 +31,17 @@ func Loop() {
 		var backward = false
 		subdirs := children
 		if len(subdirs) > term.Height()-1 {
-			if number > term.Height()-3 {
+			if number > term.Height()/2 {
 				foreward = true
 				backward = false
-			}
-			if number < 1 {
+			} else if number < term.Height()/2-2 {
 				backward = true
 				foreward = false
 			}
-			if scroll < 0 {
+			if scroll <= 0 {
 				scroll = 0
 				backward = false
-			} else if scroll > len(children)+1-term.Height() {
+			} else if scroll >= len(children)+1-term.Height() {
 				scroll = len(children) + 1 - term.Height()
 				foreward = false
 			}
