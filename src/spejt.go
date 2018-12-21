@@ -11,11 +11,10 @@ var (
 	incFolder     = true
 	incFiles      = false
 	incHidden     = false
-	cursoroll     = true
+	cursoroll     = false
 	shortcut      = 113
 	currentDir, _ = makeFile(os.Getenv("PWD"))
-	foreward      = false
-	backward      = false
+	changeDir     = true
 	number        = 0
 	scroll        = 0
 	cursorarr     []int
@@ -26,8 +25,10 @@ func Loop() {
 	fmt.Print("\033[?25l")
 	term.Flush()
 	term.Clear()
+	children, parent := ListDirs(currentDir)
 	for {
-		children, parent := ListDirs(currentDir)
+		var foreward = false
+		var backward = false
 		subdirs := children
 		if len(subdirs) > term.Height()-1 {
 			if number > term.Height()-3 {
@@ -49,13 +50,11 @@ func Loop() {
 		}
 		SelectInList(number, subdirs)
 		ascii, keycode, _ := GetChar()
-		//println(ascii, "\t", keycode)
-		if ascii == 3 || ascii == 27 || ascii == 13 {
+		if ascii == 13 || ascii == shortcut || keycode == shortcut {
 			break
-		} else if ascii == shortcut || keycode == shortcut {
+		} else if ascii == 27 || ascii == 3 {
+			changeDir = false
 			break
-		} else if ascii == 50 {
-			scroll--
 		} else if keycode == 38 { //up
 			if backward {
 				scroll--
@@ -65,12 +64,11 @@ func Loop() {
 			if number < 0 {
 				if cursoroll {
 					number = len(subdirs) - 1
+					scroll = len(children) - 1
 				} else {
 					number = 0
 				}
 			}
-		} else if ascii == 49 {
-			scroll++
 		} else if keycode == 40 { //down
 			if foreward {
 				scroll++
@@ -80,6 +78,7 @@ func Loop() {
 			if number > len(subdirs)-1 {
 				if cursoroll {
 					number = 0
+					scroll = 0
 				} else {
 					number = len(subdirs) - 1
 				}
@@ -91,7 +90,11 @@ func Loop() {
 			} else {
 				number = 0
 			}
+			scroll = 0
+			backward = false
+			foreward = false
 			currentDir, _ = makeFile(parent.Path)
+			children, parent = ListDirs(currentDir)
 		} else if keycode == 39 { //right
 			if len(subdirs) == 0 {
 				continue
@@ -99,51 +102,32 @@ func Loop() {
 			if subdirs[number].IsDir {
 				cursorarr = append(cursorarr, number)
 				currentDir, _ = makeFile(subdirs[number].Path)
+				children, parent = ListDirs(currentDir)
 			} else {
 				OpenFile(subdirs[number])
 			}
 			number = 0
+			scroll = 0
+			backward = false
+			foreward = false
 		} else {
 			for {
 				ascii, keycode, _ := GetChar()
 				if ascii == 46 {
-					if incHidden {
-						incHidden = false
-					} else {
-						incHidden = true
-					}
+					incHidden = !incHidden
+					children, parent = ListDirs(currentDir)
 					break
 				} else if ascii == 44 {
-					if incFiles {
-						incFiles = false
-					} else {
-						incFiles = true
-					}
+					incFiles = !incFiles
+					children, parent = ListDirs(currentDir)
 					break
 				} else if ascii == 35 {
-					if cursoroll {
-						cursoroll = false
-					} else {
-						cursoroll = true
-					}
-					break
-				} else if ascii == 3 || keycode == 50 {
-					break
-				} else if ascii == 45 {
-					if backward {
-						backward = false
-					} else {
-						backward = true
-					}
+					cursoroll = !cursoroll
+					children, parent = ListDirs(currentDir)
 					break
 				} else {
-					if foreward || backward {
-						foreward = false
-						backward = false
-					} else {
-						foreward = true
-						backward = true
-					}
+					println(ascii, "\t", keycode)
+					GetChar()
 					break
 				}
 			}
@@ -151,6 +135,8 @@ func Loop() {
 	}
 	fmt.Print("\033[?25h")
 	fmt.Println()
-	file, _ := os.Create(outDir)
-	file.WriteString(currentDir.Path)
+	if changeDir {
+		file, _ := os.Create(outDir)
+		file.WriteString(currentDir.Path)
+	}
 }

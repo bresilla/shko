@@ -44,7 +44,7 @@ func colorList(file File, active bool) {
 		fmt.Println("\t " + name + " ")
 		ResetStyle()
 	} else if !file.IsDir && !active {
-		SetStyle(HighLight, Grey, None)
+		SetStyle(Default, Grey, None)
 		fmt.Println("\t" + name)
 		ResetStyle()
 

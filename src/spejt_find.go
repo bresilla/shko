@@ -1,0 +1,5 @@
+package spejt
+
+func find() {
+
+}

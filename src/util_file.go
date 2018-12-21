@@ -106,9 +106,9 @@ func listCurrentFiles(dir string) (files []File, err error) {
 	return
 }
 
-func ListCurrentFiles(dir string) (paths []File, files []File) {
-	files = []File{}
-	paths = []File{}
+func ListChooseCurrent(incFolder, incFiles, incHidden bool, dir string) (list []File) {
+	files := []File{}
+	paths := []File{}
 	list, err := listCurrentFiles(dir)
 	if err != nil {
 		return
@@ -120,31 +120,9 @@ func ListCurrentFiles(dir string) (paths []File, files []File) {
 			files = append(files, f)
 		}
 	}
-	return
-}
-
-func ListRecourFiles(dir string) (paths []File, files []File) {
-	files = []File{}
-	paths = []File{}
-	list, err := listRecourFiles(dir)
-	if err != nil {
-		return
-	}
-	for _, f := range list {
-		if f.IsDir {
-			paths = append(paths, f)
-		} else {
-			files = append(files, f)
-		}
-	}
-	return
-}
-
-func ListChooseCurrent(incFolder, incFiles, incHidden bool, dir string) (list []File) {
 	list = []File{}
-	dirs, files := ListCurrentFiles(dir)
 	if incFolder {
-		for _, d := range dirs {
+		for _, d := range paths {
 			if incHidden {
 				list = append(list, d)
 			} else {
