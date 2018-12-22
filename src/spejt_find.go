@@ -1,5 +1,0 @@
-package spejt
-
-func find() {
-
-}

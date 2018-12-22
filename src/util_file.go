@@ -28,6 +28,7 @@ type File struct {
 	ModTime   time.Time
 	Hash      uint64 `hash:"ignore"`
 	Other     Other
+	Icon      string
 }
 
 func makeFile(dir string) (file File, err error) {
@@ -58,6 +59,7 @@ func makeFile(dir string) (file File, err error) {
 	if f.IsDir() {
 		file.Extension = ""
 		file.Mime = "folder/folder"
+		file.Icon = categoryicons[file.Mime]
 		children, _ := godirwalk.ReadDirnames(dir, nil)
 		file.Children = len(children)
 	} else {
@@ -65,6 +67,10 @@ func makeFile(dir string) (file File, err error) {
 		mime, _, _ := mimetype.DetectFile(dir)
 		file.Extension = extension
 		file.Mime = mime
+		file.Icon = fileicons[extension]
+		if file.Icon == "" {
+			file.Icon = categoryicons["file/default"]
+		}
 	}
 	if string(name[0]) == "." {
 		file.Hidden = true
