@@ -1,12 +1,11 @@
 package spejt
 
 import (
-	"os"
+	"io/ioutil"
 	"strings"
 )
 
-var memory = []string{"/:/home"}
-var memFile, _ = os.Create("/tmp/spejt/memfile")
+var memory, _ = loadMemoryFromFile()
 
 func addToMemory(parent, child File) {
 	for i, el := range memory {
@@ -31,5 +30,16 @@ func findInMemory(parent File, child []File) (number, scroll int) {
 			scroll = 0
 		}
 	}
+	return
+}
+
+func saveMemoryToFile(array []string) {
+	jointMem := strings.Join(array, ",")
+	ioutil.WriteFile(memFile, []byte(jointMem), 0666)
+}
+
+func loadMemoryFromFile() (memory []string, err error) {
+	jointMem, err := ioutil.ReadFile(memFile)
+	memory = strings.Split(string(jointMem), ",")
 	return
 }

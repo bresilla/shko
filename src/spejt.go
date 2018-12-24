@@ -19,8 +19,9 @@ var (
 	changeDir     = true
 	number        = 0
 	scroll        = 0
-	outDir        = "/tmp/spejt"
-	file, _       = os.Create(outDir)
+	dirFile       = "/tmp/spejt"
+	memFile       = "/tmp/spejt_memory"
+	file, _       = os.Create(dirFile)
 	showIcons     = true
 	showChildren  = false
 	cmd           *exec.Cmd
@@ -148,6 +149,7 @@ func Loop() {
 	}
 	fmt.Print("\033[?25h")
 	fmt.Println()
+	saveMemoryToFile(memory)
 	if changeDir {
 		file.WriteString(currentDir.Path)
 	} else {
