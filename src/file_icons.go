@@ -78,7 +78,7 @@ var fileicons = map[string]string{
 	".mpg":      "",
 	".mustache": "",
 	".ogg":      "",
-	".pdf":      "",
+	".pdf":      "",
 	".php":      "",
 	".pl":       "",
 	".pm":       "",

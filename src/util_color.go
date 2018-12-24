@@ -111,6 +111,18 @@ func ResetStyle() {
 
 func Print(stl Style, fg Color, bg Color, toPrint string) {
 	SetStyle(stl, fg, bg)
-	fmt.Println(toPrint)
+	fmt.Print(toPrint)
 	ResetStyle()
+}
+
+func Invert(active bool, style Style, color Color, print string) {
+	if active {
+		SetStyle(style, Black, color)
+		fmt.Print(print)
+		ResetStyle()
+	} else {
+		SetStyle(style, color, None)
+		fmt.Print(print)
+		ResetStyle()
+	}
 }

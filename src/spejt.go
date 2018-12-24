@@ -3,13 +3,14 @@ package spejt
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	term "github.com/buger/goterm"
 )
 
 var (
 	incFolder     = true
-	incFiles      = false
+	incFiles      = true
 	incHidden     = false
 	wrap          = true
 	shortcut      = 113
@@ -18,9 +19,11 @@ var (
 	changeDir     = true
 	number        = 0
 	scroll        = 0
-	cursorarr     []int
 	outDir        = "/tmp/spejt"
 	file, _       = os.Create(outDir)
+	showIcons     = true
+	showChildren  = false
+	cmd           *exec.Cmd
 )
 
 func Loop() {
@@ -70,6 +73,7 @@ func Loop() {
 					number = 0
 				}
 			}
+			continue
 		} else if keycode == 40 { //down
 			if foreward {
 				scroll++
@@ -84,6 +88,7 @@ func Loop() {
 					number = len(subdirs) - 1
 				}
 			}
+			continue
 		} else if keycode == 37 { //left
 			backward = false
 			foreward = false
@@ -91,41 +96,53 @@ func Loop() {
 			currentDir, _ = makeFile(parent.Path)
 			children, parent = ListDirs(currentDir)
 			number, scroll = find(children, oldDir)
+			continue
 		} else if keycode == 39 { //right
 			if len(subdirs) == 0 {
 				continue
 			}
 			if subdirs[number].IsDir {
+				oldDir := currentDir
 				currentDir, _ = makeFile(subdirs[number].Path)
 				children, parent = ListDirs(currentDir)
+				addToMemory(oldDir, currentDir)
+				number, scroll = findInMemory(currentDir, children)
 			} else {
-				OpenFile(subdirs[number])
+				cmd = exec.Command("xdg-open", subdirs[number].Path)
 				fmt.Print("\033[?25l")
 			}
-			number = 0
-			scroll = 0
 			backward = false
 			foreward = false
+			continue
 		} else {
-			for {
+			if ascii == 32 {
+				children, parent = ListDirs(currentDir)
 				ascii, keycode, _ := GetChar()
-				if ascii == 46 {
-					incHidden = !incHidden
-					children, parent = ListDirs(currentDir)
-					break
-				} else if ascii == 44 {
-					incFiles = !incFiles
-					children, parent = ListDirs(currentDir)
-					break
-				} else if ascii == 35 {
-					wrap = !wrap
-					children, parent = ListDirs(currentDir)
-					break
+				if ascii == 110 {
+					showChildren = !showChildren
+				} else if ascii == 105 {
+					showIcons = !showIcons
+				} else if ascii == 71 {
+					number = len(subdirs) - 1
+					scroll = len(children) - 1
+				} else if ascii == 103 {
+					number = 0
+					scroll = 0
 				} else {
 					println(ascii, "\t", keycode)
 					GetChar()
-					break
 				}
+				continue
+			} else if ascii == 44 {
+				incFiles = !incFiles
+				children, parent = ListDirs(currentDir)
+			} else if ascii == 46 {
+				incHidden = !incHidden
+				children, parent = ListDirs(currentDir)
+			} else if ascii == 35 {
+				wrap = !wrap
+			} else {
+				continue
 			}
 		}
 	}

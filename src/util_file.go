@@ -12,8 +12,6 @@ import (
 	"github.com/mitchellh/hashstructure"
 )
 
-type Other struct {
-}
 type File struct {
 	Path      string
 	Name      string
@@ -28,7 +26,11 @@ type File struct {
 	ModTime   time.Time
 	Hash      uint64 `hash:"ignore"`
 	Other     Other
-	Icon      string
+}
+type Other struct {
+	Deep       int
+	NameLength int
+	Icon       string
 }
 
 func makeFile(dir string) (file File, err error) {
@@ -59,7 +61,7 @@ func makeFile(dir string) (file File, err error) {
 	if f.IsDir() {
 		file.Extension = ""
 		file.Mime = "folder/folder"
-		file.Icon = categoryicons[file.Mime]
+		file.Other.Icon = categoryicons["folder/folder"]
 		children, _ := godirwalk.ReadDirnames(dir, nil)
 		file.Children = len(children)
 	} else {
@@ -67,9 +69,9 @@ func makeFile(dir string) (file File, err error) {
 		mime, _, _ := mimetype.DetectFile(dir)
 		file.Extension = extension
 		file.Mime = mime
-		file.Icon = fileicons[extension]
-		if file.Icon == "" {
-			file.Icon = categoryicons["file/default"]
+		file.Other.Icon = fileicons[extension]
+		if file.Other.Icon == "" {
+			file.Other.Icon = categoryicons["file/default"]
 		}
 	}
 	if string(name[0]) == "." {
@@ -80,6 +82,7 @@ func makeFile(dir string) (file File, err error) {
 		return file, err
 	}
 	file.Hash = hash
+	file.Other.NameLength = len(file.Name)
 	return
 }
 
