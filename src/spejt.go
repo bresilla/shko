@@ -31,6 +31,7 @@ var (
 	showChildren  = false
 	showSize      = false
 	showDate      = false
+	showMode      = false
 	cmd           *exec.Cmd
 )
 
@@ -62,7 +63,7 @@ func Loop() {
 			}
 			subdirs = subdirs[0+scroll : termHeight-1+scroll]
 		}
-		SelectInList(number, subdirs)
+		SelectInList(number, subdirs, children)
 		ascii, keycode, _ := GetChar()
 		if ascii == 13 || ascii == shortcut || keycode == shortcut {
 			break
@@ -129,9 +130,11 @@ func Loop() {
 				children, parent = ListDirs(currentDir)
 				term.MoveTo(0, termHeight)
 				Print(HighLight, Black, White, "leader")
-				ascii, keycode, _ := GetChar()
+				ascii, _, _ := GetChar()
 				if ascii == 110 {
 					showChildren = !showChildren
+				} else if ascii == 102 {
+					showMode = !showMode
 				} else if ascii == 109 {
 					showDate = !showDate
 				} else if ascii == 115 {
@@ -148,7 +151,7 @@ func Loop() {
 					scroll = 0
 				} else {
 					fmt.Print(" ")
-					toPrint := strconv.Itoa(ascii) + "  " + strconv.Itoa(keycode)
+					toPrint := "ascii: " + strconv.Itoa(ascii)
 					Print(HighLight, Black, White, toPrint)
 					GetChar()
 				}

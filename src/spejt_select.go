@@ -12,7 +12,7 @@ var (
 	tab = 20
 )
 
-func SelectInList(selected int, file []File) {
+func SelectInList(selected int, file, children []File) {
 	term.MoveTo(0, 0)
 	term.ClearAll()
 	if len(file) == 0 {
@@ -21,12 +21,16 @@ func SelectInList(selected int, file []File) {
 		//term.MoveTo(0, termHeight)
 		//Print(HighLight, Red, None, DashBorder2("nothing to show"))
 	} else {
+		var maxSize int64
+		for _, el := range children {
+			maxSize += el.Size
+		}
 		for i, el := range file {
 			fmt.Print("  ")
 			if i == selected {
-				colorList(el, true, i)
+				colorList(el, true, i, maxSize)
 			} else {
-				colorList(el, false, i)
+				colorList(el, false, i, maxSize)
 			}
 			fmt.Print("\n")
 			ResetStyle()
@@ -36,7 +40,7 @@ func SelectInList(selected int, file []File) {
 	}
 }
 
-func colorList(file File, active bool, i int) {
+func colorList(file File, active bool, i int, maxSize int64) {
 	if file.IsDir {
 		Invert(active, HighLight, White)
 	} else {
@@ -46,6 +50,8 @@ func colorList(file File, active bool, i int) {
 	tab = drawIcon(active, showIcons, file)
 	tab = drawName(active, file)
 	tab = drawChildren(showChildren, file, i)
+	tab = drawMode(showMode, file, i)
+	tab = drawDU(duMode, file, i, maxSize)
 	tab = drawSize(showSize, file, i)
 	tab = drawDate(showDate, file, i)
 	SetStyle(Default, White, Black)
@@ -87,8 +93,8 @@ func drawName(active bool, file File) (tabTurn int) {
 func drawChildren(yesno bool, file File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print("\t  " + strconv.Itoa(file.Children) + " ")
-		tabTurn = tab + 6
+		fmt.Print("  " + strconv.Itoa(file.Children) + " ")
+		tabTurn = tab + 8
 	} else {
 		tabTurn = tab
 	}
@@ -98,8 +104,8 @@ func drawChildren(yesno bool, file File, i int) (tabTurn int) {
 func drawSize(yesno bool, file File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print("\t" + file.Other.HumanSize + " ")
-		tabTurn = tab + 15
+		fmt.Print(file.Other.HumanSize + " ")
+		tabTurn = tab + 12
 	} else {
 		tabTurn = tab
 	}
@@ -109,8 +115,49 @@ func drawSize(yesno bool, file File, i int) (tabTurn int) {
 func drawDate(yesno bool, file File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print("\t" + file.ModTime.Format(time.RFC822) + " ")
+		fmt.Print(file.ModTime.Format(time.RFC822) + " ")
 		tabTurn = tab + 25
+	} else {
+		tabTurn = tab
+	}
+	return tabTurn
+}
+
+func drawMode(yesno bool, file File, i int) (tabTurn int) {
+	if yesno {
+		term.MoveTo(tab, i+1)
+		fmt.Print(file.Mode)
+		fmt.Print(" ")
+		tabTurn = tab + 12
+	} else {
+		tabTurn = tab
+	}
+	return tabTurn
+}
+
+func sizeBar(maxSize, size int64) (toPrint string) {
+	var (
+		load  string
+		uload string
+	)
+	percentage := int(size) * 100 / int(maxSize)
+	for i := 1; i <= percentage; i = i + 10 {
+		load += "█"
+	}
+	for i := 1; i <= 10-len([]rune(load)); i++ {
+		uload += "░"
+	}
+	toPrint = "│" + load + uload + "│"
+	//toPrint = strconv.Itoa(percentage)
+	return
+}
+
+func drawDU(yesno bool, file File, i int, maxSize int64) (tabTurn int) {
+	if yesno {
+		term.MoveTo(tab, i+1)
+		fmt.Print(sizeBar(maxSize, file.Size))
+		fmt.Print(" ")
+		tabTurn = tab + 13
 	} else {
 		tabTurn = tab
 	}
