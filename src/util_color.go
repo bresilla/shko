@@ -115,14 +115,10 @@ func Print(stl Style, fg Color, bg Color, toPrint string) {
 	ResetStyle()
 }
 
-func Invert(active bool, style Style, color Color, print string) {
+func Invert(active bool, style Style, color Color) {
 	if active {
 		SetStyle(style, Black, color)
-		fmt.Print(print)
-		ResetStyle()
 	} else {
 		SetStyle(style, color, None)
-		fmt.Print(print)
-		ResetStyle()
 	}
 }

@@ -8,16 +8,15 @@ import (
 
 func OpenFile(file File) bool {
 	var cmd *exec.Cmd
-	filepath := file.Path
 	editor := os.Getenv("EDITOR")
 
 	if len(editor) > 0 {
-		cmd = exec.Command(editor, filepath)
+		cmd = exec.Command(editor, file.Path)
 	} else {
 		if _, err := os.Stat("/usr/bin/sensible-editor"); err == nil {
-			cmd = exec.Command("/usr/bin/sensible-editor", filepath)
+			cmd = exec.Command("/usr/bin/sensible-editor", file.Path)
 		} else {
-			cmd = exec.Command("/usr/bin/env", "nvim", filepath)
+			cmd = exec.Command("/usr/bin/env", "nvim", file.Path)
 		}
 	}
 
@@ -26,7 +25,6 @@ func OpenFile(file File) bool {
 	err := cmd.Run()
 	if err != nil {
 		log.Println("Error:", err)
-		log.Println("File not saved:", filepath)
 		return false
 	}
 	return true

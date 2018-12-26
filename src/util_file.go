@@ -1,6 +1,7 @@
 package spejt
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"sort"
@@ -11,6 +12,50 @@ import (
 	"github.com/karrick/godirwalk"
 	"github.com/mitchellh/hashstructure"
 )
+
+func ByteCountSI(b int64) string {
+	const unit = 1000
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB",
+		float64(b)/float64(div), "kMGTPE"[exp])
+}
+
+func ByteCountIEC(b int64) string {
+	const unit = 1024
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %ciB",
+		float64(b)/float64(div), "KMGTPE"[exp])
+}
+
+func gothrough(dir string) (size int64) {
+	godirwalk.Walk(dir, &godirwalk.Options{
+		Callback: func(osPathname string, de *godirwalk.Dirent) (err error) {
+			f, err := os.Stat(osPathname)
+			if err != nil {
+				return
+			}
+			size += f.Size()
+			return nil
+		},
+		Unsorted:      true,
+		ScratchBuffer: make([]byte, 64*1024),
+	})
+	return
+}
 
 type File struct {
 	Path      string
@@ -28,6 +73,7 @@ type File struct {
 	Other     Other
 }
 type Other struct {
+	HumanSize  string
 	Deep       int
 	NameLength int
 	Icon       string
@@ -58,7 +104,14 @@ func makeFile(dir string) (file File, err error) {
 		ModTime: f.ModTime(),
 		IsDir:   f.IsDir(),
 	}
+
 	if f.IsDir() {
+		if duMode {
+			file.Size = gothrough(dir)
+			file.Other.HumanSize = ByteCountIEC(file.Size)
+		} else {
+			file.Other.HumanSize = "0 B"
+		}
 		file.Extension = ""
 		file.Mime = "folder/folder"
 		file.Other.Icon = categoryicons["folder/folder"]
@@ -67,6 +120,7 @@ func makeFile(dir string) (file File, err error) {
 	} else {
 		extension := path.Ext(dir)
 		mime, _, _ := mimetype.DetectFile(dir)
+		file.Other.HumanSize = ByteCountIEC(f.Size())
 		file.Extension = extension
 		file.Mime = mime
 		file.Other.Icon = fileicons[extension]
@@ -162,4 +216,19 @@ func ListDirs(dir File) (files []File, parent File) {
 		files = append(files, d)
 	}
 	return
+}
+
+func createDirectory(dirName string) bool {
+	src, err := os.Stat(dirName)
+	if os.IsNotExist(err) {
+		errDir := os.MkdirAll(dirName, 0755)
+		if errDir != nil {
+			panic(err)
+		}
+		return true
+	}
+	if src.Mode().IsRegular() {
+		return false
+	}
+	return false
 }

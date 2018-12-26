@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 
-	term "github.com/buger/goterm"
+	term "github.com/tj/go/term"
 )
 
 var (
@@ -14,44 +15,52 @@ var (
 	incHidden     = false
 	wrap          = true
 	shortcut      = 113
+	duMode        = false
 	currentDir, _ = makeFile(os.Getenv("PWD"))
 	startDir, _   = makeFile(os.Getenv("PWD"))
 	changeDir     = true
+	_, termHeight = term.Size()
 	number        = 0
 	scroll        = 0
-	dirFile       = "/tmp/spejt"
-	memFile       = "/tmp/spejt_memory"
+	appfolder     = "/tmp/spejt"
+	dirFile       = appfolder + "/chdir"
+	memFile       = appfolder + "/memory"
+	confFile      = appfolder + "/config"
 	file, _       = os.Create(dirFile)
 	showIcons     = true
 	showChildren  = false
+	showSize      = false
+	showDate      = false
 	cmd           *exec.Cmd
 )
 
 func Loop() {
 	fmt.Print("\033[?25l")
-	term.Flush()
-	term.Clear()
+	createDirectory(appfolder)
+	term.ClearAll()
 	children, parent := ListDirs(currentDir)
 	for {
+		_, termHeight = term.Size()
+		termHeight = termHeight - 1
 		var foreward = false
 		var backward = false
 		subdirs := children
-		if len(subdirs) > term.Height()-1 {
-			if number > term.Height()/2 {
+		if len(subdirs) > termHeight-1 {
+			if number > termHeight/2 {
 				foreward = true
 				backward = false
-			} else if number < term.Height()/2-2 {
+			} else if number < termHeight/2-2 {
 				backward = true
 				foreward = false
 			}
 			if scroll <= 0 {
 				scroll = 0
 				backward = false
-			} else if scroll >= len(children)+1-term.Height() {
-				scroll = len(children) + 1 - term.Height()
+			} else if scroll >= len(children)+1-termHeight {
+				scroll = len(children) + 1 - termHeight
 				foreward = false
 			}
-			subdirs = subdirs[0+scroll : term.Height()-1+scroll]
+			subdirs = subdirs[0+scroll : termHeight-1+scroll]
 		}
 		SelectInList(number, subdirs)
 		ascii, keycode, _ := GetChar()
@@ -109,7 +118,7 @@ func Loop() {
 				addToMemory(oldDir, currentDir)
 				number, scroll = findInMemory(currentDir, children)
 			} else {
-				cmd = exec.Command("xdg-open", subdirs[number].Path)
+				OpenFile(subdirs[number])
 				fmt.Print("\033[?25l")
 			}
 			backward = false
@@ -118,9 +127,17 @@ func Loop() {
 		} else {
 			if ascii == 32 {
 				children, parent = ListDirs(currentDir)
+				term.MoveTo(0, termHeight)
+				Print(HighLight, Black, White, "leader")
 				ascii, keycode, _ := GetChar()
 				if ascii == 110 {
 					showChildren = !showChildren
+				} else if ascii == 109 {
+					showDate = !showDate
+				} else if ascii == 115 {
+					showSize = !showSize
+				} else if ascii == 19 {
+					duMode = !duMode
 				} else if ascii == 105 {
 					showIcons = !showIcons
 				} else if ascii == 71 {
@@ -130,7 +147,9 @@ func Loop() {
 					number = 0
 					scroll = 0
 				} else {
-					println(ascii, "\t", keycode)
+					fmt.Print(" ")
+					toPrint := strconv.Itoa(ascii) + "  " + strconv.Itoa(keycode)
+					Print(HighLight, Black, White, toPrint)
 					GetChar()
 				}
 				continue

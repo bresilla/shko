@@ -2,80 +2,117 @@ package spejt
 
 import (
 	"fmt"
-	"os"
 	"strconv"
-	"text/tabwriter"
+	"time"
 
-	term "github.com/buger/goterm"
+	term "github.com/tj/go/term"
+)
+
+var (
+	tab = 20
 )
 
 func SelectInList(selected int, file []File) {
-	term.MoveCursor(0, 0)
-	term.Flush()
-	term.Clear()
-	for i, el := range file {
-		w := new(tabwriter.Writer)
-		w.Init(os.Stdout, 0, 0, 2, '0', tabwriter.AlignRight|tabwriter.Debug)
-		fmt.Print("\t")
-		if i == selected {
-			colorList(el, true)
-		} else {
-			colorList(el, false)
-		}
-		fmt.Println()
-		ResetStyle()
-		w.Flush()
-	}
+	term.MoveTo(0, 0)
+	term.ClearAll()
 	if len(file) == 0 {
-		Print(HighLight, Black, White, "\t nothing to show ")
+		fmt.Print("  ")
+		Print(HighLight, Black, White, "  nothing to show  ")
+		//term.MoveTo(0, termHeight)
+		//Print(HighLight, Red, None, DashBorder2("nothing to show"))
+	} else {
+		for i, el := range file {
+			fmt.Print("  ")
+			if i == selected {
+				colorList(el, true, i)
+			} else {
+				colorList(el, false, i)
+			}
+			fmt.Print("\n")
+			ResetStyle()
+		}
+		//term.MoveTo(0, termHeight)
+		//Print(HighLight, Red, None, DashBorder2(file[selected].Path))
 	}
 }
 
-func colorList(file File, active bool) {
-	icon := drawIcon(active, showIcons, file)
-	name := drawName(active, file)
-	chld := drawChildren(showChildren, file)
-	all := icon + name + chld
+func colorList(file File, active bool, i int) {
 	if file.IsDir {
-		Invert(active, HighLight, White, all)
+		Invert(active, HighLight, White)
 	} else {
-		Invert(active, Default, Cyan, all)
+		Invert(active, Default, Cyan)
 	}
+	term.ClearLineEnd()
+	tab = drawIcon(active, showIcons, file)
+	tab = drawName(active, file)
+	tab = drawChildren(showChildren, file, i)
+	tab = drawSize(showSize, file, i)
+	tab = drawDate(showDate, file, i)
+	SetStyle(Default, White, Black)
+	term.ClearLineEnd()
 }
-func drawName(active bool, file File) (back string) {
-	spacer := ""
-	if active {
-		spacer = " "
-	}
-	if file.IsDir {
-		back = file.Name + spacer + "/ \t"
-	} else {
-		back = file.Name + spacer + "\t"
-	}
-	return
-}
-func drawIcon(active, yesno bool, file File) (back string) {
+
+func drawIcon(active, yesno bool, file File) (tabTurn int) {
 	spacer := ""
 	if active {
 		spacer = " "
 	}
 	if yesno {
-		back = " " + spacer + file.Other.Icon + "  "
+		fmt.Print(" " + spacer + file.Other.Icon + "  ")
 	} else {
 		if file.IsDir {
-			back = spacer + " >  "
+			fmt.Print(spacer + " >  ")
 		} else {
-			back = spacer + " -  "
+			fmt.Print(spacer + " -  ")
 		}
 	}
+	tabTurn = 10
 	return
 }
 
-func drawChildren(yesno bool, file File) (back string) {
-	if yesno {
-		back = strconv.Itoa(file.Children) + "\t"
-	} else {
-		back = ""
+func drawName(active bool, file File) (tabTurn int) {
+	spacer := ""
+	if active {
+		spacer = " "
 	}
+	if file.IsDir {
+		fmt.Print(file.Name + spacer + "/ ")
+	} else {
+		fmt.Print(file.Name + spacer + " ")
+	}
+	tabTurn = tab + 15
 	return
+}
+
+func drawChildren(yesno bool, file File, i int) (tabTurn int) {
+	if yesno {
+		term.MoveTo(tab, i+1)
+		fmt.Print("\t  " + strconv.Itoa(file.Children) + " ")
+		tabTurn = tab + 6
+	} else {
+		tabTurn = tab
+	}
+	return tabTurn
+}
+
+func drawSize(yesno bool, file File, i int) (tabTurn int) {
+	if yesno {
+		term.MoveTo(tab, i+1)
+		fmt.Print("\t" + file.Other.HumanSize + " ")
+		tabTurn = tab + 15
+	} else {
+		tabTurn = tab
+	}
+	return tabTurn
+}
+
+func drawDate(yesno bool, file File, i int) (tabTurn int) {
+	if yesno {
+		term.MoveTo(tab, i+1)
+		fmt.Print("\t" + file.ModTime.Format(time.RFC822) + " ")
+		tabTurn = tab + 25
+	} else {
+		tabTurn = tab
+	}
+	return tabTurn
 }
