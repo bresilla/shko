@@ -12,14 +12,18 @@ var (
 	tab = 20
 )
 
-func SelectInList(selected int, file, children []File) {
+func SelectInList(selected int, file, children []File, parent File) {
 	term.MoveTo(0, 0)
 	term.ClearAll()
+	termWidth, termHeight := term.Size()
+	topBarSpace := 0
+	if topBar {
+		topBarSpace = 1
+		Print(HighLight, Black, Cyan, DashBorder2(parent.Path, termWidth/2-(len([]rune(parent.Path)))/2))
+	}
 	if len(file) == 0 {
 		fmt.Print("  ")
 		Print(HighLight, Black, White, "  nothing to show  ")
-		//term.MoveTo(0, termHeight)
-		//Print(HighLight, Red, None, DashBorder2("nothing to show"))
 	} else {
 		var maxSize int64
 		for _, el := range children {
@@ -28,15 +32,17 @@ func SelectInList(selected int, file, children []File) {
 		for i, el := range file {
 			fmt.Print("  ")
 			if i == selected {
-				colorList(el, true, i, maxSize)
+				colorList(el, true, i+topBarSpace, maxSize)
 			} else {
-				colorList(el, false, i, maxSize)
+				colorList(el, false, i+topBarSpace, maxSize)
 			}
 			fmt.Print("\n")
 			ResetStyle()
 		}
-		//term.MoveTo(0, termHeight)
-		//Print(HighLight, Red, None, DashBorder2(file[selected].Path))
+	}
+	if statBar {
+		term.MoveTo(0, termHeight-1)
+		Print(HighLight, Black, Cyan, DashBorder2(parent.Path, termWidth/2-(len([]rune(parent.Path)))/2))
 	}
 }
 

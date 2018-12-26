@@ -13,9 +13,13 @@ func DashBorder() string {
 	return toPrint
 }
 
-func DashBorder2(text string) string {
+func DashBorder2(text string, before int) string {
 	width, _ := term.Size()
-	var toPrint = "--- " + text + " -"
+	var toPrint = ""
+	for n := 1; n <= before; n++ {
+		toPrint += "-"
+	}
+	toPrint += " " + text + " -"
 	var toPrintLen = len([]rune(toPrint))
 	for n := 1; n <= width-toPrintLen; n++ {
 		toPrint = toPrint + "-"

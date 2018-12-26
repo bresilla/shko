@@ -15,6 +15,8 @@ var (
 	incHidden     = false
 	wrap          = true
 	shortcut      = 113
+	statBar       = false
+	topBar        = false
 	duMode        = false
 	currentDir, _ = makeFile(os.Getenv("PWD"))
 	startDir, _   = makeFile(os.Getenv("PWD"))
@@ -42,7 +44,11 @@ func Loop() {
 	children, parent := ListDirs(currentDir)
 	for {
 		_, termHeight = term.Size()
-		termHeight = termHeight - 1
+		topBarSpace := 0
+		if topBar {
+			topBarSpace = 1
+		}
+		termHeight = termHeight - topBarSpace
 		var foreward = false
 		var backward = false
 		subdirs := children
@@ -61,9 +67,9 @@ func Loop() {
 				scroll = len(children) + 1 - termHeight
 				foreward = false
 			}
-			subdirs = subdirs[0+scroll : termHeight-1+scroll]
+			subdirs = subdirs[0+scroll : termHeight-1-topBarSpace+scroll]
 		}
-		SelectInList(number, subdirs, children)
+		SelectInList(number, subdirs, children, currentDir)
 		ascii, keycode, _ := GetChar()
 		if ascii == 13 || ascii == shortcut || keycode == shortcut {
 			break
@@ -128,7 +134,7 @@ func Loop() {
 		} else {
 			if ascii == 32 {
 				children, parent = ListDirs(currentDir)
-				term.MoveTo(0, termHeight)
+				term.MoveTo(0, termHeight+1)
 				Print(HighLight, Black, White, "leader")
 				ascii, _, _ := GetChar()
 				if ascii == 110 {
@@ -137,6 +143,9 @@ func Loop() {
 					showMode = !showMode
 				} else if ascii == 109 {
 					showDate = !showDate
+				} else if ascii == 98 {
+					topBar = !topBar
+					statBar = !statBar
 				} else if ascii == 115 {
 					showSize = !showSize
 				} else if ascii == 19 {
