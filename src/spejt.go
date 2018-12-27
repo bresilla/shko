@@ -18,6 +18,7 @@ var (
 	statBar       = false
 	topBar        = false
 	duMode        = false
+	center        = false
 	currentDir, _ = makeFile(os.Getenv("PWD"))
 	startDir, _   = makeFile(os.Getenv("PWD"))
 	changeDir     = true
@@ -46,7 +47,16 @@ func Loop() {
 		_, termHeight = term.Size()
 		topBarSpace := 0
 		if topBar {
-			topBarSpace = 1
+			topBarSpace = 2
+		}
+		if center {
+			showChildren = false
+			showSize = false
+			showDate = false
+			showMode = false
+			duMode = false
+			statBar = false
+			topBar = false
 		}
 		termHeight = termHeight - topBarSpace
 		var foreward = false
@@ -72,9 +82,11 @@ func Loop() {
 		SelectInList(number, subdirs, children, currentDir)
 		ascii, keycode, _ := GetChar()
 		if ascii == 13 || ascii == shortcut || keycode == shortcut {
+			term.ClearAll()
 			break
 		} else if ascii == 27 || ascii == 3 {
 			changeDir = false
+			term.ClearAll()
 			break
 		} else if keycode == 38 { //up
 			if backward {
@@ -139,17 +151,25 @@ func Loop() {
 				ascii, _, _ := GetChar()
 				if ascii == 110 {
 					showChildren = !showChildren
+					center = false
 				} else if ascii == 102 {
 					showMode = !showMode
+					center = false
 				} else if ascii == 109 {
 					showDate = !showDate
+					center = false
 				} else if ascii == 98 {
 					topBar = !topBar
 					statBar = !statBar
+					center = false
 				} else if ascii == 115 {
 					showSize = !showSize
-				} else if ascii == 19 {
+					center = false
+				} else if ascii == 99 {
+					center = !center
+				} else if ascii == 100 {
 					duMode = !duMode
+					center = false
 				} else if ascii == 105 {
 					showIcons = !showIcons
 				} else if ascii == 71 {
@@ -159,7 +179,7 @@ func Loop() {
 					number = 0
 					scroll = 0
 				} else {
-					fmt.Print(" ")
+					term.MoveTo(0, termHeight+1)
 					toPrint := "ascii: " + strconv.Itoa(ascii)
 					Print(HighLight, Black, White, toPrint)
 					GetChar()
