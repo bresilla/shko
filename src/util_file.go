@@ -57,6 +57,130 @@ func gothrough(dir string) (size int64) {
 	return
 }
 
+var fileicons = map[string]string{
+	".7z":       "",
+	".ai":       "",
+	".apk":      "",
+	".avi":      "",
+	".bat":      "",
+	".bmp":      "",
+	".bz2":      "",
+	".c":        "",
+	".c++":      "",
+	".cab":      "",
+	".cc":       "",
+	".clj":      "",
+	".cljc":     "",
+	".cljs":     "",
+	".coffee":   "",
+	".conf":     "",
+	".cp":       "",
+	".cpio":     "",
+	".cpp":      "",
+	".css":      "",
+	".cxx":      "",
+	".d":        "",
+	".dart":     "",
+	".db":       "",
+	".deb":      "",
+	".diff":     "",
+	".dump":     "",
+	".edn":      "",
+	".ejs":      "",
+	".epub":     "",
+	".erl":      "",
+	".f#":       "",
+	".fish":     "",
+	".flac":     "",
+	".flv":      "",
+	".fs":       "",
+	".fsi":      "",
+	".fsscript": "",
+	".fsx":      "",
+	".gem":      "",
+	".gif":      "",
+	".go":       "",
+	".gz":       "",
+	".gzip":     "",
+	".hbs":      "",
+	".hrl":      "",
+	".hs":       "",
+	".htm":      "",
+	".html":     "",
+	".ico":      "",
+	".ini":      "",
+	".java":     "",
+	".jl":       "",
+	".jpeg":     "",
+	".jpg":      "",
+	".js":       "",
+	".json":     "",
+	".jsx":      "",
+	".less":     "",
+	".lha":      "",
+	".lhs":      "",
+	".log":      "",
+	".lua":      "",
+	".lzh":      "",
+	".lzma":     "",
+	".markdown": "",
+	".md":       "",
+	".mkv":      "",
+	".ml":       "λ",
+	".mli":      "λ",
+	".mov":      "",
+	".mp3":      "",
+	".mp4":      "",
+	".mpeg":     "",
+	".mpg":      "",
+	".mustache": "",
+	".ogg":      "",
+	".pdf":      "",
+	".php":      "",
+	".pl":       "",
+	".pm":       "",
+	".png":      "",
+	".psb":      "",
+	".psd":      "",
+	".py":       "",
+	".pyc":      "",
+	".pyd":      "",
+	".pyo":      "",
+	".rar":      "",
+	".rb":       "",
+	".rc":       "",
+	".rlib":     "",
+	".rpm":      "",
+	".rs":       "",
+	".rss":      "",
+	".scala":    "",
+	".scss":     "",
+	".sh":       "",
+	".slim":     "",
+	".sln":      "",
+	".sql":      "",
+	".styl":     "",
+	".suo":      "",
+	".t":        "",
+	".tar":      "",
+	".tgz":      "",
+	".ts":       "",
+	".twig":     "",
+	".vim":      "",
+	".vimrc":    "",
+	".wav":      "",
+	".xml":      "",
+	".xul":      "",
+	".xz":       "",
+	".yml":      "",
+	".zip":      "",
+}
+
+var categoryicons = map[string]string{
+	"folder/folder": "",
+	"file/default":  "",
+}
+
 type File struct {
 	Path      string
 	Name      string
@@ -73,13 +197,16 @@ type File struct {
 	Other     Other
 }
 type Other struct {
+	Number     int
+	Selected   bool
+	Active     bool
 	HumanSize  string
 	Deep       int
 	NameLength int
 	Icon       string
 }
 
-func makeFile(dir string) (file File, err error) {
+func MakeFile(dir string) (file File, err error) {
 	f, err := os.Stat(dir)
 	if err != nil {
 		return
@@ -140,78 +267,73 @@ func makeFile(dir string) (file File, err error) {
 	return
 }
 
-func listRecourFiles(dir string) (files []File, err error) {
-	files = []File{}
-	err = godirwalk.Walk(dir, &godirwalk.Options{
-		Callback: func(osPathname string, de *godirwalk.Dirent) (err error) {
-			file, _ := makeFile(osPathname)
-			files = append(files, file)
-			return nil
-		},
-		Unsorted:      true,
-		ScratchBuffer: make([]byte, 64*1024),
-	})
-	return
-}
-
-func listCurrentFiles(dir string) (files []File, err error) {
-	files = []File{}
-	children, err := godirwalk.ReadDirnames(dir, nil)
-	if err != nil {
-		return
-	}
-	sort.Strings(children)
-	for _, child := range children {
-		osPathname := path.Join(dir + "/" + child)
-		file, _ := makeFile(osPathname)
-		files = append(files, file)
+func fileList(recurrent bool, dir File) (paths []File, err error) {
+	paths = []File{}
+	if recurrent {
+		err = godirwalk.Walk(dir.Path, &godirwalk.Options{
+			Callback: func(osPathname string, de *godirwalk.Dirent) (err error) {
+				file, _ := MakeFile(osPathname)
+				paths = append(paths, file)
+				return nil
+			},
+			Unsorted:      true,
+			ScratchBuffer: make([]byte, 64*1024),
+		})
+	} else {
+		children, err := godirwalk.ReadDirnames(dir.Path, nil)
+		if err != nil {
+			return paths, err
+		}
+		sort.Strings(children)
+		for _, child := range children {
+			osPathname := path.Join(dir.Path + "/" + child)
+			file, _ := MakeFile(osPathname)
+			paths = append(paths, file)
+		}
 	}
 	return
 }
 
-func ListChooseCurrent(incFolder, incFiles, incHidden bool, dir string) (list []File) {
+func chooseFile(incFolder, incFiles, incHidden, recurrent bool, dir File) (list []File) {
 	files := []File{}
-	paths := []File{}
-	list, err := listCurrentFiles(dir)
-	if err != nil {
-		return
-	}
-	for _, f := range list {
+	folder := []File{}
+	hidden := []File{}
+	paths, _ := fileList(recurrent, dir)
+	for _, f := range paths {
 		if f.IsDir {
-			paths = append(paths, f)
+			folder = append(folder, f)
 		} else {
 			files = append(files, f)
 		}
 	}
-	list = []File{}
 	if incFolder {
-		for _, d := range paths {
-			if incHidden {
-				list = append(list, d)
-			} else {
-				if d.Hidden == false {
-					list = append(list, d)
-				}
-			}
+		for _, d := range folder {
+			hidden = append(hidden, d)
 		}
 	}
 	if incFiles {
 		for _, f := range files {
-			if incHidden {
+			hidden = append(hidden, f)
+		}
+	}
+	if incHidden {
+		list = hidden
+	} else {
+		for _, f := range hidden {
+			if !f.Hidden {
 				list = append(list, f)
-			} else {
-				if f.Hidden == false {
-					list = append(list, f)
-				}
 			}
 		}
+	}
+	for i, _ := range list {
+		list[i].Other.Number = i
 	}
 	return
 }
 
-func ListDirs(dir File) (files []File, parent File) {
-	list := ListChooseCurrent(incFolder, incFiles, incHidden, dir.Path)
-	parent, _ = makeFile(path.Dir(dir.Path))
+func ListFiles(dir File) (files []File, parent File) {
+	list := chooseFile(incFolder, incFiles, incHidden, recurrent, dir)
+	parent, _ = MakeFile(path.Dir(dir.Path))
 	for _, d := range list {
 		files = append(files, d)
 	}

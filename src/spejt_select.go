@@ -9,41 +9,43 @@ import (
 )
 
 var (
-	tab     = 20
-	space   = 1
-	padding = 0
+	tab   = 20
+	space = 1
 )
 
-func SelectInList(selected int, file, children []File, parent File) {
+func SelectInList(selected, scroll int, drawlist, filelist []File, parent File) {
 	term.MoveTo(0, 0)
 	term.ClearAll()
 	termWidth, termHeight := term.Size()
-	topBarSpace := 0
-	padding = 0
+	topSpace = 0
+	sideSpace = 0
 	if topBar {
-		topBarSpace = 2
+		topSpace = 2
 		Print(HighLight, Cyan, None, DashBorder2(parent.Path, termWidth/2-(len([]rune(parent.Path)))/2))
 		println()
 	}
-	if center && termHeight > len(file) {
-		topBarSpace += termHeight/2 - (len(file) / 2)
-		padding = termWidth/2 - 25/2
+	if center && termHeight > len(drawlist) {
+		topSpace += termHeight/2 - (len(drawlist) / 2)
+		sideSpace = termWidth/2 - 25/2
 	}
-	if len(file) == 0 {
+	if len(drawlist) == 0 {
 		fmt.Print("  ")
-		term.MoveTo(padding+3, topBarSpace)
+		term.MoveTo(sideSpace+3, topSpace)
 		Print(HighLight, Black, White, "  nothing to show  ")
 	} else {
 		var maxSize int64
-		for _, el := range children {
+		for _, el := range filelist {
 			maxSize += el.Size
 		}
-		for i, el := range file {
+		for i, el := range drawlist {
+			if selected+scroll == el.Other.Number {
+				el.Other.Active = true
+			}
 			fmt.Print("  ")
-			if i == selected {
-				colorList(el, true, i+topBarSpace, maxSize)
+			if i == selected || el.Other.Selected == true {
+				colorList(el, true, i+topSpace, maxSize)
 			} else {
-				colorList(el, false, i+topBarSpace, maxSize)
+				colorList(el, false, i+topSpace, maxSize)
 			}
 			fmt.Print("\n")
 			ResetStyle()
@@ -58,7 +60,7 @@ func SelectInList(selected int, file, children []File, parent File) {
 
 func colorList(file File, active bool, i int, maxSize int64) {
 	termWidth, _ := term.Size()
-	tab = space + 2 + padding
+	tab = space + 2 + sideSpace
 	term.MoveTo(tab, i+1)
 	if file.IsDir {
 		Invert(active, HighLight, White)
@@ -83,17 +85,23 @@ func colorList(file File, active bool, i int, maxSize int64) {
 }
 
 func drawIcon(active, yesno bool, file File, i int) (tabTurn int) {
-	spacer := ""
-	if active {
-		spacer = " "
+	before := ""
+	after := "  "
+	if file.Other.Selected && file.Other.Active {
+		before = "×"
+	} else if file.Other.Selected {
+		before = " ×"
+	} else if active {
+		before = " "
 	}
+	before += " "
 	if yesno {
-		fmt.Print(" " + spacer + file.Other.Icon + "  ")
+		fmt.Print(before + file.Other.Icon + after)
 	} else {
 		if file.IsDir {
-			fmt.Print(spacer + " >  ")
+			fmt.Print(before + ">" + after)
 		} else {
-			fmt.Print(spacer + " -  ")
+			fmt.Print(before + "-" + after)
 		}
 	}
 	tabTurn = tab + 5
@@ -173,7 +181,6 @@ func sizeBar(maxSize, size int64) (toPrint string) {
 		uload += "░"
 	}
 	toPrint = "│" + load + uload + "│"
-	//toPrint = strconv.Itoa(percentage)
 	return
 }
 
