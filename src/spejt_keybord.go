@@ -153,10 +153,6 @@ func Loop(filelist []File, parent File) {
 					center = false
 				} else if ascii == 105 { //	--------------------------------	i
 					showIcons = !showIcons
-				} else if ascii == 103 { //	--------------------------------	-
-					if dirASwitch {
-						dirA = currentDir
-					}
 				} else if ascii == 71 { // ---------------------------------	G
 					number = len(drawlist) - 1
 					scroll = len(filelist) - 1
@@ -182,6 +178,30 @@ func Loop(filelist []File, parent File) {
 			} else if ascii == 46 { //	-------------------------------------	.
 				incHidden = !incHidden
 				filelist, parent = ListFiles(currentDir)
+			} else if ascii == 45 { //	-------------------------------------	-
+				if dirASwitch {
+					if len(filelist) > 0 {
+						dirA, _ = MakeFile(filelist[0].Other.ParentPath)
+					} else {
+						dirA, _ = MakeFile(parent.Path)
+					}
+					currentDir = dirB
+					filelist, parent = ListFiles(dirB)
+					number, scroll = findInMemory(currentDir, filelist)
+					dirASwitch = false
+					dirBSwitch = true
+				} else {
+					if len(filelist) > 0 {
+						dirB, _ = MakeFile(filelist[0].Other.ParentPath)
+					} else {
+						dirB, _ = MakeFile(parent.Path)
+					}
+					currentDir = dirA
+					filelist, parent = ListFiles(dirA)
+					number, scroll = findInMemory(currentDir, filelist)
+					dirBSwitch = false
+					dirASwitch = true
+				}
 			} else if ascii == 126 { //	-------------------------------------	~
 				filelist, parent = ListFiles(homeDir)
 			} else if ascii == 35 { //	-------------------------------------	#

@@ -15,7 +15,7 @@ var (
 	recurrent        = false
 	wrap             = true
 	shortcut         = 113
-	dirASwitch       = false
+	dirASwitch       = true
 	dirBSwitch       = false
 	statBar          = false
 	topBar           = statBar

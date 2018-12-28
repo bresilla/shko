@@ -200,6 +200,7 @@ type Other struct {
 	Number     int
 	Selected   bool
 	Active     bool
+	ParentPath string
 	HumanSize  string
 	Deep       int
 	NameLength int
@@ -212,14 +213,16 @@ func MakeFile(dir string) (file File, err error) {
 		return
 	}
 	parent := "/"
+	parentPath := "/"
 	name := "/"
 	if dir != "/" {
 		dir = path.Clean(dir)
-		parent, name = path.Split(dir)
-		parent = strings.TrimRight(parent, "/")
+		parentPath, name = path.Split(dir)
+		parent = strings.TrimRight(parentPath, "/")
 		_, parent = path.Split(parent)
 		if parent == "" {
 			parent = "/"
+			parentPath = "/"
 		}
 	}
 	file = File{
@@ -264,6 +267,7 @@ func MakeFile(dir string) (file File, err error) {
 	}
 	file.Hash = hash
 	file.Other.NameLength = len(file.Name)
+	file.Other.ParentPath = parentPath
 	return
 }
 
