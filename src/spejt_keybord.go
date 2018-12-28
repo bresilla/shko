@@ -58,16 +58,16 @@ func Loop(filelist []File, parent File) {
 		drawlist := prepList(filelist)
 		SelectInList(number, scroll, drawlist, filelist, currentDir)
 		ascii, keycode, _ := GetChar()
-		if ascii == 13 || ascii == shortcut || keycode == shortcut {
+		if ascii == 13 || ascii == shortcut { //----------------------------	q, SHORTCUT
 			term.ClearAll()
 			break
-		} else if ascii == 3 {
+		} else if ascii == 3 { // ------------------------------------------	Ctrl+C
 			changeDir = false
 			term.ClearAll()
 			break
-		} else if ascii == 27 {
+		} else if ascii == 27 { // -----------------------------------------	ESC
 			continue
-		} else if keycode == 38 { //up
+		} else if keycode == 38 { // ---------------------------------------	up
 			if backward {
 				scroll--
 			} else {
@@ -85,7 +85,7 @@ func Loop(filelist []File, parent File) {
 				}
 			}
 			continue
-		} else if keycode == 40 { //down
+		} else if keycode == 40 { // ---------------------------------------	down
 			if foreward {
 				scroll++
 			} else {
@@ -100,7 +100,7 @@ func Loop(filelist []File, parent File) {
 				}
 			}
 			continue
-		} else if keycode == 37 { //left
+		} else if keycode == 37 { // ---------------------------------------	left
 			backward = false
 			foreward = false
 			oldDir := currentDir
@@ -108,7 +108,7 @@ func Loop(filelist []File, parent File) {
 			filelist, parent = ListFiles(currentDir)
 			number, scroll = find(filelist, oldDir)
 			continue
-		} else if keycode == 39 { //right
+		} else if keycode == 39 { // ---------------------------------------	right
 			if len(drawlist) == 0 {
 				continue
 			}
@@ -130,33 +130,37 @@ func Loop(filelist []File, parent File) {
 				term.MoveTo(0, termHeight+1)
 				Print(HighLight, Black, White, "leader")
 				ascii, _, _ := GetChar()
-				if ascii == 110 {
+				if ascii == 110 { //	------------------------------------	n
 					showChildren = !showChildren
 					center = false
-				} else if ascii == 102 {
+				} else if ascii == 102 { //	--------------------------------	f
 					showMode = !showMode
 					center = false
-				} else if ascii == 109 {
+				} else if ascii == 109 { //	--------------------------------	m
 					showDate = !showDate
 					center = false
-				} else if ascii == 98 {
+				} else if ascii == 98 { //	--------------------------------	b
 					topBar = !topBar
 					statBar = !statBar
 					center = false
-				} else if ascii == 115 {
+				} else if ascii == 115 { //	--------------------------------	s
 					showSize = !showSize
 					center = false
-				} else if ascii == 99 {
+				} else if ascii == 99 { //	--------------------------------	c
 					center = !center
-				} else if ascii == 100 {
+				} else if ascii == 100 { //	--------------------------------	d
 					duMode = !duMode
 					center = false
-				} else if ascii == 105 {
+				} else if ascii == 105 { //	--------------------------------	i
 					showIcons = !showIcons
-				} else if ascii == 71 {
+				} else if ascii == 103 { //	--------------------------------	-
+					if dirASwitch {
+						dirA = currentDir
+					}
+				} else if ascii == 71 { // ---------------------------------	G
 					number = len(drawlist) - 1
 					scroll = len(filelist) - 1
-				} else if ascii == 103 {
+				} else if ascii == 103 { // --------------------------------	g
 					number = 0
 					scroll = 0
 				} else {
@@ -166,21 +170,23 @@ func Loop(filelist []File, parent File) {
 					GetChar()
 				}
 				continue
-			} else if ascii == 9 {
+			} else if ascii == 9 { //	-------------------------------------	TAB
 				recurrent = !recurrent
 				incFolder = !incFolder
 				incHidden = false
 				duMode = false
 				filelist, parent = ListFiles(currentDir)
-			} else if ascii == 44 {
+			} else if ascii == 44 { //	-------------------------------------	,
 				incFiles = !incFiles
 				filelist, parent = ListFiles(currentDir)
-			} else if ascii == 46 {
+			} else if ascii == 46 { //	-------------------------------------	.
 				incHidden = !incHidden
 				filelist, parent = ListFiles(currentDir)
-			} else if ascii == 35 {
+			} else if ascii == 126 { //	-------------------------------------	~
+				filelist, parent = ListFiles(homeDir)
+			} else if ascii == 35 { //	-------------------------------------	#
 				wrap = !wrap
-			} else if ascii == 118 {
+			} else if ascii == 118 { //	-------------------------------------	v
 				drawlist[number].Other.Selected = !drawlist[number].Other.Selected
 				if foreward {
 					scroll++
