@@ -2,6 +2,7 @@ package shko
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	term "github.com/tj/go/term"
@@ -204,6 +205,22 @@ func Loop(childrens []File, parent File) {
 					dirBSwitch = false
 					dirASwitch = true
 				}
+			} else if ascii == 100 { //	-------------------------------------	d
+				statusWrite("Delete selected? Y/N")
+				ascii, _, _ = GetChar()
+				if ascii == 121 || ascii == 89 {
+					onList := false
+					for i, _ := range childrens {
+						if childrens[i].Other.Selected {
+							os.RemoveAll(childrens[i].Path)
+							onList = true
+						}
+					}
+					if !onList {
+						os.RemoveAll(drawlist[number].Path)
+					}
+				}
+				childrens, parent = ListFiles(currentDir)
 			} else if ascii == 126 { //	-------------------------------------	~
 				childrens, parent = ListFiles(homeDir)
 			} else if ascii == 35 { //	-------------------------------------	#

@@ -208,3 +208,8 @@ func drawMime(yesno bool, file File, i int) (tabTurn int) {
 	}
 	return tabTurn
 }
+
+func statusWrite(toWrite string) {
+	term.MoveTo(0, termHeight+1)
+	Print(HighLight, Black, Red, toWrite)
+}
