@@ -1,4 +1,4 @@
-package spejt
+package shko
 
 import (
 	"fmt"
@@ -28,9 +28,9 @@ func entryConditions() {
 	backward = false
 }
 
-func prepList(filelist []File) (drawlist []File) {
+func prepList(childrens []File) (drawlist []File) {
 	entryConditions()
-	drawlist = filelist
+	drawlist = childrens
 	_, termHeight = term.Size()
 	termHeight = termHeight - topSpace
 	if len(drawlist) > termHeight-1 {
@@ -44,8 +44,8 @@ func prepList(filelist []File) (drawlist []File) {
 		if scroll <= 0 {
 			scroll = 0
 			backward = false
-		} else if scroll >= len(filelist)+1-termHeight {
-			scroll = len(filelist) + 1 - termHeight
+		} else if scroll >= len(childrens)+1-termHeight {
+			scroll = len(childrens) + 1 - termHeight
 			foreward = false
 		}
 		drawlist = drawlist[0+scroll : termHeight-1-topSpace+scroll]
@@ -53,15 +53,15 @@ func prepList(filelist []File) (drawlist []File) {
 	return
 }
 
-func Loop(filelist []File, parent File) {
+func Loop(childrens []File, parent File) {
 	for {
-		drawlist := prepList(filelist)
-		SelectInList(number, scroll, drawlist, filelist, currentDir)
+		drawlist := prepList(childrens)
+		SelectInList(number, scroll, drawlist, childrens, currentDir)
 		ascii, keycode, _ := GetChar()
-		if ascii == 13 || ascii == shortcut { //----------------------------	q, SHORTCUT
+		if ascii == shortcut { //-------------------------------------------	SHORTCUT
 			term.ClearAll()
 			break
-		} else if ascii == 3 { // ------------------------------------------	Ctrl+C
+		} else if ascii == 3 || ascii == 113 { // --------------------------	q, Ctrl+c
 			changeDir = false
 			term.ClearAll()
 			break
@@ -76,8 +76,8 @@ func Loop(filelist []File, parent File) {
 			if number < 0 {
 				if wrap {
 					number = len(drawlist) - 1
-					scroll = len(filelist) - 1
-					if len(filelist) < termHeight {
+					scroll = len(childrens) - 1
+					if len(childrens) < termHeight {
 						scroll = 0
 					}
 				} else {
@@ -105,8 +105,8 @@ func Loop(filelist []File, parent File) {
 			foreward = false
 			oldDir := currentDir
 			currentDir, _ = MakeFile(parent.Path)
-			filelist, parent = ListFiles(currentDir)
-			number, scroll = find(filelist, oldDir)
+			childrens, parent = ListFiles(currentDir)
+			number, scroll = find(childrens, oldDir)
 			continue
 		} else if keycode == 39 { // ---------------------------------------	right
 			if len(drawlist) == 0 {
@@ -115,9 +115,9 @@ func Loop(filelist []File, parent File) {
 			if drawlist[number].IsDir {
 				oldDir := currentDir
 				currentDir, _ = MakeFile(drawlist[number].Path)
-				filelist, parent = ListFiles(currentDir)
+				childrens, parent = ListFiles(currentDir)
 				addToMemory(oldDir, currentDir)
-				number, scroll = findInMemory(currentDir, filelist)
+				number, scroll = findInMemory(currentDir, childrens)
 			} else {
 				OpenFile(drawlist[number])
 				fmt.Print("\033[?25l")
@@ -126,7 +126,7 @@ func Loop(filelist []File, parent File) {
 			foreward = false
 			continue
 		} else {
-			if ascii == 32 {
+			if ascii == 32 { // --------------------------------------------	SPACE
 				term.MoveTo(0, termHeight+1)
 				Print(HighLight, Black, White, "leader")
 				ascii, _, _ := GetChar()
@@ -155,7 +155,7 @@ func Loop(filelist []File, parent File) {
 					showIcons = !showIcons
 				} else if ascii == 71 { // ---------------------------------	G
 					number = len(drawlist) - 1
-					scroll = len(filelist) - 1
+					scroll = len(childrens) - 1
 				} else if ascii == 103 { // --------------------------------	g
 					number = 0
 					scroll = 0
@@ -171,39 +171,41 @@ func Loop(filelist []File, parent File) {
 				incFolder = !incFolder
 				incHidden = false
 				duMode = false
-				filelist, parent = ListFiles(currentDir)
+				childrens, parent = ListFiles(currentDir)
+				number = 0
+				scroll = 0
 			} else if ascii == 44 { //	-------------------------------------	,
 				incFiles = !incFiles
-				filelist, parent = ListFiles(currentDir)
+				childrens, parent = ListFiles(currentDir)
 			} else if ascii == 46 { //	-------------------------------------	.
 				incHidden = !incHidden
-				filelist, parent = ListFiles(currentDir)
+				childrens, parent = ListFiles(currentDir)
 			} else if ascii == 45 { //	-------------------------------------	-
 				if dirASwitch {
-					if len(filelist) > 0 {
-						dirA, _ = MakeFile(filelist[0].Other.ParentPath)
+					if len(childrens) > 0 {
+						dirA, _ = MakeFile(childrens[0].Other.ParentPath)
 					} else {
 						dirA, _ = MakeFile(parent.Path)
 					}
 					currentDir = dirB
-					filelist, parent = ListFiles(dirB)
-					number, scroll = findInMemory(currentDir, filelist)
+					childrens, parent = ListFiles(dirB)
+					number, scroll = findInMemory(currentDir, childrens)
 					dirASwitch = false
 					dirBSwitch = true
 				} else {
-					if len(filelist) > 0 {
-						dirB, _ = MakeFile(filelist[0].Other.ParentPath)
+					if len(childrens) > 0 {
+						dirB, _ = MakeFile(childrens[0].Other.ParentPath)
 					} else {
 						dirB, _ = MakeFile(parent.Path)
 					}
 					currentDir = dirA
-					filelist, parent = ListFiles(dirA)
-					number, scroll = findInMemory(currentDir, filelist)
+					childrens, parent = ListFiles(dirA)
+					number, scroll = findInMemory(currentDir, childrens)
 					dirBSwitch = false
 					dirASwitch = true
 				}
 			} else if ascii == 126 { //	-------------------------------------	~
-				filelist, parent = ListFiles(homeDir)
+				childrens, parent = ListFiles(homeDir)
 			} else if ascii == 35 { //	-------------------------------------	#
 				wrap = !wrap
 			} else if ascii == 118 { //	-------------------------------------	v

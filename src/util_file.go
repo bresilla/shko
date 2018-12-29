@@ -1,4 +1,4 @@
-package spejt
+package shko
 
 import (
 	"fmt"

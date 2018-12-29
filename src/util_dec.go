@@ -1,4 +1,4 @@
-package spejt
+package shko
 
 import (
 	term "github.com/tj/go/term"

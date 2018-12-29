@@ -1,4 +1,4 @@
-package spejt
+package shko
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ var (
 	space = 1
 )
 
-func SelectInList(selected, scroll int, drawlist, filelist []File, parent File) {
+func SelectInList(selected, scroll int, drawlist, childrens []File, parent File) {
 	term.MoveTo(0, 0)
 	term.ClearAll()
 	termWidth, termHeight := term.Size()
@@ -21,7 +21,7 @@ func SelectInList(selected, scroll int, drawlist, filelist []File, parent File) 
 	sideSpace = 0
 	if topBar {
 		topSpace = 2
-		Print(HighLight, Cyan, None, DashBorder2(parent.Path, termWidth/2-(len([]rune(parent.Path)))/2))
+		Print(HighLight, Black, Cyan, DashBorder2(parent.Path, termWidth/2-(len([]rune(parent.Path)))/2))
 		println()
 	}
 	if center && termHeight > len(drawlist) {
@@ -34,7 +34,7 @@ func SelectInList(selected, scroll int, drawlist, filelist []File, parent File) 
 		Print(HighLight, Black, White, "  nothing to show  ")
 	} else {
 		var maxSize int64
-		for _, el := range filelist {
+		for _, el := range childrens {
 			maxSize += el.Size
 		}
 		for i, el := range drawlist {
@@ -54,7 +54,7 @@ func SelectInList(selected, scroll int, drawlist, filelist []File, parent File) 
 	if statBar {
 		term.MoveTo(0, termHeight-2)
 		println()
-		Print(HighLight, Cyan, None, DashBorder2(parent.Path, termWidth/2-(len([]rune(parent.Path)))/2))
+		Print(HighLight, Black, Cyan, DashBorder2(parent.Path, termWidth/2-(len([]rune(parent.Path)))/2))
 	}
 }
 
@@ -75,6 +75,7 @@ func colorList(file File, active bool, i int, maxSize int64) {
 	tab = drawDU(duMode, file, i, maxSize)
 	tab = drawSize(showSize, file, i)
 	tab = drawDate(showDate, file, i)
+	//tab = drawMime(true, file, i)
 	if !topBar {
 		SetStyle(Default, White, Black)
 	} else {
@@ -190,6 +191,18 @@ func drawDU(yesno bool, file File, i int, maxSize int64) (tabTurn int) {
 		fmt.Print(sizeBar(maxSize, file.Size))
 		fmt.Print(" ")
 		tabTurn = tab + 13
+	} else {
+		tabTurn = tab
+	}
+	return tabTurn
+}
+
+func drawMime(yesno bool, file File, i int) (tabTurn int) {
+	if yesno {
+		term.MoveTo(tab, i+1)
+		fmt.Print(file.Mime)
+		fmt.Print(" ")
+		tabTurn = tab + 20
 	} else {
 		tabTurn = tab
 	}

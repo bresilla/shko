@@ -1,9 +1,9 @@
 package main
 
 import (
-	spejt "./src"
+	shko "./src"
 )
 
 func main() {
-	spejt.Run()
+	shko.Run()
 }
