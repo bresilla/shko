@@ -35,7 +35,9 @@ var (
 	dirFile           = appfolder + "/chdir"
 	memFile           = appfolder + "/memory"
 	confFile          = appfolder + "/config"
-	file, _           = os.Create(dirFile)
+	fileD, _          = os.Create(dirFile)
+	copySlice         []File
+	ignoreSlice       = []string{}
 	showIcons         = true
 	showChildren      = false
 	showSize          = false
@@ -53,12 +55,12 @@ var (
 
 func Flags() {
 	flag.BoolVar(&duMode, "d", false, "")
-	flag.BoolVar(&center, "c", true, "")
+	flag.BoolVar(&center, "c", false, "")
 	flag.BoolVar(&showChildren, "n", false, "")
 	flag.BoolVar(&showSize, "s", false, "")
 	flag.BoolVar(&showIcons, "i", true, "")
-	flag.BoolVar(&showMode, "f", false, "")
-	flag.BoolVar(&showDate, "m", false, "")
+	flag.BoolVar(&showMode, "m", false, "")
+	flag.BoolVar(&showDate, "t", false, "")
 	flag.BoolVar(&topBar, "b", false, "")
 	flag.Parse()
 }
@@ -73,8 +75,8 @@ func Run() {
 
 	saveMemoryToFile(memory)
 	if changeDir {
-		file.WriteString(currentDir.Path)
+		fileD.WriteString(currentDir.Path)
 	} else {
-		file.WriteString(startDir.Path)
+		fileD.WriteString(startDir.Path)
 	}
 }

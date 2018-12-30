@@ -10,7 +10,6 @@ import (
 
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/karrick/godirwalk"
-	"github.com/mitchellh/hashstructure"
 )
 
 func ByteCountSI(b int64) string {
@@ -193,7 +192,6 @@ type File struct {
 	Size      int64
 	Mode      os.FileMode
 	ModTime   time.Time
-	Hash      uint64 `hash:"ignore"`
 	Other     Other
 }
 type Other struct {
@@ -204,6 +202,7 @@ type Other struct {
 	HumanSize  string
 	Deep       int
 	NameLength int
+	Ignore     bool
 	Icon       string
 }
 
@@ -261,11 +260,12 @@ func MakeFile(dir string) (file File, err error) {
 	if string(name[0]) == "." {
 		file.Hidden = true
 	}
-	hash, err := hashstructure.Hash(file, nil)
-	if err != nil {
-		return file, err
+	for _, s := range strings.Split(dir, "/") {
+		if s != "" && string(s[0]) == "." {
+			file.Other.Ignore = true
+			break
+		}
 	}
-	file.Hash = hash
 	file.Other.NameLength = len(file.Name)
 	file.Other.ParentPath = parentPath
 	return
@@ -277,7 +277,9 @@ func fileList(recurrent bool, dir File) (paths []File, err error) {
 		err = godirwalk.Walk(dir.Path, &godirwalk.Options{
 			Callback: func(osPathname string, de *godirwalk.Dirent) (err error) {
 				file, _ := MakeFile(osPathname)
-				paths = append(paths, file)
+				if !file.Other.Ignore {
+					paths = append(paths, file)
+				}
 				return nil
 			},
 			Unsorted:      true,
@@ -302,6 +304,7 @@ func chooseFile(incFolder, incFiles, incHidden, recurrent bool, dir File) (list 
 	files := []File{}
 	folder := []File{}
 	hidden := []File{}
+	ignore := []File{}
 	paths, _ := fileList(recurrent, dir)
 	for _, f := range paths {
 		if f.IsDir {
@@ -321,13 +324,26 @@ func chooseFile(incFolder, incFiles, incHidden, recurrent bool, dir File) (list 
 		}
 	}
 	if incHidden {
-		list = hidden
+		ignore = hidden
 	} else {
 		for _, f := range hidden {
 			if !f.Hidden {
-				list = append(list, f)
+				ignore = append(ignore, f)
 			}
 		}
+	}
+	if len(ignoreSlice) > 0 {
+		for _, f := range ignore {
+			for _, s := range ignoreSlice {
+				if f.Name == s {
+					break
+				}
+				list = append(list, f)
+				break
+			}
+		}
+	} else {
+		list = ignore
 	}
 	for i, _ := range list {
 		list[i].Other.Number = i

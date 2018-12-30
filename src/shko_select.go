@@ -63,7 +63,11 @@ func colorList(file File, active bool, i int, maxSize int64) {
 	tab = space + 2 + sideSpace
 	term.MoveTo(tab, i+1)
 	if file.IsDir {
-		Invert(active, HighLight, White)
+		if dirASwitch {
+			Invert(active, HighLight, White)
+		} else {
+			Invert(active, HighLight, Green)
+		}
 	} else {
 		Invert(active, Default, Cyan)
 	}
@@ -174,6 +178,9 @@ func sizeBar(maxSize, size int64) (toPrint string) {
 		load  string
 		uload string
 	)
+	if maxSize == 0 {
+		maxSize = 1
+	}
 	percentage := int(size) * 100 / int(maxSize)
 	for i := 1; i <= percentage; i = i + 10 {
 		load += "█"

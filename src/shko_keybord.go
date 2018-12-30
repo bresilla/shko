@@ -134,10 +134,10 @@ func Loop(childrens []File, parent File) {
 				if ascii == 110 { //	------------------------------------	n
 					showChildren = !showChildren
 					center = false
-				} else if ascii == 102 { //	--------------------------------	f
+				} else if ascii == 109 { //	--------------------------------	m
 					showMode = !showMode
 					center = false
-				} else if ascii == 109 { //	--------------------------------	m
+				} else if ascii == 116 { //	--------------------------------	t
 					showDate = !showDate
 					center = false
 				} else if ascii == 98 { //	--------------------------------	b
@@ -210,7 +210,7 @@ func Loop(childrens []File, parent File) {
 				ascii, _, _ = GetChar()
 				if ascii == 121 || ascii == 89 {
 					onList := false
-					for i, _ := range childrens {
+					for i := range childrens {
 						if childrens[i].Other.Selected {
 							os.RemoveAll(childrens[i].Path)
 							onList = true
@@ -218,6 +218,38 @@ func Loop(childrens []File, parent File) {
 					}
 					if !onList {
 						os.RemoveAll(drawlist[number].Path)
+					}
+				}
+				childrens, parent = ListFiles(currentDir)
+			} else if ascii == 121 { //	-------------------------------------	y
+				copySlice = []File{}
+				onList := false
+				for i, file := range childrens {
+					if childrens[i].Other.Selected {
+						copySlice = append(copySlice, file)
+						onList = true
+					}
+				}
+				if !onList {
+					copySlice = append(copySlice, drawlist[number])
+				}
+				childrens, parent = ListFiles(currentDir)
+			} else if ascii == 112 { //	-------------------------------------	p
+				statusWrite("Paste? Y/N")
+				ascii, _, _ = GetChar()
+				if ascii == 121 || ascii == 89 && len(copySlice) > 0 {
+					for _, el := range copySlice {
+						Copy(el.Path, currentDir.Path)
+					}
+				}
+				childrens, parent = ListFiles(currentDir)
+			} else if ascii == 109 { //	-------------------------------------	p
+				statusWrite("Move? Y/N")
+				ascii, _, _ = GetChar()
+				if ascii == 121 || ascii == 89 && len(copySlice) > 0 {
+					for _, el := range copySlice {
+						Copy(el.Path, currentDir.Path)
+						os.RemoveAll(el.Path)
 					}
 				}
 				childrens, parent = ListFiles(currentDir)
