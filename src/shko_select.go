@@ -1,7 +1,9 @@
 package shko
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -38,7 +40,7 @@ func SelectInList(selected, scroll int, drawlist, childrens []File, parent File)
 			maxSize += el.Size
 		}
 		for i, el := range drawlist {
-			if selected+scroll == el.Other.Number {
+			if selected+scroll == el.Number {
 				el.Other.Active = true
 			}
 			fmt.Print("  ")
@@ -131,7 +133,7 @@ func drawName(active bool, file File, i int) (tabTurn int) {
 func drawChildren(yesno bool, file File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print("  " + strconv.Itoa(file.Children) + " ")
+		fmt.Print("  " + strconv.Itoa(file.Other.Children) + " ")
 		tabTurn = tab + 8
 	} else {
 		tabTurn = tab
@@ -219,4 +221,15 @@ func drawMime(yesno bool, file File, i int) (tabTurn int) {
 func statusWrite(toWrite string) {
 	term.MoveTo(0, termHeight+1)
 	Print(HighLight, Black, Red, toWrite)
+}
+
+func statusRead(toWrite, defaultStr string) (text string) {
+	term.MoveTo(0, termHeight+1)
+	reader := bufio.NewReader(os.Stdin)
+	Print(HighLight, Black, Red, toWrite)
+	text, _ = reader.ReadString('\n')
+	if text == "" {
+		text = defaultStr + "1"
+	}
+	return
 }

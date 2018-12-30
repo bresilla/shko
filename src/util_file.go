@@ -181,10 +181,12 @@ var categoryicons = map[string]string{
 }
 
 type File struct {
+	Number    int
 	Path      string
 	Name      string
 	Parent    string
-	Children  int
+	Ancestors []string
+	Childrens []string
 	Mime      string
 	Extension string
 	IsDir     bool
@@ -195,7 +197,7 @@ type File struct {
 	Other     Other
 }
 type Other struct {
-	Number     int
+	Children   int
 	Selected   bool
 	Active     bool
 	ParentPath string
@@ -244,8 +246,8 @@ func MakeFile(dir string) (file File, err error) {
 		file.Extension = ""
 		file.Mime = "folder/folder"
 		file.Other.Icon = categoryicons["folder/folder"]
-		children, _ := godirwalk.ReadDirnames(dir, nil)
-		file.Children = len(children)
+		file.Childrens, _ = godirwalk.ReadDirnames(dir, nil)
+		file.Other.Children = len(file.Childrens)
 	} else {
 		extension := path.Ext(dir)
 		mime, _, _ := mimetype.DetectFile(dir)
@@ -257,10 +259,11 @@ func MakeFile(dir string) (file File, err error) {
 			file.Other.Icon = categoryicons["file/default"]
 		}
 	}
+	file.Ancestors = strings.Split(dir, "/")
 	if string(name[0]) == "." {
 		file.Hidden = true
 	}
-	for _, s := range strings.Split(dir, "/") {
+	for _, s := range file.Ancestors {
 		if s != "" && string(s[0]) == "." {
 			file.Other.Ignore = true
 			break
@@ -346,7 +349,7 @@ func chooseFile(incFolder, incFiles, incHidden, recurrent bool, dir File) (list 
 		list = ignore
 	}
 	for i, _ := range list {
-		list[i].Other.Number = i
+		list[i].Number = i
 	}
 	return
 }

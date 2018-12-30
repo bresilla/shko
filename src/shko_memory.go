@@ -56,7 +56,7 @@ func find(list []File, actual File) (number, scroll int) {
 				break
 			} else {
 				number = termHeight / 2
-				scroll = el.Other.Number - number
+				scroll = el.Number - number
 				break
 			}
 		} else {

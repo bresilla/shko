@@ -206,9 +206,9 @@ func Loop(childrens []File, parent File) {
 					dirASwitch = true
 				}
 			} else if ascii == 100 { //	-------------------------------------	d
-				statusWrite("Delete selected? Y/N")
+				statusWrite("Press \"d\" to DELETE selected")
 				ascii, _, _ = GetChar()
-				if ascii == 121 || ascii == 89 {
+				if ascii == 100 {
 					onList := false
 					for i := range childrens {
 						if childrens[i].Other.Selected {
@@ -222,35 +222,71 @@ func Loop(childrens []File, parent File) {
 				}
 				childrens, parent = ListFiles(currentDir)
 			} else if ascii == 121 { //	-------------------------------------	y
-				copySlice = []File{}
-				onList := false
-				for i, file := range childrens {
-					if childrens[i].Other.Selected {
-						copySlice = append(copySlice, file)
-						onList = true
+				statusWrite("Press \"y\" to YANK selected")
+				ascii, _, _ = GetChar()
+				if ascii == 121 {
+					copySlice = []File{}
+					onList := false
+					for i, file := range childrens {
+						if childrens[i].Other.Selected {
+							copySlice = append(copySlice, file)
+							onList = true
+						}
 					}
+					if !onList {
+						copySlice = append(copySlice, drawlist[number])
+					}
+					childrens, parent = ListFiles(currentDir)
 				}
-				if !onList {
-					copySlice = append(copySlice, drawlist[number])
-				}
-				childrens, parent = ListFiles(currentDir)
 			} else if ascii == 112 { //	-------------------------------------	p
-				statusWrite("Paste? Y/N")
-				ascii, _, _ = GetChar()
-				if ascii == 121 || ascii == 89 && len(copySlice) > 0 {
-					for _, el := range copySlice {
-						Copy(el.Path, currentDir.Path)
+				if len(copySlice) > 0 {
+					statusWrite("Press \"p\" to PASTE here")
+					ascii, _, _ = GetChar()
+					if ascii == 112 {
+						for _, el := range copySlice {
+							Copy(el.Path, currentDir.Path)
+						}
 					}
+					childrens, parent = ListFiles(currentDir)
 				}
-				childrens, parent = ListFiles(currentDir)
-			} else if ascii == 109 { //	-------------------------------------	p
-				statusWrite("Move? Y/N")
-				ascii, _, _ = GetChar()
-				if ascii == 121 || ascii == 89 && len(copySlice) > 0 {
-					for _, el := range copySlice {
-						Copy(el.Path, currentDir.Path)
-						os.RemoveAll(el.Path)
+			} else if ascii == 109 { //	-------------------------------------	m
+				if len(copySlice) > 0 {
+					statusWrite("Press \"m\" to MOVE here")
+					ascii, _, _ = GetChar()
+					if ascii == 109 {
+						for _, el := range copySlice {
+							Copy(el.Path, currentDir.Path)
+							os.RemoveAll(el.Path)
+							copySlice = []File{}
+						}
 					}
+					childrens, parent = ListFiles(currentDir)
+				}
+			} else if ascii == 114 { //	-------------------------------------	r
+				statusWrite("Press \"r\" to RENAME selected")
+				ascii, _, _ = GetChar()
+				if ascii == 114 {
+					onList := false
+					for i, file := range childrens {
+						if childrens[i].Other.Selected {
+							onList = true
+							print(file.Name)
+						}
+					}
+					if !onList {
+						newname := statusRead("Rename "+childrens[number].Name+" to: ", childrens[number].Name)
+						os.Rename(childrens[number].Path, childrens[number].Other.ParentPath+"/"+newname)
+					}
+					childrens, parent = ListFiles(currentDir)
+				}
+			} else if ascii == 110 { //	-------------------------------------	n
+				statusWrite("Press \"n\" to make new FILE or \"f\" to make new FOLDER")
+				ascii, _, _ = GetChar()
+				if ascii == 110 {
+					newFile, _ := os.Create(currentDir.Path + "/" + "newFile.txt")
+					newFile.Close()
+				} else if ascii == 102 {
+					os.MkdirAll(currentDir.Path+"/"+"newFolder", 0777)
 				}
 				childrens, parent = ListFiles(currentDir)
 			} else if ascii == 126 { //	-------------------------------------	~

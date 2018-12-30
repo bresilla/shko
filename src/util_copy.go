@@ -8,7 +8,7 @@
 // Use Files(srcs, dst) to copy multiple files/directories into a directory.
 //
 // source: https://github.com/rvi64/copy
-//
+// this version has some modifications e.g. if file exists, it adds "_" after the name
 
 package shko
 
@@ -18,20 +18,39 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 )
+
+func IfExists(name string) string {
+	if _, err := os.Stat(name); err == nil {
+		i := 1
+		for {
+			if _, err := os.Stat(name + strconv.Itoa(i)); err == nil {
+				i++
+			} else {
+				break
+			}
+		}
+		return name + strconv.Itoa(i)
+	}
+	return name
+}
 
 func cpFile(src, dst string) error {
 	in, err := os.Open(src)
 	if err != nil {
 		return err
 	}
-
+	var out *os.File
 	defer in.Close()
 
-	out, err := os.Create(dst)
+	dst = IfExists(dst)
+
+	out, err = os.Create(dst)
 	if err != nil {
 		return err
 	}
+
 	defer func() {
 		if e := out.Close(); e != nil {
 			err = e
@@ -68,13 +87,7 @@ func cpDir(src string, dst string) error {
 		return fmt.Errorf("source is not a directory")
 	}
 
-	_, err = os.Stat(dst)
-	if err != nil && !os.IsNotExist(err) {
-		return err
-	}
-	if err == nil {
-		return fmt.Errorf("dstination already exists")
-	}
+	dst = IfExists(dst)
 
 	err = os.MkdirAll(dst, si.Mode())
 	if err != nil {
