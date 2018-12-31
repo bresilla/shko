@@ -154,12 +154,6 @@ func Loop(childrens []File, parent File) {
 					center = false
 				} else if ascii == 105 { //	--------------------------------	i
 					showIcons = !showIcons
-				} else if ascii == 71 { // ---------------------------------	G
-					number = len(drawlist) - 1
-					scroll = len(childrens) - 1
-				} else if ascii == 103 { // --------------------------------	g
-					number = 0
-					scroll = 0
 				} else {
 					term.MoveTo(8, termHeight+1)
 					toPrint := "ascii: " + strconv.Itoa(ascii)
@@ -181,6 +175,8 @@ func Loop(childrens []File, parent File) {
 			} else if ascii == 46 { //	-------------------------------------	.
 				incHidden = !incHidden
 				childrens, parent = ListFiles(currentDir)
+			} else if ascii == 35 { //	-------------------------------------	#
+				wrap = !wrap
 			} else if ascii == 45 { //	-------------------------------------	-
 				if dirASwitch {
 					if len(childrens) > 0 {
@@ -283,16 +279,20 @@ func Loop(childrens []File, parent File) {
 				statusWrite("Press \"n\" to make new FILE or \"f\" to make new FOLDER")
 				ascii, _, _ = GetChar()
 				if ascii == 110 {
-					newFile, _ := os.Create(currentDir.Path + "/" + "newFile.txt")
+					name := statusRead("Enter filename: ", "file.txt")
+					newFileName := currentDir.Path + "/" + name
+					newFileName = IfExists(newFileName)
+					newFile, _ := os.Create(newFileName)
 					newFile.Close()
 				} else if ascii == 102 {
-					os.MkdirAll(currentDir.Path+"/"+"newFolder", 0777)
+					name := statusRead("Enter filename: ", "folder")
+					newFolderName := currentDir.Path + "/" + name
+					newFolderName = IfExists(newFolderName)
+					os.MkdirAll(newFolderName, 0777)
 				}
 				childrens, parent = ListFiles(currentDir)
 			} else if ascii == 126 { //	-------------------------------------	~
 				childrens, parent = ListFiles(homeDir)
-			} else if ascii == 35 { //	-------------------------------------	#
-				wrap = !wrap
 			} else if ascii == 118 { //	-------------------------------------	v
 				drawlist[number].Other.Selected = !drawlist[number].Other.Selected
 				if foreward {
@@ -309,6 +309,12 @@ func Loop(childrens []File, parent File) {
 					}
 				}
 				continue
+			} else if ascii == 71 { // -------------------------------------	G
+				number = len(drawlist) - 1
+				scroll = len(childrens) - 1
+			} else if ascii == 103 { // ------------------------------------	g
+				number = 0
+				scroll = 0
 			} else {
 				continue
 			}

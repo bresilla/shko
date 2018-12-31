@@ -75,7 +75,7 @@ func cpFile(src, dst string) error {
 	return os.Chmod(dst, si.Mode())
 }
 
-func cpDir(src string, dst string) error {
+func cpDir(src, dst string) error {
 	src = filepath.Clean(src)
 	dst = filepath.Clean(dst)
 

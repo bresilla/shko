@@ -220,16 +220,26 @@ func drawMime(yesno bool, file File, i int) (tabTurn int) {
 
 func statusWrite(toWrite string) {
 	term.MoveTo(0, termHeight+1)
-	Print(HighLight, Black, Red, toWrite)
+	Print(HighLight, Black, White, toWrite)
 }
 
 func statusRead(toWrite, defaultStr string) (text string) {
+	scanner := bufio.NewScanner(os.Stdin)
 	term.MoveTo(0, termHeight+1)
-	reader := bufio.NewReader(os.Stdin)
-	Print(HighLight, Black, Red, toWrite)
-	text, _ = reader.ReadString('\n')
+	cleanLine(1)
+	term.MoveTo(0, termHeight+1)
+	Print(HighLight, Black, White, toWrite)
+	scanner.Scan()
+	text = scanner.Text()
 	if text == "" {
-		text = defaultStr + "1"
+		text = defaultStr
 	}
 	return
+}
+
+func cleanLine(minus int) {
+	termWidth, _ := term.Size()
+	for i := 0; i < termWidth-minus; i++ {
+		fmt.Print(" ")
+	}
 }

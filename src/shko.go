@@ -35,6 +35,7 @@ var (
 	dirFile           = appfolder + "/chdir"
 	memFile           = appfolder + "/memory"
 	confFile          = appfolder + "/config"
+	markFile          = appfolder + "/makrs"
 	fileD, _          = os.Create(dirFile)
 	copySlice         []File
 	ignoreSlice       = []string{}
