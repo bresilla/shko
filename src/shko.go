@@ -52,6 +52,7 @@ var (
 
 var (
 	homeDir, _ = MakeFile(os.Getenv("HOME"))
+	tempDir, _ = MakeFile(tempfolder)
 	dirA       = homeDir
 	dirB       = homeDir
 	dir1       File

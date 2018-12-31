@@ -20,7 +20,7 @@ func main() {
 }
 
 func makeTemplate(name string, bytes []byte) {
-	if _, err := os.Stat(name); err == nil {
+	if _, err := os.Stat(tempfolder + "/" + name); err == nil {
 		log.Print("File Exists")
 	} else {
 		newFileName := tempfolder + "/" + name

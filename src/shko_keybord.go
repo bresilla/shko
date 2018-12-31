@@ -132,28 +132,28 @@ func Loop(childrens []File, parent File) {
 				Print(HighLight, Black, White, "leader")
 				ascii, _, _ := GetChar()
 				switch ascii {
-				case 110: //	------------------------------------	n
+				case 110: //	--------------------------------------------	n
 					showChildren = !showChildren
 					center = false
-				case 109: //	--------------------------------	m
+				case 109: //	--------------------------------------------	m
 					showMode = !showMode
 					center = false
-				case 116: //	--------------------------------	t
+				case 116: //	--------------------------------------------	t
 					showDate = !showDate
 					center = false
-				case 98: //	--------------------------------	b
+				case 98: //	------------------------------------------------	b
 					topBar = !topBar
 					statBar = !statBar
 					center = false
-				case 115: //	--------------------------------	s
+				case 115: //	--------------------------------------------	s
 					showSize = !showSize
 					center = false
-				case 99: //	--------------------------------	c
+				case 99: //	------------------------------------------------	c
 					center = !center
-				case 100: //	--------------------------------	d
+				case 100: //	--------------------------------------------	d
 					duMode = !duMode
 					center = false
-				case 105: //	--------------------------------	i
+				case 105: //	--------------------------------------------	i
 					showIcons = !showIcons
 				default:
 					term.MoveTo(8, termHeight+1)
@@ -277,19 +277,67 @@ func Loop(childrens []File, parent File) {
 					childrens, parent = ListFiles(currentDir)
 				}
 			} else if ascii == 110 { //	-------------------------------------	n
-				statusWrite("Press \"n\" to make new FILE or \"f\" to make new FOLDER")
+				statusWrite("Press \"n\" to make new FILE, \"f\" to make new FOLDER or  \"t\" to select from TEMPLATES")
 				ascii, _, _ = GetChar()
-				if ascii == 110 {
+				switch ascii {
+				case 110:
 					name := statusRead("Enter filename: ", "file.txt")
 					newFileName := currentDir.Path + "/" + name
 					newFileName = IfExists(newFileName)
 					newFile, _ := os.Create(newFileName)
 					newFile.Close()
-				} else if ascii == 102 {
+				case 102:
 					name := statusRead("Enter filename: ", "folder")
 					newFolderName := currentDir.Path + "/" + name
 					newFolderName = IfExists(newFolderName)
 					os.MkdirAll(newFolderName, 0777)
+				case 116:
+					number = 0
+					scroll = 0
+					childrens, parent = ListFiles(tempDir)
+					for {
+						drawlist := prepList(childrens)
+						SelectInList(number, scroll, drawlist, childrens, tempDir)
+						ascii, keycode, _ := GetChar()
+						if keycode == 38 || ascii == 107 { // ------------------------	up
+							if backward {
+								scroll--
+							} else {
+								number--
+							}
+							if number < 0 {
+								if wrap {
+									number = len(drawlist) - 1
+									scroll = len(childrens) - 1
+									if len(childrens) < termHeight {
+										scroll = 0
+									}
+								} else {
+									number = 0
+								}
+							}
+							continue
+						} else if keycode == 40 || ascii == 106 { // ------------------------	down
+							if foreward {
+								scroll++
+							} else {
+								number++
+							}
+							if number > len(drawlist)-1 {
+								if wrap {
+									number = 0
+									scroll = 0
+								} else {
+									number = len(drawlist) - 1
+								}
+							}
+						} else if ascii == 13 {
+							Copy(drawlist[number].Path, currentDir.Path)
+							break
+						} else {
+							break
+						}
+					}
 				}
 				childrens, parent = ListFiles(currentDir)
 			} else if ascii == 118 { //	-------------------------------------	v
