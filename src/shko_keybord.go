@@ -68,7 +68,7 @@ func Loop(childrens []File, parent File) {
 			break
 		} else if ascii == 27 { // -----------------------------------------	ESC
 			continue
-		} else if keycode == 38 { // ---------------------------------------	up
+		} else if keycode == 38 || ascii == 107 { // ------------------------	up
 			if backward {
 				scroll--
 			} else {
@@ -86,7 +86,7 @@ func Loop(childrens []File, parent File) {
 				}
 			}
 			continue
-		} else if keycode == 40 { // ---------------------------------------	down
+		} else if keycode == 40 || ascii == 106 { // ------------------------	down
 			if foreward {
 				scroll++
 			} else {
@@ -101,7 +101,7 @@ func Loop(childrens []File, parent File) {
 				}
 			}
 			continue
-		} else if keycode == 37 { // ---------------------------------------	left
+		} else if keycode == 37 || ascii == 104 { // ------------------------	left
 			backward = false
 			foreward = false
 			oldDir := currentDir
@@ -109,7 +109,7 @@ func Loop(childrens []File, parent File) {
 			childrens, parent = ListFiles(currentDir)
 			number, scroll = find(childrens, oldDir)
 			continue
-		} else if keycode == 39 { // ---------------------------------------	right
+		} else if keycode == 39 || ascii == 108 { // ------------------------	right
 			if len(drawlist) == 0 {
 				continue
 			}
@@ -131,30 +131,31 @@ func Loop(childrens []File, parent File) {
 				term.MoveTo(0, termHeight+1)
 				Print(HighLight, Black, White, "leader")
 				ascii, _, _ := GetChar()
-				if ascii == 110 { //	------------------------------------	n
+				switch ascii {
+				case 110: //	------------------------------------	n
 					showChildren = !showChildren
 					center = false
-				} else if ascii == 109 { //	--------------------------------	m
+				case 109: //	--------------------------------	m
 					showMode = !showMode
 					center = false
-				} else if ascii == 116 { //	--------------------------------	t
+				case 116: //	--------------------------------	t
 					showDate = !showDate
 					center = false
-				} else if ascii == 98 { //	--------------------------------	b
+				case 98: //	--------------------------------	b
 					topBar = !topBar
 					statBar = !statBar
 					center = false
-				} else if ascii == 115 { //	--------------------------------	s
+				case 115: //	--------------------------------	s
 					showSize = !showSize
 					center = false
-				} else if ascii == 99 { //	--------------------------------	c
+				case 99: //	--------------------------------	c
 					center = !center
-				} else if ascii == 100 { //	--------------------------------	d
+				case 100: //	--------------------------------	d
 					duMode = !duMode
 					center = false
-				} else if ascii == 105 { //	--------------------------------	i
+				case 105: //	--------------------------------	i
 					showIcons = !showIcons
-				} else {
+				default:
 					term.MoveTo(8, termHeight+1)
 					toPrint := "ascii: " + strconv.Itoa(ascii)
 					Print(HighLight, Black, White, toPrint)
@@ -291,8 +292,6 @@ func Loop(childrens []File, parent File) {
 					os.MkdirAll(newFolderName, 0777)
 				}
 				childrens, parent = ListFiles(currentDir)
-			} else if ascii == 126 { //	-------------------------------------	~
-				childrens, parent = ListFiles(homeDir)
 			} else if ascii == 118 { //	-------------------------------------	v
 				drawlist[number].Other.Selected = !drawlist[number].Other.Selected
 				if foreward {
@@ -315,7 +314,106 @@ func Loop(childrens []File, parent File) {
 			} else if ascii == 103 { // ------------------------------------	g
 				number = 0
 				scroll = 0
+			} else if ascii == 126 { //	-------------------------------------	~
+				childrens, parent = ListFiles(homeDir)
+			} else if ascii == 119 { //	-------------------------------------	b
+				statusWrite("Pres one of \"0\" to \"9\" keys to save this as WARPMARK")
+				ascii, _, _ = GetChar()
+				switch ascii {
+				case 48:
+					dir0 = currentDir
+				case 49:
+					dir1 = currentDir
+				case 50:
+					dir2 = currentDir
+				case 51:
+					dir3 = currentDir
+				case 52:
+					dir4 = currentDir
+				case 53:
+					dir5 = currentDir
+				case 54:
+					dir6 = currentDir
+				case 55:
+					dir7 = currentDir
+				case 56:
+					dir8 = currentDir
+				case 57:
+					dir9 = currentDir
+				}
 			} else {
+				switch ascii {
+				case 48:
+					if dir0.Path != "" {
+						currentDir, _ = MakeFile(dir0.Path)
+						childrens, parent = ListFiles(currentDir)
+					} else {
+						continue
+					}
+				case 49:
+					if dir1.Path != "" {
+						currentDir, _ = MakeFile(dir1.Path)
+						childrens, parent = ListFiles(currentDir)
+					} else {
+						continue
+					}
+				case 50:
+					if dir2.Path != "" {
+						currentDir, _ = MakeFile(dir2.Path)
+						childrens, parent = ListFiles(currentDir)
+					} else {
+						continue
+					}
+				case 51:
+					if dir3.Path != "" {
+						currentDir, _ = MakeFile(dir3.Path)
+						childrens, parent = ListFiles(currentDir)
+					} else {
+						continue
+					}
+				case 52:
+					if dir4.Path != "" {
+						currentDir, _ = MakeFile(dir4.Path)
+						childrens, parent = ListFiles(currentDir)
+					} else {
+						continue
+					}
+				case 53:
+					if dir5.Path != "" {
+						currentDir, _ = MakeFile(dir5.Path)
+						childrens, parent = ListFiles(currentDir)
+					} else {
+						continue
+					}
+				case 54:
+					if dir6.Path != "" {
+						currentDir, _ = MakeFile(dir6.Path)
+						childrens, parent = ListFiles(currentDir)
+					} else {
+						continue
+					}
+				case 55:
+					if dir7.Path != "" {
+						currentDir, _ = MakeFile(dir7.Path)
+						childrens, parent = ListFiles(currentDir)
+					} else {
+						continue
+					}
+				case 56:
+					if dir8.Path != "" {
+						currentDir, _ = MakeFile(dir8.Path)
+						childrens, parent = ListFiles(currentDir)
+					} else {
+						continue
+					}
+				case 57:
+					if dir9.Path != "" {
+						currentDir, _ = MakeFile(dir9.Path)
+						childrens, parent = ListFiles(currentDir)
+					} else {
+						continue
+					}
+				}
 				continue
 			}
 		}
