@@ -190,6 +190,7 @@ func Loop(childrens []File, parent File) {
 					number, scroll = findInMemory(currentDir, childrens)
 					dirASwitch = false
 					dirBSwitch = true
+					showIcons = !showIcons
 				} else {
 					if len(childrens) > 0 {
 						dirB, _ = MakeFile(childrens[0].Other.ParentPath)
@@ -201,6 +202,7 @@ func Loop(childrens []File, parent File) {
 					number, scroll = findInMemory(currentDir, childrens)
 					dirBSwitch = false
 					dirASwitch = true
+					showIcons = !showIcons
 				}
 			} else if ascii == 100 { //	-------------------------------------	d
 				statusWrite("Press \"d\" to DELETE selected")

@@ -65,11 +65,7 @@ func colorList(file File, active bool, i int, maxSize int64) {
 	tab = space + 2 + sideSpace
 	term.MoveTo(tab, i+1)
 	if file.IsDir {
-		if dirASwitch {
-			Invert(active, HighLight, White)
-		} else {
-			Invert(active, HighLight, Green)
-		}
+		Invert(active, HighLight, White)
 	} else {
 		Invert(active, Default, Cyan)
 	}
