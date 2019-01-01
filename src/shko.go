@@ -31,14 +31,16 @@ var (
 	scroll            = 0
 	foreward          = false
 	backward          = false
-	appfolder         = "/tmp/shko"
+	appfolder         = "/home/bresilla/.config/shko"
+	setfolder         = appfolder + "/settings"
 	tempfolder        = appfolder + "/templates"
-	dirFile           = appfolder + "/chdir"
-	freqFile          = appfolder + "/frecency"
-	memFile           = appfolder + "/memory"
 	confFile          = appfolder + "/config"
-	bulkFile          = appfolder + "/rename"
-	markFile          = appfolder + "/makrs"
+	dirFile           = setfolder + "/chdir"
+	tabFile           = setfolder + "/tabdirs"
+	freqFile          = setfolder + "/frecency"
+	memFile           = setfolder + "/memory"
+	bulkFile          = setfolder + "/rename"
+	markFile          = setfolder + "/makrs"
 	fileD, _          = os.Create(dirFile)
 	memory, _         = loadFromFile(memFile)
 	frecency, _       = loadFromFile(freqFile)
@@ -92,6 +94,7 @@ func check(e error) {
 func Run() {
 	createDirectory(appfolder)
 	createTemplates(tempfolder)
+	makeBookmarks()
 
 	fmt.Print("\033[?25l")
 	Flags()

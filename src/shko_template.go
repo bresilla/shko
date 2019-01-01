@@ -103,3 +103,22 @@ func createTemplates(folder string) {
 		makeTemplate(key, value)
 	}
 }
+
+var bookmark = map[string]string{
+	"~": homeDir.Path,
+	"d": homeDir.Path + "/Documents",
+	"p": homeDir.Path + "/Pictures",
+}
+
+func makeBookmarks() {
+	if _, err := os.Stat(markFile); err == nil {
+		log.Print("File Exists")
+	} else {
+		newFileName := markFile
+		newFile, _ := os.Create(newFileName)
+		for i, el := range bookmark {
+			newFile.WriteString(i + " > " + el + "\n")
+		}
+		newFile.Close()
+	}
+}
