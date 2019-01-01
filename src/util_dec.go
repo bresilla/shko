@@ -1,6 +1,8 @@
 package shko
 
 import (
+	"fmt"
+
 	term "github.com/tj/go/term"
 )
 
@@ -26,4 +28,17 @@ func DashBorder2(text string, before int) string {
 	}
 	toPrint = toPrint + "\n"
 	return toPrint
+}
+
+func Print(stl Style, fg Color, bg Color, toPrint string) {
+	SetStyle(stl, fg, bg)
+	fmt.Print(toPrint)
+	ResetStyle()
+}
+
+func PrintWait(toPrint string) {
+	SetStyle(HighLight, Black, White)
+	fmt.Print(toPrint)
+	ResetStyle()
+	GetChar()
 }

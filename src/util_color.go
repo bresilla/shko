@@ -109,12 +109,6 @@ func ResetStyle() {
 	fmt.Print("\x1b[0m")
 }
 
-func Print(stl Style, fg Color, bg Color, toPrint string) {
-	SetStyle(stl, fg, bg)
-	fmt.Print(toPrint)
-	ResetStyle()
-}
-
 func Invert(active bool, style Style, color Color) {
 	if active {
 		SetStyle(style, Black, color)
