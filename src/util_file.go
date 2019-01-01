@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bresilla/godirwalk"
 	"github.com/gabriel-vasile/mimetype"
-	"github.com/karrick/godirwalk"
 )
 
 func ByteCountSI(b int64) string {

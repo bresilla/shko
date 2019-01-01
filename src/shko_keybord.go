@@ -107,7 +107,7 @@ func Loop(childrens []File, parent File) {
 			oldDir := currentDir
 			currentDir, _ = MakeFile(parent.Path)
 			childrens, parent = ListFiles(currentDir)
-			number, scroll = find(childrens, oldDir)
+			number, scroll = findFile(childrens, oldDir)
 			continue
 		} else if keycode == 39 || ascii == 108 { // ------------------------	right
 			if len(drawlist) == 0 {
@@ -311,7 +311,10 @@ func Loop(childrens []File, parent File) {
 						drawlist := prepList(childrens)
 						SelectInList(number, scroll, drawlist, childrens, tempDir)
 						ascii, keycode, _ := GetChar()
-						if keycode == 38 || ascii == 107 { // ----------------------------------	up
+						if ascii == 13 { // ----	ENTER
+							Copy(drawlist[number].Path, currentDir.Path)
+							break
+						} else if keycode == 38 || ascii == 107 { // ----up
 							if backward {
 								scroll--
 							} else {
@@ -329,7 +332,7 @@ func Loop(childrens []File, parent File) {
 								}
 							}
 							continue
-						} else if keycode == 40 || ascii == 106 { // ------------------------	down
+						} else if keycode == 40 || ascii == 106 { // ----	down
 							if foreward {
 								scroll++
 							} else {
@@ -343,16 +346,13 @@ func Loop(childrens []File, parent File) {
 									number = len(drawlist) - 1
 								}
 							}
-						} else if ascii == 13 { // ------------------------------------------	ENTER
-							Copy(drawlist[number].Path, currentDir.Path)
-							break
 						} else {
 							break
 						}
 					}
 				}
 				childrens, parent = ListFiles(currentDir)
-			} else if ascii == 118 { //	-------------------------------------	v
+			} else if ascii == 118 { //	-------------------------------------	v (paste)
 				drawlist[number].Other.Selected = !drawlist[number].Other.Selected
 				if foreward {
 					scroll++
@@ -368,15 +368,14 @@ func Loop(childrens []File, parent File) {
 					}
 				}
 				continue
-			} else if ascii == 71 { // -------------------------------------	G
-				number = len(drawlist) - 1
-				scroll = len(childrens) - 1
+			} else if ascii == 115 { // ------------------------------------	s (script)
 			} else if ascii == 103 { // ------------------------------------	g
-				number = 0
-				scroll = 0
+				name := statusRead("Go-To: ", "folder")
+				print(name)
+				GetChar()
 			} else if ascii == 126 { //	-------------------------------------	~
 				childrens, parent = ListFiles(homeDir)
-			} else if ascii == 119 { //	-------------------------------------	b
+			} else if ascii == 119 { //	-------------------------------------	w
 				statusWrite("Pres one of \"0\" to \"9\" keys to save this as WARPMARK")
 				ascii, _, _ = GetChar()
 				switch ascii {

@@ -34,11 +34,14 @@ var (
 	appfolder         = "/tmp/shko"
 	tempfolder        = appfolder + "/templates"
 	dirFile           = appfolder + "/chdir"
+	freqFile          = appfolder + "/frecency"
 	memFile           = appfolder + "/memory"
 	confFile          = appfolder + "/config"
 	bulkFile          = appfolder + "/rename"
 	markFile          = appfolder + "/makrs"
 	fileD, _          = os.Create(dirFile)
+	memory, _         = loadFromFile(memFile)
+	frecency, _       = loadFromFile(freqFile)
 	copySlice         []File
 	ignoreSlice       = []string{}
 	showIcons         = true
@@ -95,10 +98,13 @@ func Run() {
 	Loop(childrens, parent)
 	fmt.Print("\033[?25h")
 
-	saveMemoryToFile(memory)
 	if changeDir {
 		fileD.WriteString(currentDir.Path)
+		addToFrecency(currentDir)
 	} else {
 		fileD.WriteString(startDir.Path)
 	}
+
+	saveToFile(memory, memFile)
+	saveToFile(frecency, freqFile)
 }
