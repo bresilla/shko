@@ -88,9 +88,7 @@ func check(e error) {
 
 func Run() {
 	createDirectory(appfolder)
-	createDirectory(tempfolder)
-
-	createTemplates()
+	createTemplates(tempfolder)
 
 	fmt.Print("\033[?25l")
 	Flags()

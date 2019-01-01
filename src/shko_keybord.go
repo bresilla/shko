@@ -263,14 +263,24 @@ func Loop(childrens []File, parent File) {
 				statusWrite("Press \"r\" to RENAME selected")
 				ascii, _, _ = GetChar()
 				if ascii == 114 {
-					onList := false
-					for i, file := range childrens {
+					var onList []File
+					for i := range childrens {
 						if childrens[i].Other.Selected {
-							onList = true
-							print(file.Name)
+							onList = append(onList, childrens[i])
 						}
 					}
-					if !onList {
+					if len(onList) > 0 {
+						editBulk, _ := os.Create(bulkFile)
+						for _, file := range onList {
+							editBulk.Write([]byte(file.Name + "\n"))
+						}
+						EditFile(bulkFile)
+						fmt.Print("\033[?25l")
+						newNames, _ := ReadLines(bulkFile)
+						for i, name := range newNames {
+							os.Rename(onList[i].Path, onList[i].Other.ParentPath+name)
+						}
+					} else {
 						newname := statusRead("Rename "+childrens[number].Name+" to: ", childrens[number].Name)
 						os.Rename(childrens[number].Path, childrens[number].Other.ParentPath+"/"+newname)
 					}
@@ -299,7 +309,7 @@ func Loop(childrens []File, parent File) {
 						drawlist := prepList(childrens)
 						SelectInList(number, scroll, drawlist, childrens, tempDir)
 						ascii, keycode, _ := GetChar()
-						if keycode == 38 || ascii == 107 { // ------------------------	up
+						if keycode == 38 || ascii == 107 { // ----------------------------------	up
 							if backward {
 								scroll--
 							} else {
@@ -331,7 +341,7 @@ func Loop(childrens []File, parent File) {
 									number = len(drawlist) - 1
 								}
 							}
-						} else if ascii == 13 {
+						} else if ascii == 13 { // ------------------------------------------	ENTER
 							Copy(drawlist[number].Path, currentDir.Path)
 							break
 						} else {
