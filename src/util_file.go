@@ -280,12 +280,12 @@ func fileList(recurrent bool, dir File) (paths []File, err error) {
 		err = godirwalk.Walk(dir.Path, &godirwalk.Options{
 			Callback: func(osPathname string, de *godirwalk.Dirent) (err error) {
 				file, _ := MakeFile(osPathname)
-				if !file.Other.Ignore {
-					paths = append(paths, file)
-				}
+				paths = append(paths, file)
 				return nil
 			},
 			Unsorted:      true,
+			NoHidden:      true,
+			Ignore:        []string{".git"},
 			ScratchBuffer: make([]byte, 64*1024),
 		})
 	} else {

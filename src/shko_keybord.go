@@ -376,9 +376,10 @@ func Loop(childrens []File, parent File) {
 					currentDir, _ = MakeFile(matched)
 					childrens, parent = ListFiles(currentDir)
 				}
-			} else if ascii == 126 { //	-------------------------------------	~
+			} else if ascii == 98 { // -------------------------------------	b
+			} else if ascii == 126 { //	------------------------------------	~
 				childrens, parent = ListFiles(homeDir)
-			} else if ascii == 119 { //	-------------------------------------	w
+			} else if ascii == 119 { //	------------------------------------	w
 				statusWrite("Pres one of \"0\" to \"9\" keys to save this as WARPMARK")
 				ascii, _, _ = GetChar()
 				switch ascii {
