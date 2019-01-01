@@ -3,6 +3,8 @@ package shko
 import (
 	"io/ioutil"
 	"math"
+	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -11,7 +13,7 @@ import (
 )
 
 var (
-	frequency int
+	frequency = 1
 )
 
 func saveToFile(array []string, file string) {
@@ -112,5 +114,31 @@ func addToFrecency(parent File) {
 func calcFrecency(hits int, attime time.Time) (frecency float64) {
 	toTime := float64(time.Now().Sub(attime))
 	frecency = float64(hits)/0.25 + 3*math.Pow(10, -6)*toTime
+	return
+}
+
+func matchFrecency(toMatch string) (matchedFile string) {
+	var matchedList []string
+	re := regexp.MustCompile(`(?i)` + toMatch)
+	for _, el := range frecency {
+		arr := strings.Split(el, " > ")
+		_, name := path.Split(arr[0])
+		if re.Match([]byte(name)) {
+			matchedList = append(matchedList, el)
+		}
+	}
+
+	if len(matchedList) > 0 {
+		var bestScore float64
+		for _, el := range matchedList {
+			arr := strings.Split(el, " > ")
+			frequency, _ = strconv.Atoi(arr[1])
+			timeconv, _ := time.Parse("2019-01-01 19:07:28.623195367 +0100 CET m=+9.257016799", arr[2])
+			if calcFrecency(frequency, timeconv) > bestScore {
+				bestScore = calcFrecency(frequency, timeconv)
+				matchedFile = arr[0]
+			}
+		}
+	}
 	return
 }

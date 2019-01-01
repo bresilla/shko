@@ -371,8 +371,11 @@ func Loop(childrens []File, parent File) {
 			} else if ascii == 115 { // ------------------------------------	s (script)
 			} else if ascii == 103 { // ------------------------------------	g
 				name := statusRead("Go-To: ", "folder")
-				print(name)
-				GetChar()
+				matched := matchFrecency(name)
+				if _, err := os.Stat(matched); err == nil {
+					currentDir, _ = MakeFile(matched)
+					childrens, parent = ListFiles(currentDir)
+				}
 			} else if ascii == 126 { //	-------------------------------------	~
 				childrens, parent = ListFiles(homeDir)
 			} else if ascii == 119 { //	-------------------------------------	w
