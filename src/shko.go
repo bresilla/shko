@@ -60,16 +60,17 @@ var (
 	tempDir, _ = MakeFile(tempfolder)
 	dirA       = homeDir
 	dirB       = homeDir
-	dir1       File
-	dir2       File
-	dir3       File
-	dir4       File
-	dir5       File
-	dir6       File
-	dir7       File
-	dir8       File
-	dir9       File
-	dir0       File
+	//dirB       = tabDir(tabFile)
+	dir1 File
+	dir2 File
+	dir3 File
+	dir4 File
+	dir5 File
+	dir6 File
+	dir7 File
+	dir8 File
+	dir9 File
+	dir0 File
 )
 
 func Flags() {
@@ -94,7 +95,7 @@ func check(e error) {
 func Run() {
 	createDirectory(appfolder)
 	createTemplates(tempfolder)
-	makeBookmarks()
+	initializeBookmarks()
 
 	fmt.Print("\033[?25l")
 	Flags()

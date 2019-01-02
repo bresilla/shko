@@ -1,8 +1,10 @@
 package shko
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 )
 
 var template = map[string][]byte{
@@ -104,21 +106,49 @@ func createTemplates(folder string) {
 	}
 }
 
-var bookmark = map[string]string{
+var bookinit = map[string]string{
 	"~": homeDir.Path,
 	"d": homeDir.Path + "/Documents",
 	"p": homeDir.Path + "/Pictures",
 }
 
-func makeBookmarks() {
+var bookmark = map[string]string{}
+
+func ASCII(r rune) rune {
+	switch {
+	case 97 <= r && r <= 122:
+		return r - 32
+	case 65 <= r && r <= 90:
+		return r + 32
+	default:
+		return r
+	}
+}
+
+func initializeBookmarks() {
 	if _, err := os.Stat(markFile); err == nil {
-		log.Print("File Exists")
+		jointMem, err := ioutil.ReadFile(markFile)
+		if err != nil {
+			return
+		}
+		allBooks := strings.Split(string(jointMem), "\n")
+		for _, el := range allBooks {
+			arr := strings.Split(el, " > ")
+			if arr[0] == "" || arr[1] == "" {
+				continue
+			}
+			bookmark[arr[0]] = arr[1]
+		}
 	} else {
 		newFileName := markFile
 		newFile, _ := os.Create(newFileName)
-		for i, el := range bookmark {
+		for i, el := range bookinit {
 			newFile.WriteString(i + " > " + el + "\n")
 		}
 		newFile.Close()
 	}
+}
+
+func readBookmarks(letter string) (file File) {
+	return
 }

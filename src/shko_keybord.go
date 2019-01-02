@@ -191,6 +191,7 @@ func Loop(childrens []File, parent File) {
 					dirASwitch = false
 					dirBSwitch = true
 					showIcons = !showIcons
+					//ioutil.WriteFile(tabFile, []byte(dirB.Path), 0666)
 				} else {
 					if len(childrens) > 0 {
 						dirB, _ = MakeFile(childrens[0].Other.ParentPath)
@@ -203,8 +204,9 @@ func Loop(childrens []File, parent File) {
 					dirBSwitch = false
 					dirASwitch = true
 					showIcons = !showIcons
+					//ioutil.WriteFile(tabFile, []byte(dirB.Path), 0666)
 				}
-			} else if ascii == 100 { //	-------------------------------------	d
+			} else if ascii == 100 { //	-------------------------------------	d (delete)
 				statusWrite("Press \"d\" to DELETE selected")
 				ascii, _, _ = GetChar()
 				if ascii == 100 {
@@ -220,7 +222,7 @@ func Loop(childrens []File, parent File) {
 					}
 				}
 				childrens, parent = ListFiles(currentDir)
-			} else if ascii == 121 { //	-------------------------------------	y
+			} else if ascii == 121 { //	-------------------------------------	y (yank copy)
 				statusWrite("Press \"y\" to YANK selected")
 				ascii, _, _ = GetChar()
 				if ascii == 121 {
@@ -237,7 +239,7 @@ func Loop(childrens []File, parent File) {
 					}
 					childrens, parent = ListFiles(currentDir)
 				}
-			} else if ascii == 112 { //	-------------------------------------	p
+			} else if ascii == 112 { //	-------------------------------------	p (paste copy)
 				if len(copySlice) > 0 {
 					statusWrite("Press \"p\" to PASTE here")
 					ascii, _, _ = GetChar()
@@ -248,7 +250,7 @@ func Loop(childrens []File, parent File) {
 					}
 					childrens, parent = ListFiles(currentDir)
 				}
-			} else if ascii == 109 { //	-------------------------------------	m
+			} else if ascii == 109 { //	-------------------------------------	m (move copy)
 				if len(copySlice) > 0 {
 					statusWrite("Press \"m\" to MOVE here")
 					ascii, _, _ = GetChar()
@@ -261,7 +263,7 @@ func Loop(childrens []File, parent File) {
 					}
 					childrens, parent = ListFiles(currentDir)
 				}
-			} else if ascii == 114 { //	-------------------------------------	r
+			} else if ascii == 114 { //	-------------------------------------	r (rename)
 				statusWrite("Press \"r\" to RENAME selected")
 				ascii, _, _ = GetChar()
 				if ascii == 114 {
@@ -288,7 +290,7 @@ func Loop(childrens []File, parent File) {
 					}
 					childrens, parent = ListFiles(currentDir)
 				}
-			} else if ascii == 110 { //	-------------------------------------	n
+			} else if ascii == 110 { //	-------------------------------------	n (new)
 				statusWrite("Press \"n\" to make new FILE, \"f\" to make new FOLDER or  \"t\" to select from TEMPLATES")
 				ascii, _, _ = GetChar()
 				switch ascii {
@@ -377,6 +379,12 @@ func Loop(childrens []File, parent File) {
 					childrens, parent = ListFiles(currentDir)
 				}
 			} else if ascii == 98 { // -------------------------------------	b
+				//keyy := statusRead("Press any key to go to the bookmark, or SPACE to assign new bookmark: ")
+				for i, el := range bookmark {
+					print(i, el)
+					GetChar()
+				}
+
 			} else if ascii == 126 { //	------------------------------------	~
 				childrens, parent = ListFiles(homeDir)
 			} else if ascii == 119 { //	------------------------------------	w

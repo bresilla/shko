@@ -3,6 +3,7 @@ package shko
 import (
 	"io/ioutil"
 	"math"
+	"os"
 	"path"
 	"regexp"
 	"strconv"
@@ -15,6 +16,18 @@ import (
 var (
 	frequency = 1
 )
+
+func tabDir(tabfile string) (file File) {
+	file = homeDir
+	dirname, err := ioutil.ReadFile(tabFile)
+	if err == nil {
+		return
+	}
+	if _, err := os.Stat(string(dirname)); err == nil {
+		file, _ = MakeFile(string(dirname))
+	}
+	return
+}
 
 func saveToFile(array []string, file string) {
 	jointMem := strings.Join(array, "\n")
