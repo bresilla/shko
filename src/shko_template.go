@@ -109,19 +109,18 @@ func createTemplates(folder string) {
 var bookinit = map[string]string{
 	"~": homeDir.Path,
 	"d": homeDir.Path + "/Documents",
-	"p": homeDir.Path + "/Pictures",
 }
 
 var bookmark = map[string]string{}
 
-func ASCII(r rune) rune {
+func ASCII(r []rune) int {
 	switch {
-	case 97 <= r && r <= 122:
-		return r - 32
-	case 65 <= r && r <= 90:
-		return r + 32
+	case 97 <= r[0] && r[0] <= 122:
+		return int(r[0] - 32)
+	case 65 <= r[0] && r[0] <= 90:
+		return int(r[0] + 32)
 	default:
-		return r
+		return int(r[0])
 	}
 }
 
@@ -140,8 +139,7 @@ func initializeBookmarks() {
 			bookmark[arr[0]] = arr[1]
 		}
 	} else {
-		newFileName := markFile
-		newFile, _ := os.Create(newFileName)
+		newFile, _ := os.Create(markFile)
 		for i, el := range bookinit {
 			newFile.WriteString(i + " > " + el + "\n")
 		}
@@ -149,6 +147,38 @@ func initializeBookmarks() {
 	}
 }
 
-func readBookmarks(letter string) (file File) {
+func saveBookmarks() {
+	newFile, _ := os.Create(markFile)
+	for i, el := range bookmark {
+		newFile.WriteString(i + " > " + el + "\n")
+	}
+	newFile.Close()
+}
+
+func addBookmark(ascii int, path string) {
+	runeString := string(rune(ascii))
+	bookmark[runeString] = path
+}
+
+func deleteBookmark(ascii int) {
+	for i := range bookmark {
+		runeInt := rune(i[0])
+		if int(runeInt) == ascii {
+			delete(bookmark, i)
+		}
+	}
+	return
+}
+
+func readBookmarks(ascii int) (file string, exists bool) {
+	for i, el := range bookmark {
+		runeInt := rune(i[0])
+		if int(runeInt) == ascii {
+			if _, err := os.Stat(el); err == nil {
+				file = el
+				exists = true
+			}
+		}
+	}
 	return
 }

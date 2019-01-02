@@ -216,6 +216,8 @@ func drawMime(yesno bool, file File, i int) (tabTurn int) {
 
 func statusWrite(toWrite string) {
 	term.MoveTo(0, termHeight+1)
+	cleanLine(1)
+	term.MoveTo(0, termHeight+1)
 	Print(HighLight, Black, White, toWrite)
 }
 

@@ -371,23 +371,43 @@ func Loop(childrens []File, parent File) {
 				}
 				continue
 			} else if ascii == 115 { // ------------------------------------	s (script)
-			} else if ascii == 103 { // ------------------------------------	g
+			} else if ascii == 103 { // ------------------------------------	g (go-to)
 				name := statusRead("Go-To: ", "folder")
 				matched := matchFrecency(name)
 				if _, err := os.Stat(matched); err == nil {
 					currentDir, _ = MakeFile(matched)
 					childrens, parent = ListFiles(currentDir)
 				}
-			} else if ascii == 98 { // -------------------------------------	b
-				//keyy := statusRead("Press any key to go to the bookmark, or SPACE to assign new bookmark: ")
-				for i, el := range bookmark {
-					print(i, el)
-					GetChar()
+			} else if ascii == 98 { // -------------------------------------	b (bookmarks)
+				statusWrite("Press any key to go to the bookmark, or SPACE to assign new bookmark")
+				ascii, _, _ = GetChar()
+				if ascii == 32 {
+					statusWrite("Press the key you want to associate this directory as bookmark")
+					ascii, _, _ = GetChar()
+					bookdir, exists := readBookmarks(ascii)
+					if exists {
+						runeString := string(rune(ascii))
+						statusWrite("Bookmark " + bookdir + " is associated to this key, press \"" + runeString + "\" again to owerwrite")
+						ascii2, _, _ := GetChar()
+						if ascii2 == ascii {
+							deleteBookmark(ascii)
+							addBookmark(ascii, currentDir.Path)
+							saveBookmarks()
+						}
+					} else {
+						addBookmark(ascii, currentDir.Path)
+						saveBookmarks()
+					}
+				} else {
+					bookdir, exists := readBookmarks(ascii)
+					if exists {
+						currentDir, _ = MakeFile(bookdir)
+						childrens, parent = ListFiles(currentDir)
+					}
 				}
-
 			} else if ascii == 126 { //	------------------------------------	~
 				childrens, parent = ListFiles(homeDir)
-			} else if ascii == 119 { //	------------------------------------	w
+			} else if ascii == 119 { //	------------------------------------	w (warps)
 				statusWrite("Pres one of \"0\" to \"9\" keys to save this as WARPMARK")
 				ascii, _, _ = GetChar()
 				switch ascii {
