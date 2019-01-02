@@ -285,7 +285,7 @@ func fileList(recurrent bool, dir File) (paths []File, err error) {
 			},
 			Unsorted:      true,
 			NoHidden:      true,
-			Ignore:        []string{".git"},
+			Ignore:        ignoreSlice,
 			ScratchBuffer: make([]byte, 64*1024),
 		})
 	} else {

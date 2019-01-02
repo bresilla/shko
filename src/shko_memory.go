@@ -19,14 +19,21 @@ var (
 
 func tabDir(tabfile string) (file File) {
 	file = homeDir
-	dirname, err := ioutil.ReadFile(tabFile)
-	if err == nil {
-		return
-	}
-	if _, err := os.Stat(string(dirname)); err == nil {
-		file, _ = MakeFile(string(dirname))
+	if len(swichero) < 2 || len(swichero) > 2 {
+		saveToFile([]string{homeDir.Path, homeDir.Path}, tabfile)
+	} else {
+		if _, err := os.Stat(swichero[0]); err == nil {
+			file, _ = MakeFile(swichero[0])
+		}
 	}
 	return
+}
+
+func manageTabDir(toadd string) {
+	if toadd != swichero[1] {
+		swichero = swichero[1:]
+		swichero = append(swichero, toadd)
+	}
 }
 
 func saveToFile(array []string, file string) {

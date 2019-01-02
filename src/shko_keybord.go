@@ -191,7 +191,6 @@ func Loop(childrens []File, parent File) {
 					dirASwitch = false
 					dirBSwitch = true
 					showIcons = !showIcons
-					//ioutil.WriteFile(tabFile, []byte(dirB.Path), 0666)
 				} else {
 					if len(childrens) > 0 {
 						dirB, _ = MakeFile(childrens[0].Other.ParentPath)
@@ -204,7 +203,6 @@ func Loop(childrens []File, parent File) {
 					dirBSwitch = false
 					dirASwitch = true
 					showIcons = !showIcons
-					//ioutil.WriteFile(tabFile, []byte(dirB.Path), 0666)
 				}
 			} else if ascii == 100 { //	-------------------------------------	d (delete)
 				statusWrite("Press \"d\" to DELETE selected")
@@ -408,29 +406,32 @@ func Loop(childrens []File, parent File) {
 			} else if ascii == 126 { //	------------------------------------	~
 				childrens, parent = ListFiles(homeDir)
 			} else if ascii == 119 { //	------------------------------------	w (warps)
-				statusWrite("Pres one of \"0\" to \"9\" keys to save this as WARPMARK")
+				statusWrite("Pres SPACE then one of \"0\" to \"9\" keys to save this as WARPMARK")
 				ascii, _, _ = GetChar()
-				switch ascii {
-				case 48:
-					dir0 = currentDir
-				case 49:
-					dir1 = currentDir
-				case 50:
-					dir2 = currentDir
-				case 51:
-					dir3 = currentDir
-				case 52:
-					dir4 = currentDir
-				case 53:
-					dir5 = currentDir
-				case 54:
-					dir6 = currentDir
-				case 55:
-					dir7 = currentDir
-				case 56:
-					dir8 = currentDir
-				case 57:
-					dir9 = currentDir
+				if ascii == 32 {
+					ascii, _, _ = GetChar()
+					switch ascii {
+					case 48:
+						dir0 = currentDir
+					case 49:
+						dir1 = currentDir
+					case 50:
+						dir2 = currentDir
+					case 51:
+						dir3 = currentDir
+					case 52:
+						dir4 = currentDir
+					case 53:
+						dir5 = currentDir
+					case 54:
+						dir6 = currentDir
+					case 55:
+						dir7 = currentDir
+					case 56:
+						dir8 = currentDir
+					case 57:
+						dir9 = currentDir
+					}
 				}
 			} else {
 				switch ascii {

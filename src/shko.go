@@ -44,6 +44,7 @@ var (
 	fileD, _          = os.Create(dirFile)
 	memory, _         = loadFromFile(memFile)
 	frecency, _       = loadFromFile(freqFile)
+	swichero, _       = loadFromFile(tabFile)
 	copySlice         []File
 	ignoreSlice       = []string{}
 	showIcons         = true
@@ -59,18 +60,17 @@ var (
 	homeDir, _ = MakeFile(os.Getenv("HOME"))
 	tempDir, _ = MakeFile(tempfolder)
 	dirA       = homeDir
-	dirB       = homeDir
-	//dirB       = tabDir(tabFile)
-	dir1 File
-	dir2 File
-	dir3 File
-	dir4 File
-	dir5 File
-	dir6 File
-	dir7 File
-	dir8 File
-	dir9 File
-	dir0 File
+	dirB       = tabDir(tabFile)
+	dir1       File
+	dir2       File
+	dir3       File
+	dir4       File
+	dir5       File
+	dir6       File
+	dir7       File
+	dir8       File
+	dir9       File
+	dir0       File
 )
 
 func Flags() {
@@ -102,6 +102,8 @@ func Run() {
 	Loop(childrens, parent)
 	fmt.Print("\033[?25h")
 
+	manageTabDir(currentDir.Path)
+
 	if changeDir {
 		fileD.WriteString(currentDir.Path)
 		addToFrecency(currentDir)
@@ -111,4 +113,5 @@ func Run() {
 
 	saveToFile(memory, memFile)
 	saveToFile(frecency, freqFile)
+	saveToFile(swichero, tabFile)
 }
