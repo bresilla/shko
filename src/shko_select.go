@@ -15,7 +15,7 @@ var (
 	space = 1
 )
 
-func SelectInList(selected, scroll int, drawlist, childrens []File, parent File) {
+func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir File) {
 	term.MoveTo(0, 0)
 	term.ClearAll()
 	termWidth, termHeight := term.Size()
@@ -23,8 +23,8 @@ func SelectInList(selected, scroll int, drawlist, childrens []File, parent File)
 	sideSpace = 0
 	if topBar {
 		topSpace = 2
-		Print(HighLight, Black, Cyan, DashBorder2(parent.Path, termWidth/2-(len([]rune(parent.Path)))/2))
-		println()
+		Print(HighLight, Black, Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
+		Print(Default, Cyan, Black, DashBorder2("", "¯", 0))
 	}
 	if center && termHeight > len(drawlist) {
 		topSpace += termHeight/2 - (len(drawlist) / 2)
@@ -55,8 +55,8 @@ func SelectInList(selected, scroll int, drawlist, childrens []File, parent File)
 	}
 	if statBar {
 		term.MoveTo(0, termHeight-2)
-		println()
-		Print(HighLight, Black, Cyan, DashBorder2(parent.Path, termWidth/2-(len([]rune(parent.Path)))/2))
+		Print(Default, Cyan, Black, DashBorder2("", "_", 0))
+		Print(HighLight, Black, Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
 	}
 }
 
@@ -216,17 +216,19 @@ func drawMime(yesno bool, file File, i int) (tabTurn int) {
 
 func statusWrite(toWrite string) {
 	term.MoveTo(0, termHeight+1)
-	cleanLine(1)
+	cleanLine(0)
 	term.MoveTo(0, termHeight+1)
-	Print(HighLight, Black, White, toWrite)
+	Print(HighLight, Black, White, " "+toWrite+" ")
+	fmt.Print(" ")
 }
 
 func statusRead(toWrite, defaultStr string) (text string) {
 	scanner := bufio.NewScanner(os.Stdin)
 	term.MoveTo(0, termHeight+1)
-	cleanLine(1)
+	cleanLine(0)
 	term.MoveTo(0, termHeight+1)
-	Print(HighLight, Black, White, toWrite)
+	Print(HighLight, Black, White, " "+toWrite+" ")
+	fmt.Print(" ")
 	scanner.Scan()
 	text = scanner.Text()
 	if text == "" {

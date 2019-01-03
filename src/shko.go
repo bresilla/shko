@@ -31,12 +31,13 @@ var (
 	scroll            = 0
 	foreward          = false
 	backward          = false
-	appfolder         = "/home/bresilla/.config/shko"
+	appfolder         = os.Getenv("HOME") + "/.config/shko"
 	setfolder         = appfolder + "/settings"
 	tempfolder        = appfolder + "/templates"
 	confFile          = appfolder + "/config"
 	dirFile           = setfolder + "/chdir"
 	tabFile           = setfolder + "/tabdirs"
+	scriptsFile       = setfolder + "/scripts"
 	freqFile          = setfolder + "/frecency"
 	memFile           = setfolder + "/memory"
 	bulkFile          = setfolder + "/rename"
@@ -45,7 +46,7 @@ var (
 	memory, _         = loadFromFile(memFile)
 	frecency, _       = loadFromFile(freqFile)
 	swichero, _       = loadFromFile(tabFile)
-	copySlice         []File
+	copySlice         Files
 	ignoreSlice       = []string{}
 	showIcons         = true
 	showChildren      = false
@@ -54,23 +55,20 @@ var (
 	showMode          = false
 	duMode            = false
 	center            = false
-)
-
-var (
-	homeDir, _ = MakeFile(os.Getenv("HOME"))
-	tempDir, _ = MakeFile(tempfolder)
-	dirA       = homeDir
-	dirB       = tabDir(tabFile)
-	dir1       File
-	dir2       File
-	dir3       File
-	dir4       File
-	dir5       File
-	dir6       File
-	dir7       File
-	dir8       File
-	dir9       File
-	dir0       File
+	homeDir, _        = MakeFile(os.Getenv("HOME"))
+	tempDir, _        = MakeFile(tempfolder)
+	dirA              = homeDir
+	dirB              = tabDir(tabFile)
+	dir1              File
+	dir2              File
+	dir3              File
+	dir4              File
+	dir5              File
+	dir6              File
+	dir7              File
+	dir8              File
+	dir9              File
+	dir0              File
 )
 
 func Flags() {

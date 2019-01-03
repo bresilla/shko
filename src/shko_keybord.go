@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	term "github.com/tj/go/term"
 )
@@ -29,7 +30,7 @@ func entryConditions() {
 	backward = false
 }
 
-func prepList(childrens []File) (drawlist []File) {
+func prepList(childrens Files) (drawlist Files) {
 	entryConditions()
 	drawlist = childrens
 	_, termHeight = term.Size()
@@ -54,21 +55,14 @@ func prepList(childrens []File) (drawlist []File) {
 	return
 }
 
-func Loop(childrens []File, parent File) {
+func Loop(childrens Files, parent File) {
 	for {
 		drawlist := prepList(childrens)
 		SelectInList(number, scroll, drawlist, childrens, currentDir)
 		ascii, keycode, _ := GetChar()
-		if ascii == shortcut { //-------------------------------------------	SHORTCUT
-			term.ClearAll()
-			break
-		} else if ascii == 3 || ascii == 113 { // --------------------------	q, Ctrl+c
-			changeDir = false
-			term.ClearAll()
-			break
-		} else if ascii == 27 { // -----------------------------------------	ESC
-			continue
-		} else if keycode == 38 || ascii == 107 { // ------------------------	up
+		if ascii == 47 { // ------------------------------------------------	/
+			childrens = fuzzyFind(childrens, currentDir)
+		} else if keycode == 38 || ascii == 107 { // -----------------------	up
 			if backward {
 				scroll--
 			} else {
@@ -86,7 +80,7 @@ func Loop(childrens []File, parent File) {
 				}
 			}
 			continue
-		} else if keycode == 40 || ascii == 106 { // ------------------------	down
+		} else if keycode == 40 || ascii == 106 { // -----------------------	down
 			if foreward {
 				scroll++
 			} else {
@@ -101,7 +95,7 @@ func Loop(childrens []File, parent File) {
 				}
 			}
 			continue
-		} else if keycode == 37 || ascii == 104 { // ------------------------	left
+		} else if keycode == 37 || ascii == 104 && !recurrent { // ---------	left
 			backward = false
 			foreward = false
 			oldDir := currentDir
@@ -109,7 +103,7 @@ func Loop(childrens []File, parent File) {
 			childrens, parent = ListFiles(currentDir)
 			number, scroll = findFile(childrens, oldDir)
 			continue
-		} else if keycode == 39 || ascii == 108 { // ------------------------	right
+		} else if keycode == 39 || ascii == 108 && !recurrent { // ---------	right
 			if len(drawlist) == 0 {
 				continue
 			}
@@ -126,6 +120,13 @@ func Loop(childrens []File, parent File) {
 			backward = false
 			foreward = false
 			continue
+		} else if ascii == shortcut { //------------------------------------	SHORTCUT
+			term.ClearAll()
+			break
+		} else if ascii == 3 || ascii == 113 { // --------------------------	q, Ctrl+c
+			changeDir = false
+			term.ClearAll()
+			break
 		} else {
 			if ascii == 32 { // --------------------------------------------	SPACE
 				term.MoveTo(0, termHeight+1)
@@ -168,6 +169,13 @@ func Loop(childrens []File, parent File) {
 				incHidden = false
 				duMode = false
 				childrens, parent = ListFiles(currentDir)
+				if recurrent {
+					for i := range childrens {
+						childrens[i].Ancestors = childrens[i].Ancestors[parent.Other.Deep+1:]
+						prepName := strings.Join(childrens[i].Ancestors, "/")
+						childrens[i].Name = prepName
+					}
+				}
 				number = 0
 				scroll = 0
 			} else if ascii == 44 { //	-------------------------------------	,
@@ -204,7 +212,7 @@ func Loop(childrens []File, parent File) {
 					dirASwitch = true
 					showIcons = !showIcons
 				}
-			} else if ascii == 100 { //	-------------------------------------	d (delete)
+			} else if ascii == 100 && len(drawlist) > 0 { // ---------------	d (delete)
 				statusWrite("Press \"d\" to DELETE selected")
 				ascii, _, _ = GetChar()
 				if ascii == 100 {
@@ -220,11 +228,11 @@ func Loop(childrens []File, parent File) {
 					}
 				}
 				childrens, parent = ListFiles(currentDir)
-			} else if ascii == 121 { //	-------------------------------------	y (yank copy)
+			} else if ascii == 121 && len(drawlist) > 0 { //	------------	y (yank copy)
 				statusWrite("Press \"y\" to YANK selected")
 				ascii, _, _ = GetChar()
 				if ascii == 121 {
-					copySlice = []File{}
+					copySlice = Files{}
 					onList := false
 					for i, file := range childrens {
 						if childrens[i].Other.Selected {
@@ -237,7 +245,7 @@ func Loop(childrens []File, parent File) {
 					}
 					childrens, parent = ListFiles(currentDir)
 				}
-			} else if ascii == 112 { //	-------------------------------------	p (paste copy)
+			} else if ascii == 112 { //	------------------------------------	p (paste copy)
 				if len(copySlice) > 0 {
 					statusWrite("Press \"p\" to PASTE here")
 					ascii, _, _ = GetChar()
@@ -248,7 +256,7 @@ func Loop(childrens []File, parent File) {
 					}
 					childrens, parent = ListFiles(currentDir)
 				}
-			} else if ascii == 109 { //	-------------------------------------	m (move copy)
+			} else if ascii == 109 { //	------------------------------------	m (move copy)
 				if len(copySlice) > 0 {
 					statusWrite("Press \"m\" to MOVE here")
 					ascii, _, _ = GetChar()
@@ -256,16 +264,16 @@ func Loop(childrens []File, parent File) {
 						for _, el := range copySlice {
 							Copy(el.Path, currentDir.Path)
 							os.RemoveAll(el.Path)
-							copySlice = []File{}
+							copySlice = Files{}
 						}
 					}
 					childrens, parent = ListFiles(currentDir)
 				}
-			} else if ascii == 114 { //	-------------------------------------	r (rename)
+			} else if ascii == 114 && len(drawlist) > 0 { //----------------	r (rename)
 				statusWrite("Press \"r\" to RENAME selected")
 				ascii, _, _ = GetChar()
 				if ascii == 114 {
-					var onList []File
+					var onList Files
 					for i := range childrens {
 						if childrens[i].Other.Selected {
 							onList = append(onList, childrens[i])
@@ -314,7 +322,7 @@ func Loop(childrens []File, parent File) {
 						if ascii == 13 { // ----	ENTER
 							Copy(drawlist[number].Path, currentDir.Path)
 							break
-						} else if keycode == 38 || ascii == 107 { // ----up
+						} else if keycode == 38 || ascii == 107 { //up
 							if backward {
 								scroll--
 							} else {
@@ -332,7 +340,7 @@ func Loop(childrens []File, parent File) {
 								}
 							}
 							continue
-						} else if keycode == 40 || ascii == 106 { // ----	down
+						} else if keycode == 40 || ascii == 106 { //down
 							if foreward {
 								scroll++
 							} else {

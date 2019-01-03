@@ -208,6 +208,16 @@ type Other struct {
 	Icon       string
 }
 
+type Files []File
+
+func (e Files) String(i int) string {
+	return e[i].Name
+}
+
+func (e Files) Len() int {
+	return len(e)
+}
+
 func MakeFile(dir string) (file File, err error) {
 	f, err := os.Stat(dir)
 	if err != nil {
@@ -260,6 +270,7 @@ func MakeFile(dir string) (file File, err error) {
 		}
 	}
 	file.Ancestors = strings.Split(dir, "/")
+	file.Other.Deep = len(file.Ancestors)
 	if string(name[0]) == "." {
 		file.Hidden = true
 	}
@@ -274,8 +285,8 @@ func MakeFile(dir string) (file File, err error) {
 	return
 }
 
-func fileList(recurrent bool, dir File) (paths []File, err error) {
-	paths = []File{}
+func fileList(recurrent bool, dir File) (paths Files, err error) {
+	paths = Files{}
 	if recurrent {
 		err = godirwalk.Walk(dir.Path, &godirwalk.Options{
 			Callback: func(osPathname string, de *godirwalk.Dirent) (err error) {
@@ -303,11 +314,11 @@ func fileList(recurrent bool, dir File) (paths []File, err error) {
 	return
 }
 
-func chooseFile(incFolder, incFiles, incHidden, recurrent bool, dir File) (list []File) {
-	files := []File{}
-	folder := []File{}
-	hidden := []File{}
-	ignore := []File{}
+func chooseFile(incFolder, incFiles, incHidden, recurrent bool, dir File) (list Files) {
+	files := Files{}
+	folder := Files{}
+	hidden := Files{}
+	ignore := Files{}
 	paths, _ := fileList(recurrent, dir)
 	for _, f := range paths {
 		if f.IsDir {
@@ -354,7 +365,7 @@ func chooseFile(incFolder, incFiles, incHidden, recurrent bool, dir File) (list 
 	return
 }
 
-func ListFiles(dir File) (files []File, parent File) {
+func ListFiles(dir File) (files Files, parent File) {
 	list := chooseFile(incFolder, incFiles, incHidden, recurrent, dir)
 	parent, _ = MakeFile(path.Dir(dir.Path))
 	for _, d := range list {

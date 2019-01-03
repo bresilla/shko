@@ -62,7 +62,7 @@ func addToMemory(parent, child File) {
 	memory = append(memory, parent.Path+" > "+child.Path)
 }
 
-func findInMemory(parent File, child []File) (number, scroll int) {
+func findInMemory(parent File, child Files) (number, scroll int) {
 	for _, el := range memory {
 		arr := strings.Split(el, " > ")
 		if arr[0] == parent.Path {
@@ -77,7 +77,7 @@ func findInMemory(parent File, child []File) (number, scroll int) {
 	return
 }
 
-func findFile(list []File, actual File) (number, scroll int) {
+func findFile(list Files, actual File) (number, scroll int) {
 	_, termHeight = term.Size()
 	for i, el := range list {
 		if el.Name == actual.Name {
