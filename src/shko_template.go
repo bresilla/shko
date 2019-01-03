@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -111,8 +112,6 @@ var bookinit = map[string]string{
 	"d": homeDir.Path + "/Documents",
 }
 
-var bookmark = map[string]string{}
-
 func initializeBookmarks() {
 	if _, err := os.Stat(markFile); err == nil {
 		jointMem, err := ioutil.ReadFile(markFile)
@@ -178,8 +177,6 @@ var scriptinit = map[string]string{
 	"g": "go build @",
 }
 
-var scriptlist = map[string]string{}
-
 func initializeScriptlist() {
 	if _, err := os.Stat(scriptsFile); err == nil {
 		jointMem, err := ioutil.ReadFile(scriptsFile)
@@ -192,7 +189,7 @@ func initializeScriptlist() {
 			if arr[0] == "" || arr[1] == "" {
 				continue
 			}
-			scriptlist[arr[0]] = arr[1]
+			scripts[arr[0]] = arr[1]
 		}
 	} else {
 		newFile, _ := os.Create(scriptsFile)
@@ -201,4 +198,41 @@ func initializeScriptlist() {
 		}
 		newFile.Close()
 	}
+}
+
+func saveScript() {
+	newFile, _ := os.Create(scriptsFile)
+	for i, el := range scripts {
+		newFile.WriteString(i + " > " + el + "\n")
+	}
+	newFile.Close()
+}
+
+func addScript(ascii int, script string) {
+	runeString := string(rune(ascii))
+	scripts[runeString] = script
+}
+
+func deleteScript(ascii int) {
+	for i := range scripts {
+		runeInt := rune(i[0])
+		if int(runeInt) == ascii {
+			delete(scripts, i)
+		}
+	}
+	return
+}
+
+func readScripts(ascii int) (script string, exists bool) {
+	re := regexp.MustCompile(`@`)
+	for i, el := range scripts {
+		runeInt := rune(i[0])
+		if int(runeInt) == ascii {
+			if re.Match([]byte(el)) {
+				script = el
+				exists = true
+			}
+		}
+	}
+	return
 }

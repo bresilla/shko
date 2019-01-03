@@ -414,6 +414,37 @@ func Loop(childrens Files, parent File) {
 				}
 				continue
 			} else if ascii == 115 { // ------------------------------------	s (script)
+				statusWrite("Press any key to launch script")
+				ascii, _, _ = GetChar()
+				if ascii == 32 {
+					statusWrite("Press any key to assign new script")
+					ascii, _, _ = GetChar()
+					_, exists := readScripts(ascii)
+					if exists && ascii != 32 {
+						runeString := string(rune(ascii))
+						statusWrite("Script exists, press \"" + runeString + "\" again to owerwrite")
+						ascii2, _, _ := GetChar()
+						if ascii2 == ascii {
+							script := statusRead("Write script:", "file @")
+							deleteScript(ascii)
+							addScript(ascii, script)
+							saveScript()
+						}
+					} else if ascii == 32 {
+						EditFile(scriptsFile)
+						fmt.Print("\033[?25l")
+					} else {
+						script := statusRead("Write script:", "file @")
+						addScript(ascii, script)
+						saveScript()
+					}
+				} else {
+					bookdir, exists := readScripts(ascii)
+					if exists {
+						print(bookdir)
+						GetChar()
+					}
+				}
 			} else if ascii == 103 { // ------------------------------------	g (go-to)
 				name := statusRead("Go-To:", "folder")
 				matched := matchFrecency(name)
@@ -422,21 +453,24 @@ func Loop(childrens Files, parent File) {
 					childrens, parent = ListFiles(currentDir)
 				}
 			} else if ascii == 98 { // -------------------------------------	b (bookmarks)
-				statusWrite("Press any key to go to the bookmark, or SPACE to assign new bookmark")
+				statusWrite("Press any key to go to the mark")
 				ascii, _, _ = GetChar()
 				if ascii == 32 {
-					statusWrite("Press the key you want to associate this directory as bookmark")
+					statusWrite("Press any key to mark this directory")
 					ascii, _, _ = GetChar()
-					bookdir, exists := readBookmarks(ascii)
-					if exists {
+					_, exists := readBookmarks(ascii)
+					if exists && ascii != 32 {
 						runeString := string(rune(ascii))
-						statusWrite("Bookmark " + bookdir + " is associated to this key, press \"" + runeString + "\" again to owerwrite")
+						statusWrite("Mark exists, press \"" + runeString + "\" again to owerwrite")
 						ascii2, _, _ := GetChar()
 						if ascii2 == ascii {
 							deleteBookmark(ascii)
 							addBookmark(ascii, currentDir.Path)
 							saveBookmarks()
 						}
+					} else if ascii == 32 {
+						EditFile(markFile)
+						fmt.Print("\033[?25l")
 					} else {
 						addBookmark(ascii, currentDir.Path)
 						saveBookmarks()
@@ -451,7 +485,7 @@ func Loop(childrens Files, parent File) {
 			} else if ascii == 126 { //	------------------------------------	~
 				childrens, parent = ListFiles(homeDir)
 			} else if ascii == 119 { //	------------------------------------	w (warps)
-				statusWrite("Pres SPACE then one of \"0\" to \"9\" keys to save this as WARPMARK")
+				statusWrite("Pres SPACE then \"0\" to \"9\" keys to save warp")
 				ascii, _, _ = GetChar()
 				if ascii == 32 {
 					ascii, _, _ = GetChar()

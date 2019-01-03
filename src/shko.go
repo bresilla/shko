@@ -46,6 +46,8 @@ var (
 	memory, _         = loadFromFile(memFile)
 	frecency, _       = loadFromFile(freqFile)
 	swichero, _       = loadFromFile(tabFile)
+	scripts           = map[string]string{}
+	bookmark          = map[string]string{}
 	copySlice         Files
 	ignoreSlice       = []string{}
 	showIcons         = true
