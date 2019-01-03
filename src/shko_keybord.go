@@ -3,6 +3,7 @@ package shko
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -439,10 +440,11 @@ func Loop(childrens Files, parent File) {
 						saveScript()
 					}
 				} else {
-					bookdir, exists := readScripts(ascii)
+					script, exists := readScripts(ascii)
 					if exists {
-						print(bookdir)
-						GetChar()
+						re := regexp.MustCompile(`@`)
+						toRun := re.ReplaceAllString(script, childrens[number].Path)
+						RunScript(toRun)
 					}
 				}
 			} else if ascii == 103 { // ------------------------------------	g (go-to)

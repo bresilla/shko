@@ -7,10 +7,10 @@ import (
 	"os/exec"
 )
 
-func OpenFile(file File) bool {
-	var cmd *exec.Cmd
-	editor := os.Getenv("EDITOR")
+var cmd *exec.Cmd
 
+func OpenFile(file File) bool {
+	editor := os.Getenv("EDITOR")
 	if len(editor) > 0 {
 		cmd = exec.Command(editor, file.Path)
 	} else {
@@ -20,7 +20,6 @@ func OpenFile(file File) bool {
 			cmd = exec.Command("/usr/bin/env", "nvim", file.Path)
 		}
 	}
-
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	err := cmd.Run()
@@ -32,19 +31,12 @@ func OpenFile(file File) bool {
 }
 
 func EditFile(name string) bool {
-	var cmd *exec.Cmd
 	editor := os.Getenv("EDITOR")
-
 	if len(editor) > 0 {
 		cmd = exec.Command(editor, name)
 	} else {
-		if _, err := os.Stat("/usr/bin/sensible-editor"); err == nil {
-			cmd = exec.Command("/usr/bin/sensible-editor", name)
-		} else {
-			cmd = exec.Command("/usr/bin/env", "nvim", name)
-		}
+		cmd = exec.Command("/usr/bin/env", "nvim", name)
 	}
-
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	err := cmd.Run()
@@ -61,11 +53,23 @@ func ReadLines(path string) ([]string, error) {
 		return nil, err
 	}
 	defer file.Close()
-
 	var lines []string
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
 	return lines, scanner.Err()
+}
+
+func RunScript(name string) bool {
+	cmd = exec.Command("/bin/bash", name)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	err := cmd.Run()
+	if err != nil {
+		log.Println("Error:", err)
+		PrintWait(name)
+		return false
+	}
+	return true
 }
