@@ -94,6 +94,7 @@ func Run() {
 	createDirectory(appfolder)
 	createTemplates(tempfolder)
 	initializeBookmarks()
+	initializeScriptlist()
 
 	fmt.Print("\033[?25l")
 	Flags()

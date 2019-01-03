@@ -113,17 +113,6 @@ var bookinit = map[string]string{
 
 var bookmark = map[string]string{}
 
-func ASCII(r []rune) int {
-	switch {
-	case 97 <= r[0] && r[0] <= 122:
-		return int(r[0] - 32)
-	case 65 <= r[0] && r[0] <= 90:
-		return int(r[0] + 32)
-	default:
-		return int(r[0])
-	}
-}
-
 func initializeBookmarks() {
 	if _, err := os.Stat(markFile); err == nil {
 		jointMem, err := ioutil.ReadFile(markFile)
@@ -181,4 +170,35 @@ func readBookmarks(ascii int) (file string, exists bool) {
 		}
 	}
 	return
+}
+
+var scriptinit = map[string]string{
+	"w": "wal -i @ --backend haishoku --saturate 1.0",
+	"f": "feh --bg-fill @",
+	"g": "go build @",
+}
+
+var scriptlist = map[string]string{}
+
+func initializeScriptlist() {
+	if _, err := os.Stat(scriptsFile); err == nil {
+		jointMem, err := ioutil.ReadFile(scriptsFile)
+		if err != nil {
+			return
+		}
+		allBooks := strings.Split(string(jointMem), "\n")
+		for _, el := range allBooks {
+			arr := strings.Split(el, " > ")
+			if arr[0] == "" || arr[1] == "" {
+				continue
+			}
+			scriptlist[arr[0]] = arr[1]
+		}
+	} else {
+		newFile, _ := os.Create(scriptsFile)
+		for i, el := range scriptinit {
+			newFile.WriteString(i + " > " + el + "\n")
+		}
+		newFile.Close()
+	}
 }

@@ -55,6 +55,43 @@ func prepList(childrens Files) (drawlist Files) {
 	return
 }
 
+func fuzzyFind(childrens Files, currentDir File) (matched Files) {
+	matched = childrens
+	var pattern string
+	for {
+		drawlist = prepList(matched)
+		SelectInList(number, scroll, drawlist, matched, currentDir)
+		statusWrite("Search for:")
+		fmt.Print(pattern)
+		ascii, keycode, _ := GetChar()
+		runeString := string(rune(ascii))
+		if ascii > 33 && ascii < 127 {
+			pattern += runeString
+		} else if ascii == 127 && len(pattern) > 0 {
+			pattern = pattern[:len(pattern)-1]
+		} else if ascii == 27 {
+			matched = childrens
+			break
+		} else if ascii == 13 || keycode > 0 {
+			break
+		} else {
+			continue
+		}
+		if pattern == "" {
+			matched = childrens
+		} else {
+			matched = Files{}
+			results := FindFrom(pattern, childrens)
+			for _, r := range results {
+				matched = append(matched, childrens[r.Index])
+			}
+		}
+		number = 0
+		scroll = 0
+	}
+	return
+}
+
 func Loop(childrens Files, parent File) {
 	for {
 		drawlist := prepList(childrens)
@@ -301,13 +338,13 @@ func Loop(childrens Files, parent File) {
 				ascii, _, _ = GetChar()
 				switch ascii {
 				case 110:
-					name := statusRead("Enter filename: ", "file.txt")
+					name := statusRead("Enter filename:", "file")
 					newFileName := currentDir.Path + "/" + name
 					newFileName = IfExists(newFileName)
 					newFile, _ := os.Create(newFileName)
 					newFile.Close()
 				case 102:
-					name := statusRead("Enter filename: ", "folder")
+					name := statusRead("Enter dirname:", "dir")
 					newFolderName := currentDir.Path + "/" + name
 					newFolderName = IfExists(newFolderName)
 					os.MkdirAll(newFolderName, 0777)
@@ -378,7 +415,7 @@ func Loop(childrens Files, parent File) {
 				continue
 			} else if ascii == 115 { // ------------------------------------	s (script)
 			} else if ascii == 103 { // ------------------------------------	g (go-to)
-				name := statusRead("Go-To: ", "folder")
+				name := statusRead("Go-To:", "folder")
 				matched := matchFrecency(name)
 				if _, err := os.Stat(matched); err == nil {
 					currentDir, _ = MakeFile(matched)

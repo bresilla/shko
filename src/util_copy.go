@@ -8,7 +8,7 @@
 // Use Files(srcs, dst) to copy multiple files/directories into a directory.
 //
 // source: https://github.com/rvi64/copy
-// this version has some modifications e.g. if file exists, it adds "_" after the name
+// this version has some modifications e.g. if file exists, it adds a number after the name
 
 package shko
 
@@ -143,10 +143,7 @@ func Copy(src, dst string) error {
 			}
 
 			dst += "/" + filepath.Base(src)
-			_, err := os.Stat(dst)
-			if err == nil {
-				return fmt.Errorf("directory exists: %s", dst)
-			}
+			dst = IfExists(dst)
 
 			return cpDir(src, dst)
 		}
