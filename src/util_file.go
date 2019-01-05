@@ -203,20 +203,18 @@ type Other struct {
 	ParentPath string
 	HumanSize  string
 	Deep       int
-	NameLength int
 	Ignore     bool
 	Icon       string
 }
 
 type Files []File
 
-func (e Files) String(i int) string {
-	return e[i].Name
-}
-
-func (e Files) Len() int {
-	return len(e)
-}
+func (e Files) String(i int) string    { return e[i].Name }
+func (e Files) Len() int               { return len(e) }
+func (e Files) Swap(i, j int)          { e[i], e[j] = e[j], e[i] }
+func (e Files) Less(i, j int) bool     { return e[i].Name < e[j].Name }
+func (e Files) SortSize(i, j int) bool { return e[i].Size < e[j].Size }
+func (e Files) SortDate(i, j int) bool { return e[i].ModTime.Before(e[j].ModTime) }
 
 func MakeFile(dir string) (file File, err error) {
 	f, err := os.Stat(dir)
@@ -247,7 +245,7 @@ func MakeFile(dir string) (file File, err error) {
 	}
 
 	if f.IsDir() {
-		if duMode {
+		if showDu {
 			file.Size = gothrough(dir)
 			file.Other.HumanSize = ByteCountIEC(file.Size)
 		} else {
@@ -271,6 +269,7 @@ func MakeFile(dir string) (file File, err error) {
 	}
 	file.Ancestors = strings.Split(dir, "/")
 	file.Other.Deep = len(file.Ancestors)
+	file.Other.ParentPath = parentPath
 	if string(name[0]) == "." {
 		file.Hidden = true
 	}
@@ -280,8 +279,6 @@ func MakeFile(dir string) (file File, err error) {
 			break
 		}
 	}
-	file.Other.NameLength = len(file.Name)
-	file.Other.ParentPath = parentPath
 	return
 }
 
@@ -296,7 +293,7 @@ func fileList(recurrent bool, dir File) (paths Files, err error) {
 			},
 			Unsorted:      true,
 			NoHidden:      true,
-			Ignore:        ignoreSlice,
+			Ignore:        ignoreRecur,
 			ScratchBuffer: make([]byte, 64*1024),
 		})
 	} else {
@@ -363,6 +360,14 @@ func chooseFile(incFolder, incFiles, incHidden, recurrent bool, dir File) (list 
 		list[i].Number = i
 	}
 	return
+}
+
+func Sorting(list Files, s bool) {
+	if s {
+		sort.Sort(Files(list))
+	} else {
+		sort.Sort(sort.Reverse(list))
+	}
 }
 
 func ListFiles(dir File) (files Files, parent File) {

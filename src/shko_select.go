@@ -74,7 +74,7 @@ func colorList(file File, active bool, i int, maxSize int64) {
 	tab = drawName(active, file, i)
 	tab = drawChildren(showChildren, file, i)
 	tab = drawMode(showMode, file, i)
-	tab = drawDU(duMode, file, i, maxSize)
+	tab = drawDU(showDu, file, i, maxSize)
 	tab = drawSize(showSize, file, i)
 	tab = drawDate(showDate, file, i)
 	tab = drawMime(showMime, file, i)

@@ -50,14 +50,22 @@ var (
 	bookmark          = map[string]string{}
 	copySlice         Files
 	ignoreSlice       = []string{}
+	ignoreRecur       = []string{"node_modules", ".git"}
 	showIcons         = true
 	showChildren      = false
 	showSize          = false
 	showDate          = false
 	showMode          = false
-	duMode            = false
+	showDu            = false
 	showMime          = false
 	center            = false
+	greater           = true
+	sortSize          = false
+	sortDate          = false
+	sortName          = false
+	sortType          = false
+	sortMode          = false
+	sortChildren      = false
 	homeDir, _        = MakeFile(os.Getenv("HOME"))
 	tempDir, _        = MakeFile(tempfolder)
 	dirA              = homeDir
@@ -75,7 +83,7 @@ var (
 )
 
 func Flags() {
-	flag.BoolVar(&duMode, "d", false, "")
+	flag.BoolVar(&showDu, "d", false, "")
 	flag.BoolVar(&center, "c", false, "")
 	flag.BoolVar(&showChildren, "n", false, "")
 	flag.BoolVar(&showSize, "s", false, "")

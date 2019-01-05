@@ -2,11 +2,13 @@ package shko
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/mholt/archiver"
 	term "github.com/tj/go/term"
 )
 
@@ -23,7 +25,7 @@ func entryConditions() {
 		showSize = false
 		showDate = false
 		showMode = false
-		duMode = false
+		showDu = false
 		statBar = false
 		topBar = false
 		showMime = false
@@ -96,6 +98,7 @@ func fuzzyFind(childrens Files, currentDir File) (matched Files) {
 
 func Loop(childrens Files, parent File) {
 	for {
+		Sorting(childrens, true)
 		drawlist := prepList(childrens)
 		SelectInList(number, scroll, drawlist, childrens, currentDir)
 		ascii, keycode, _ := GetChar()
@@ -194,7 +197,7 @@ func Loop(childrens Files, parent File) {
 				case 99: //	------------------------------------------------	c
 					center = !center
 				case 100: //	--------------------------------------------	z
-					duMode = true
+					showDu = true
 					showSize = true
 					topBar = true
 					statBar = true
@@ -205,7 +208,7 @@ func Loop(childrens Files, parent File) {
 					center = false
 				case 122: //	--------------------------------------------	z
 					center = false
-					duMode = !duMode
+					showDu = !showDu
 				case 105: //	--------------------------------------------	i
 					showIcons = !showIcons
 				default:
@@ -215,11 +218,11 @@ func Loop(childrens Files, parent File) {
 					GetChar()
 				}
 				continue
-			} else if ascii == 9 { //	-------------------------------------	TAB
+			} else if ascii == 45 { //	-------------------------------------	- (recurr)
 				recurrent = !recurrent
 				incFolder = !incFolder
 				incHidden = false
-				duMode = false
+				showDu = false
 				childrens, parent = ListFiles(currentDir)
 				if recurrent {
 					for i := range childrens {
@@ -238,7 +241,7 @@ func Loop(childrens Files, parent File) {
 				childrens, parent = ListFiles(currentDir)
 			} else if ascii == 35 { //	-------------------------------------	#
 				wrap = !wrap
-			} else if ascii == 45 { //	-------------------------------------	-
+			} else if ascii == 9 { //	-------------------------------------	TAB
 				if dirASwitch {
 					if len(childrens) > 0 {
 						dirA, _ = MakeFile(childrens[0].Other.ParentPath)
@@ -268,15 +271,30 @@ func Loop(childrens Files, parent File) {
 				statusWrite("Press \"d\" to DELETE selected")
 				ascii, _, _ = GetChar()
 				if ascii == 100 {
-					onList := false
-					for i := range childrens {
-						if childrens[i].Other.Selected {
-							os.RemoveAll(childrens[i].Path)
-							onList = true
+					statusWrite("Are you sure you want to delete? Y/N")
+					ascii, _, _ = GetChar()
+					if ascii == 121 || ascii == 89 {
+						onList := false
+						for i := range childrens {
+							if childrens[i].Other.Selected {
+								os.RemoveAll(childrens[i].Path)
+								onList = true
+							}
+						}
+						if !onList {
+							os.RemoveAll(drawlist[number].Path)
 						}
 					}
-					if !onList {
-						os.RemoveAll(drawlist[number].Path)
+				}
+				childrens, parent = ListFiles(currentDir)
+				number--
+			} else if ascii == 120 { //	------------------------------------	x (archive)
+				statusWrite("Press \"x\" to EXTRACT selected")
+				ascii, _, _ = GetChar()
+				if ascii == 120 {
+					err := archiver.Unarchive(childrens[number].Path, childrens[number].Path+"_E")
+					if err != nil {
+						log.Fatal(err)
 					}
 				}
 				childrens, parent = ListFiles(currentDir)
