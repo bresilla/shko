@@ -77,7 +77,7 @@ func colorList(file File, active bool, i int, maxSize int64) {
 	tab = drawDU(duMode, file, i, maxSize)
 	tab = drawSize(showSize, file, i)
 	tab = drawDate(showDate, file, i)
-	//tab = drawMime(true, file, i)
+	tab = drawMime(showMime, file, i)
 	if !topBar {
 		SetStyle(Default, White, Black)
 	} else {

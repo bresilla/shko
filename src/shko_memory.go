@@ -122,13 +122,15 @@ func findList(list []string, actual string) (number, scroll int) {
 func addToFrecency(parent File) {
 	for i, el := range frecency {
 		arr := strings.Split(el, " > ")
-		if arr[0] == parent.Path {
-			frequency, _ = strconv.Atoi(arr[1])
-			frecency = frecency[:i+copy(frecency[i:], frecency[i+1:])]
-			frequency++
+		if len(arr) == 3 {
+			if arr[2] == parent.Path {
+				frequency, _ = strconv.Atoi(arr[0])
+				frecency = frecency[:i+copy(frecency[i:], frecency[i+1:])]
+				frequency++
+			}
 		}
 	}
-	frecency = append(frecency, parent.Path+" > "+strconv.Itoa(frequency)+" > "+time.Now().String())
+	frecency = append(frecency, strconv.Itoa(frequency)+" > "+time.Now().String()+" > "+parent.Path)
 }
 
 func calcFrecency(hits int, attime time.Time) (frecency float64) {
@@ -142,7 +144,7 @@ func matchFrecency(toMatch string) (matchedFile string) {
 	re := regexp.MustCompile(`(?i)` + toMatch)
 	for _, el := range frecency {
 		arr := strings.Split(el, " > ")
-		_, name := path.Split(arr[0])
+		_, name := path.Split(arr[2])
 		if re.Match([]byte(name)) {
 			matchedList = append(matchedList, el)
 		}
@@ -152,11 +154,11 @@ func matchFrecency(toMatch string) (matchedFile string) {
 		var bestScore float64
 		for _, el := range matchedList {
 			arr := strings.Split(el, " > ")
-			frequency, _ = strconv.Atoi(arr[1])
-			timeconv, _ := time.Parse("2019-01-01 19:07:28.623195367 +0100 CET m=+9.257016799", arr[2])
+			frequency, _ = strconv.Atoi(arr[0])
+			timeconv, _ := time.Parse("2019-01-01 19:07:28.623195367 +0100 CET m=+9.257016799", arr[1])
 			if calcFrecency(frequency, timeconv) > bestScore {
 				bestScore = calcFrecency(frequency, timeconv)
-				matchedFile = arr[0]
+				matchedFile = arr[2]
 			}
 		}
 	}

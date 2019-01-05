@@ -56,6 +56,7 @@ var (
 	showDate          = false
 	showMode          = false
 	duMode            = false
+	showMime          = false
 	center            = false
 	homeDir, _        = MakeFile(os.Getenv("HOME"))
 	tempDir, _        = MakeFile(tempfolder)

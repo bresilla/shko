@@ -26,6 +26,7 @@ func entryConditions() {
 		duMode = false
 		statBar = false
 		topBar = false
+		showMime = false
 	}
 	foreward = false
 	backward = false
@@ -174,6 +175,9 @@ func Loop(childrens Files, parent File) {
 				case 110: //	--------------------------------------------	n
 					showChildren = !showChildren
 					center = false
+				case 117: //	--------------------------------------------	u
+					showMime = !showMime
+					center = false
 				case 109: //	--------------------------------------------	m
 					showMode = !showMode
 					center = false
@@ -189,9 +193,19 @@ func Loop(childrens Files, parent File) {
 					center = false
 				case 99: //	------------------------------------------------	c
 					center = !center
-				case 100: //	--------------------------------------------	d
-					duMode = !duMode
+				case 100: //	--------------------------------------------	z
+					duMode = true
+					showSize = true
+					topBar = true
+					statBar = true
+					showDate = true
+					showMode = true
+					showMime = true
+					showChildren = true
 					center = false
+				case 122: //	--------------------------------------------	z
+					center = false
+					duMode = !duMode
 				case 105: //	--------------------------------------------	i
 					showIcons = !showIcons
 				default:
