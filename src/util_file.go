@@ -6,6 +6,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/bresilla/godirwalk"
@@ -54,6 +55,10 @@ func gothrough(dir string) (size int64) {
 		ScratchBuffer: make([]byte, 64*1024),
 	})
 	return
+}
+
+func timespecToTime(ts syscall.Timespec) time.Time {
+	return time.Unix(int64(ts.Sec), int64(ts.Nsec))
 }
 
 var fileicons = map[string]string{
@@ -194,6 +199,8 @@ type File struct {
 	Size      int64
 	Mode      os.FileMode
 	ModTime   time.Time
+	AccTime   time.Time
+	ChgTime   time.Time
 	Other     Other
 }
 type Other struct {
@@ -221,6 +228,7 @@ func MakeFile(dir string) (file File, err error) {
 	if err != nil {
 		return
 	}
+	osStat := f.Sys().(*syscall.Stat_t)
 	parent := "/"
 	parentPath := "/"
 	name := "/"
@@ -240,8 +248,10 @@ func MakeFile(dir string) (file File, err error) {
 		Parent:  parent,
 		Size:    f.Size(),
 		Mode:    f.Mode(),
-		ModTime: f.ModTime(),
 		IsDir:   f.IsDir(),
+		ModTime: f.ModTime(),
+		AccTime: timespecToTime(osStat.Atim),
+		ChgTime: timespecToTime(osStat.Ctim),
 	}
 
 	if f.IsDir() {

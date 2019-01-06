@@ -26,19 +26,23 @@ func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir Fi
 		Print(HighLight, Black, Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
 		Print(Default, Cyan, Black, DashBorder2("", "¯", 0))
 	}
+	var maxSize int64
+	lenMax := 15
+	for i := range childrens {
+		if len(childrens[i].Name) > lenMax {
+			lenMax = len(childrens[i].Name)
+		}
+		maxSize += childrens[i].Size
+	}
 	if center && termHeight > len(drawlist) {
 		topSpace += termHeight/2 - (len(drawlist) / 2)
-		sideSpace = termWidth/2 - 25/2
+		sideSpace = termWidth/2 - lenMax/2 - 5
 	}
 	if len(drawlist) == 0 {
 		fmt.Print("  ")
 		term.MoveTo(sideSpace+3, topSpace)
 		Print(HighLight, Black, White, "  nothing to show  ")
 	} else {
-		var maxSize int64
-		for _, el := range childrens {
-			maxSize += el.Size
-		}
 		for i, el := range drawlist {
 			if selected+scroll == el.Number {
 				el.Other.Active = true
