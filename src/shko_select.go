@@ -15,19 +15,13 @@ var (
 	space = 1
 )
 
-func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir File) {
-	term.MoveTo(0, 0)
-	term.ClearAll()
+func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir File, match Matches) {
 	termWidth, termHeight := term.Size()
-	topSpace = 0
-	sideSpace = 0
-	if topBar {
-		topSpace = 2
-		Print(HighLight, Black, Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
-		Print(Default, Cyan, Black, DashBorder2("", "¯", 0))
-	}
 	var maxSize int64
 	lenMax := 15
+	topSpace = 0
+	sideSpace = 0
+
 	for i := range childrens {
 		if len(childrens[i].Name) > lenMax {
 			lenMax = len(childrens[i].Name)
@@ -37,6 +31,14 @@ func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir Fi
 	if center && termHeight > len(drawlist) {
 		topSpace += termHeight/2 - (len(drawlist) / 2)
 		sideSpace = termWidth/2 - lenMax/2 - 5
+	}
+
+	term.MoveTo(0, 0)
+	term.ClearAll()
+	if topBar {
+		topSpace = 2
+		Print(HighLight, Black, Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
+		Print(Default, Cyan, Black, DashBorder2("", "¯", 0))
 	}
 	if len(drawlist) == 0 {
 		fmt.Print("  ")
@@ -49,9 +51,9 @@ func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir Fi
 			}
 			fmt.Print("  ")
 			if i == selected || el.Other.Selected == true {
-				colorList(el, true, i+topSpace, maxSize)
+				colorList(el, true, i+topSpace, maxSize, match)
 			} else {
-				colorList(el, false, i+topSpace, maxSize)
+				colorList(el, false, i+topSpace, maxSize, match)
 			}
 			fmt.Print("\n")
 			ResetStyle()
@@ -64,18 +66,17 @@ func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir Fi
 	}
 }
 
-func colorList(file File, active bool, i int, maxSize int64) {
+func colorList(file File, active bool, i int, maxSize int64, match Matches) {
 	termWidth, _ := term.Size()
 	tab = space + 2 + sideSpace
 	term.MoveTo(tab, i+1)
 	if file.IsDir {
-		Invert(active, HighLight, White)
+		Select(active, HighLight, White)
 	} else {
-		Invert(active, Default, Cyan)
+		Select(active, Default, Cyan)
 	}
-	term.ClearLineEnd()
 	tab = drawIcon(active, showIcons, file, i)
-	tab = drawName(active, file, i)
+	tab = drawName(active, file, i, match)
 	tab = drawChildren(showChildren, file, i)
 	tab = drawMode(showMode, file, i)
 	tab = drawDU(showDu, file, i, maxSize)
@@ -89,6 +90,23 @@ func colorList(file File, active bool, i int, maxSize int64) {
 		SetStyle(Default, White, Black)
 	}
 	term.ClearLineEnd()
+}
+
+func Select(active bool, style Style, color Color) {
+	if active {
+		SetStyle(style, Black, color)
+	} else {
+		SetStyle(style, color, None)
+	}
+}
+
+func contains(needle int, haystack []int) bool {
+	for _, i := range haystack {
+		if needle == i {
+			return true
+		}
+	}
+	return false
 }
 
 func drawIcon(active, yesno bool, file File, i int) (tabTurn int) {
@@ -115,7 +133,7 @@ func drawIcon(active, yesno bool, file File, i int) (tabTurn int) {
 	return
 }
 
-func drawName(active bool, file File, i int) (tabTurn int) {
+func drawName(active bool, file File, i int, match Matches) (tabTurn int) {
 	term.MoveTo(tab, i+1)
 	spacer := ""
 	if active {

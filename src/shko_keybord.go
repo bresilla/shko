@@ -61,10 +61,11 @@ func prepList(childrens Files) (drawlist Files) {
 
 func fuzzyFind(childrens Files, currentDir File) (matched Files) {
 	matched = childrens
-	var pattern string
+	pattern := ""
+	results := FindFrom(pattern, childrens)
 	for {
 		drawlist = prepList(matched)
-		SelectInList(number, scroll, drawlist, matched, currentDir)
+		SelectInList(number, scroll, drawlist, matched, currentDir, results)
 		statusWrite("Search for:")
 		fmt.Print(pattern)
 		ascii, keycode, _ := GetChar()
@@ -85,7 +86,7 @@ func fuzzyFind(childrens Files, currentDir File) (matched Files) {
 			matched = childrens
 		} else {
 			matched = Files{}
-			results := FindFrom(pattern, childrens)
+			results = FindFrom(pattern, childrens)
 			for _, r := range results {
 				matched = append(matched, childrens[r.Index])
 			}
@@ -98,9 +99,8 @@ func fuzzyFind(childrens Files, currentDir File) (matched Files) {
 
 func Loop(childrens Files, parent File) {
 	for {
-		Sorting(childrens, true)
 		drawlist := prepList(childrens)
-		SelectInList(number, scroll, drawlist, childrens, currentDir)
+		SelectInList(number, scroll, drawlist, childrens, currentDir, Matches{})
 		ascii, keycode, _ := GetChar()
 		if ascii == 47 { // ------------------------------------------------	/
 			childrens = fuzzyFind(childrens, currentDir)
@@ -289,13 +289,47 @@ func Loop(childrens Files, parent File) {
 				childrens, parent = ListFiles(currentDir)
 				number--
 			} else if ascii == 120 { //	------------------------------------	x (archive)
-				statusWrite("Press \"x\" to EXTRACT selected")
+				statusWrite("Press \"x\" to EXTRACT or \"a\" to ARCHIVE")
 				ascii, _, _ = GetChar()
 				if ascii == 120 {
 					err := archiver.Unarchive(childrens[number].Path, childrens[number].Path+"_E")
 					if err != nil {
 						log.Fatal(err)
 					}
+				} else if ascii == 97 {
+					archSlice := []string{}
+					onList := false
+					name := ""
+					for i, file := range childrens {
+						if childrens[i].Other.Selected {
+							archSlice = append(archSlice, file.Path)
+							onList = true
+							name = currentDir.Parent
+						}
+					}
+					if !onList {
+						archSlice = append(archSlice, childrens[number].Path)
+						name = childrens[number].Name
+					}
+					statusWrite("Press \"t\" to TAR, \"z\" to ZIP or \"g\" to TGZ")
+					ascii, _, _ = GetChar()
+					if ascii == 116 {
+						err := archiver.Archive(archSlice, name+".tar")
+						if err != nil {
+							log.Fatal(err)
+						}
+					} else if ascii == 122 {
+						err := archiver.Archive(archSlice, name+".zip")
+						if err != nil {
+							log.Fatal(err)
+						}
+					} else if ascii == 103 {
+						err := archiver.Archive(archSlice, name+".tar.gz")
+						if err != nil {
+							log.Fatal(err)
+						}
+					}
+
 				}
 				childrens, parent = ListFiles(currentDir)
 			} else if ascii == 121 && len(drawlist) > 0 { //	------------	y (yank copy)
@@ -387,7 +421,7 @@ func Loop(childrens Files, parent File) {
 					childrens, parent = ListFiles(tempDir)
 					for {
 						drawlist := prepList(childrens)
-						SelectInList(number, scroll, drawlist, childrens, tempDir)
+						SelectInList(number, scroll, drawlist, childrens, tempDir, Matches{})
 						ascii, keycode, _ := GetChar()
 						if ascii == 13 { // ----	ENTER
 							Copy(drawlist[number].Path, currentDir.Path)
