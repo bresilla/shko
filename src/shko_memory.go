@@ -9,8 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	term "github.com/tj/go/term"
 )
 
 var (
@@ -78,7 +76,6 @@ func findInMemory(parent File, child Files) (number, scroll int) {
 }
 
 func findFile(list Files, actual File) (number, scroll int) {
-	_, termHeight = term.Size()
 	for i, el := range list {
 		if el.Name == actual.Name {
 			if i < termHeight/2 {
@@ -99,7 +96,6 @@ func findFile(list Files, actual File) (number, scroll int) {
 }
 
 func findList(list []string, actual string) (number, scroll int) {
-	_, termHeight = term.Size()
 	for i, el := range list {
 		if el == actual {
 			if i < termHeight/2 {

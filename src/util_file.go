@@ -198,7 +198,7 @@ type File struct {
 	Hidden    bool
 	Size      int64
 	Mode      os.FileMode
-	ModTime   time.Time
+	BrtTime   time.Time
 	AccTime   time.Time
 	ChgTime   time.Time
 	Other     Other
@@ -221,7 +221,7 @@ func (e Files) Len() int               { return len(e) }
 func (e Files) Swap(i, j int)          { e[i], e[j] = e[j], e[i] }
 func (e Files) Less(i, j int) bool     { return e[i].Name < e[j].Name }
 func (e Files) SortSize(i, j int) bool { return e[i].Size < e[j].Size }
-func (e Files) SortDate(i, j int) bool { return e[i].ModTime.Before(e[j].ModTime) }
+func (e Files) SortDate(i, j int) bool { return e[i].BrtTime.Before(e[j].BrtTime) }
 
 func MakeFile(dir string) (file File, err error) {
 	f, err := os.Stat(dir)
@@ -249,7 +249,7 @@ func MakeFile(dir string) (file File, err error) {
 		Size:    f.Size(),
 		Mode:    f.Mode(),
 		IsDir:   f.IsDir(),
-		ModTime: f.ModTime(),
+		BrtTime: timespecToTime(osStat.Mtim),
 		AccTime: timespecToTime(osStat.Atim),
 		ChgTime: timespecToTime(osStat.Ctim),
 	}

@@ -15,8 +15,7 @@ var (
 	space = 1
 )
 
-func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir File, match Matches) {
-	termWidth, termHeight := term.Size()
+func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir File) {
 	var maxSize int64
 	lenMax := 15
 	topSpace = 0
@@ -51,9 +50,9 @@ func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir Fi
 			}
 			fmt.Print("  ")
 			if i == selected || el.Other.Selected == true {
-				colorList(el, true, i+topSpace, maxSize, match)
+				colorList(el, true, i+topSpace, maxSize)
 			} else {
-				colorList(el, false, i+topSpace, maxSize, match)
+				colorList(el, false, i+topSpace, maxSize)
 			}
 			fmt.Print("\n")
 			ResetStyle()
@@ -66,8 +65,7 @@ func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir Fi
 	}
 }
 
-func colorList(file File, active bool, i int, maxSize int64, match Matches) {
-	termWidth, _ := term.Size()
+func colorList(file File, active bool, i int, maxSize int64) {
 	tab = space + 2 + sideSpace
 	term.MoveTo(tab, i+1)
 	if file.IsDir {
@@ -76,7 +74,7 @@ func colorList(file File, active bool, i int, maxSize int64, match Matches) {
 		Select(active, Default, Cyan)
 	}
 	tab = drawIcon(active, showIcons, file, i)
-	tab = drawName(active, file, i, match)
+	tab = drawName(active, file, i)
 	tab = drawChildren(showChildren, file, i)
 	tab = drawMode(showMode, file, i)
 	tab = drawDU(showDu, file, i, maxSize)
@@ -133,7 +131,7 @@ func drawIcon(active, yesno bool, file File, i int) (tabTurn int) {
 	return
 }
 
-func drawName(active bool, file File, i int, match Matches) (tabTurn int) {
+func drawName(active bool, file File, i int) (tabTurn int) {
 	term.MoveTo(tab, i+1)
 	spacer := ""
 	if active {
@@ -173,7 +171,7 @@ func drawSize(yesno bool, file File, i int) (tabTurn int) {
 func drawDate(yesno bool, file File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print(file.ModTime.Format(time.RFC822) + " ")
+		fmt.Print(file.BrtTime.Format(time.RFC822) + " ")
 		tabTurn = tab + 25
 	} else {
 		tabTurn = tab
@@ -260,7 +258,6 @@ func statusRead(toWrite, defaultStr string) (text string) {
 }
 
 func cleanLine(minus int) {
-	termWidth, _ := term.Size()
 	for i := 0; i < termWidth-minus; i++ {
 		fmt.Print(" ")
 	}

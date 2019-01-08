@@ -2,14 +2,11 @@ package shko
 
 import (
 	"fmt"
-
-	term "github.com/tj/go/term"
 )
 
 func DashBorder(symb string) string {
-	width, _ := term.Size()
 	var toPrint string
-	for n := 1; n <= width; n++ {
+	for n := 1; n <= termWidth; n++ {
 		toPrint = toPrint + symb
 	}
 	toPrint = toPrint + "\n"
@@ -17,7 +14,6 @@ func DashBorder(symb string) string {
 }
 
 func DashBorder2(text, symb string, before int) string {
-	width, _ := term.Size()
 	var toPrint = ""
 	for n := 1; n <= before; n++ {
 		toPrint += symb
@@ -26,7 +22,7 @@ func DashBorder2(text, symb string, before int) string {
 		toPrint += " " + text + " " + symb
 	}
 	var toPrintLen = len([]rune(toPrint))
-	for n := 1; n <= width-toPrintLen; n++ {
+	for n := 1; n <= termWidth-toPrintLen; n++ {
 		toPrint = toPrint + symb
 	}
 	toPrint = toPrint + "\n"
