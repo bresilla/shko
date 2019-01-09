@@ -5,7 +5,7 @@
 //source: https://github.com/sahilm/fuzzy
 //this version has some corrections to suite my needs
 
-package shko
+package dirk
 
 import (
 	"sort"

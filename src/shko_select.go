@@ -1,18 +1,21 @@
 package shko
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"log"
 	"strconv"
 	"time"
 
+	. "./dirk"
+	"github.com/logrusorgru/aurora"
+	"github.com/peterh/liner"
 	term "github.com/tj/go/term"
 )
 
 var (
 	tab   = 20
 	space = 1
+	au    = aurora.NewAurora(colors)
 )
 
 func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir File) {
@@ -59,7 +62,7 @@ func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir Fi
 		}
 	}
 	if statBar {
-		term.MoveTo(0, termHeight-2)
+		term.MoveTo(0, termHeight)
 		Print(Default, Cyan, Black, DashBorder2("", "_", 0))
 		Print(HighLight, Black, Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
 	}
@@ -77,7 +80,7 @@ func colorList(file File, active bool, i int, maxSize int64) {
 	tab = drawName(active, file, i)
 	tab = drawChildren(showChildren, file, i)
 	tab = drawMode(showMode, file, i)
-	tab = drawDU(showDu, file, i, maxSize)
+	tab = drawDU(DiskUse, file, i, maxSize)
 	tab = drawSize(showSize, file, i)
 	tab = drawDate(showDate, file, i)
 	tab = drawMime(showMime, file, i)
@@ -87,7 +90,6 @@ func colorList(file File, active bool, i int, maxSize int64) {
 		term.MoveTo(termWidth-space, i+1)
 		SetStyle(Default, White, Black)
 	}
-	term.ClearLineEnd()
 }
 
 func Select(active bool, style Style, color Color) {
@@ -238,21 +240,21 @@ func statusWrite(toWrite string) {
 	term.MoveTo(0, termHeight+1)
 	cleanLine(0)
 	term.MoveTo(0, termHeight+1)
-	Print(HighLight, Black, White, " "+toWrite+" ")
+	fmt.Print(au.Sprintf(au.BgCyan(au.Bold(au.Black(toWrite)))))
 	fmt.Print(" ")
 }
 
 func statusRead(toWrite, defaultStr string) (text string) {
-	scanner := bufio.NewScanner(os.Stdin)
+	line := liner.NewLiner()
+	defer line.Close()
+	line.SetCtrlCAborts(true)
 	term.MoveTo(0, termHeight+1)
-	cleanLine(0)
-	term.MoveTo(0, termHeight+1)
-	Print(HighLight, Black, White, " "+toWrite+" ")
-	fmt.Print(" ")
-	scanner.Scan()
-	text = scanner.Text()
-	if text == "" {
-		text = defaultStr
+	if name, err := line.PromptWithSuggestion(toWrite+": ", defaultStr, -1); err == nil {
+		text = name
+	} else if err == liner.ErrPromptAborted {
+		log.Print("Aborted")
+	} else {
+		log.Print("Error reading line: ", err)
 	}
 	return
 }

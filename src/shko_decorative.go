@@ -2,6 +2,8 @@ package shko
 
 import (
 	"fmt"
+
+	. "./dirk"
 )
 
 func DashBorder(symb string) string {

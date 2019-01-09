@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	shko.Run()
+	shko.Main()
 }

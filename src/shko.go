@@ -5,15 +5,13 @@ import (
 	"fmt"
 	"os"
 
+	. "./dirk"
 	term "github.com/tj/go/term"
 )
 
 var (
 	termWidth, termHeight = term.Size()
-	incFolder             = true
-	incFiles              = true
-	incHidden             = false
-	recurrent             = false
+	colors                = true
 	wrap                  = true
 	shortcut              = 17
 	dirASwitch            = true
@@ -49,14 +47,11 @@ var (
 	scripts               = map[string]string{}
 	bookmark              = map[string]string{}
 	copySlice             Files
-	ignoreSlice           = []string{}
-	ignoreRecur           = []string{"node_modules", ".git"}
 	showIcons             = true
 	showChildren          = false
 	showSize              = false
 	showDate              = false
 	showMode              = false
-	showDu                = false
 	showMime              = false
 	center                = false
 	greater               = true
@@ -83,7 +78,8 @@ var (
 )
 
 func Flags() {
-	flag.BoolVar(&showDu, "d", false, "")
+	flag.BoolVar(&colors, "o", true, "disable colors - defualt enable")
+	flag.BoolVar(&DiskUse, "d", false, "")
 	flag.BoolVar(&center, "c", false, "")
 	flag.BoolVar(&showChildren, "n", false, "")
 	flag.BoolVar(&showSize, "s", false, "")
@@ -102,8 +98,8 @@ func check(e error) {
 	}
 }
 
-func Run() {
-	createDirectory(appfolder)
+func Main() {
+	CreateDirectory(appfolder)
 	createTemplates(tempfolder)
 	initializeBookmarks()
 	initializeScriptlist()

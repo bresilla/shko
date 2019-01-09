@@ -1,4 +1,4 @@
-package shko
+package dirk
 
 import (
 	"fmt"
@@ -13,7 +13,17 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 )
 
-func ByteCountSI(b int64) string {
+var (
+	IgnoreSlice = []string{}
+	IgnoreRecur = []string{"node_modules", ".git"}
+	IncFolder   = true
+	IncFiles    = true
+	IncHidden   = false
+	Recurrent   = false
+	DiskUse     = false
+)
+
+func byteCountSI(b int64) string {
 	const unit = 1000
 	if b < unit {
 		return fmt.Sprintf("%d B", b)
@@ -27,7 +37,7 @@ func ByteCountSI(b int64) string {
 		float64(b)/float64(div), "kMGTPE"[exp])
 }
 
-func ByteCountIEC(b int64) string {
+func byteCountIEC(b int64) string {
 	const unit = 1024
 	if b < unit {
 		return fmt.Sprintf("%d B", b)
@@ -255,9 +265,9 @@ func MakeFile(dir string) (file File, err error) {
 	}
 
 	if f.IsDir() {
-		if showDu {
+		if DiskUse {
 			file.Size = gothrough(dir)
-			file.Other.HumanSize = ByteCountIEC(file.Size)
+			file.Other.HumanSize = byteCountIEC(file.Size)
 		} else {
 			file.Other.HumanSize = "0 B"
 		}
@@ -269,7 +279,7 @@ func MakeFile(dir string) (file File, err error) {
 	} else {
 		extension := path.Ext(dir)
 		mime, _, _ := mimetype.DetectFile(dir)
-		file.Other.HumanSize = ByteCountIEC(f.Size())
+		file.Other.HumanSize = byteCountIEC(f.Size())
 		file.Extension = extension
 		file.Mime = mime
 		file.Other.Icon = fileicons[extension]
@@ -303,7 +313,7 @@ func fileList(recurrent bool, dir File) (paths Files, err error) {
 			},
 			Unsorted:      true,
 			NoHidden:      true,
-			Ignore:        ignoreRecur,
+			Ignore:        IgnoreRecur,
 			ScratchBuffer: make([]byte, 64*1024),
 		})
 	} else {
@@ -353,9 +363,9 @@ func chooseFile(incFolder, incFiles, incHidden, recurrent bool, dir File) (list 
 			}
 		}
 	}
-	if len(ignoreSlice) > 0 {
+	if len(IgnoreSlice) > 0 {
 		for _, f := range ignore {
-			for _, s := range ignoreSlice {
+			for _, s := range IgnoreSlice {
 				if f.Name == s {
 					break
 				}
@@ -372,7 +382,7 @@ func chooseFile(incFolder, incFiles, incHidden, recurrent bool, dir File) (list 
 	return
 }
 
-func Sorting(list Files, s bool) {
+func sortFiles(list Files, s bool) {
 	if s {
 		sort.Sort(Files(list))
 	} else {
@@ -381,7 +391,7 @@ func Sorting(list Files, s bool) {
 }
 
 func ListFiles(dir File) (files Files, parent File) {
-	list := chooseFile(incFolder, incFiles, incHidden, recurrent, dir)
+	list := chooseFile(IncFolder, IncFiles, IncHidden, Recurrent, dir)
 	parent, _ = MakeFile(path.Dir(dir.Path))
 	for _, d := range list {
 		files = append(files, d)
@@ -389,7 +399,7 @@ func ListFiles(dir File) (files Files, parent File) {
 	return
 }
 
-func createDirectory(dirName string) bool {
+func CreateDirectory(dirName string) bool {
 	src, err := os.Stat(dirName)
 	if os.IsNotExist(err) {
 		errDir := os.MkdirAll(dirName, 0755)

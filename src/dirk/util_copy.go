@@ -10,7 +10,7 @@
 // source: https://github.com/rvi64/copy
 // this version has some modifications e.g. if file exists, it adds a number after the name
 
-package shko
+package dirk
 
 import (
 	"fmt"
