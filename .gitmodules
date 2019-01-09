@@ -1,0 +1,3 @@
+[submodule "src/dirk"]
+	path = src/dirk
+	url = https://github.com/bresilla/dirk
