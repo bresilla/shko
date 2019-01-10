@@ -164,10 +164,14 @@ func Loop(childrens d.Files) {
 			backward = false
 			foreward = false
 			continue
-		} else if ascii == 113 || ascii == 13 || ascii == shortcut { //------	SHORTCUT
+		} else if ascii == 13 || ascii == shortcut { //---------------------	enter + SHORTCUT
 			term.ClearAll()
 			break
-		} else if ascii == 3 { // ------------------------------------------	q, Ctrl+c
+		} else if ascii == 113 { //-----------------------------------------	q
+			changeDir = false
+			term.ClearAll()
+			break
+		} else if ascii == 3 { // ------------------------------------------	Ctrl+c
 			changeDir = false
 			term.ClearAll()
 			break
@@ -276,6 +280,8 @@ func Loop(childrens d.Files) {
 					showIcons = !showIcons
 				}
 			} else if ascii == 122 { // ------------------------------------	z (test)
+				d.Overite(currentDir.Path, "test", []byte("TRIM"+"\n"))
+				childrens = d.ListDir(currentDir)
 			} else if ascii == 111 { // ------------------------------------	o (open)
 				statusWrite("Press \"o\" to OPEN or \"w\" to OPEN WITH...")
 				ascii, _, _ = d.GetChar()
@@ -362,9 +368,9 @@ func Loop(childrens d.Files) {
 					statusWrite("Press \"p\" to PASTE or \"m\" to MOVE")
 					ascii, _, _ = d.GetChar()
 					if ascii == 112 {
-						d.Copy(copySlice, currentDir.Path)
+						d.Copy(currentDir.Path, copySlice)
 					} else if ascii == 109 {
-						d.Move(copySlice, currentDir.Path)
+						d.Move(currentDir.Path, copySlice)
 					}
 					childrens = d.ListDir(currentDir)
 				}
@@ -401,15 +407,10 @@ func Loop(childrens d.Files) {
 				switch ascii {
 				case 110, 102:
 					name := statusRead("Enter filename", "file")
-					newFileName := currentDir.Path + "/" + name
-					newFileName = d.RenameExist(newFileName)
-					newFile, _ := os.Create(newFileName)
-					newFile.Close()
+					d.Write(currentDir.Path, name, []byte{})
 				case 100:
 					name := statusRead("Enter dirname", "dir")
-					newFolderName := currentDir.Path + "/" + name
-					newFolderName = d.RenameExist(newFolderName)
-					os.MkdirAll(newFolderName, 0777)
+					d.Mkdir(currentDir.Path, name)
 				case 116:
 					number = 0
 					scroll = 0
@@ -420,7 +421,7 @@ func Loop(childrens d.Files) {
 						SelectInList(number, scroll, drawlist, childrens, tempDir)
 						ascii, keycode, _ := d.GetChar()
 						if ascii == 13 { // ----	ENTER
-							d.Copy([]string{drawlist[number].Path}, currentDir.Path)
+							d.Copy(currentDir.Path, []string{drawlist[number].Path})
 							break
 						} else if keycode == 38 || ascii == 107 { //up
 							if backward {
