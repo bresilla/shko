@@ -51,7 +51,6 @@ func SelectInList(selected, scroll int, drawlist, childrens Files, currentDir Fi
 			if selected+scroll == el.Number {
 				el.Other.Active = true
 			}
-			fmt.Print("  ")
 			if i == selected || el.Other.Selected == true {
 				colorList(el, true, i+topSpace, maxSize)
 			} else {
@@ -72,9 +71,9 @@ func colorList(file File, active bool, i int, maxSize int64) {
 	tab = space + 2 + sideSpace
 	term.MoveTo(tab, i+1)
 	if file.IsDir {
-		Select(active, HighLight, White)
+		ColorSelect(active, HighLight, White)
 	} else {
-		Select(active, Default, Cyan)
+		ColorSelect(active, Default, Cyan)
 	}
 	tab = drawIcon(active, showIcons, file, i)
 	tab = drawName(active, file, i)
@@ -84,29 +83,15 @@ func colorList(file File, active bool, i int, maxSize int64) {
 	tab = drawSize(showSize, file, i)
 	tab = drawDate(showDate, file, i)
 	tab = drawMime(showMime, file, i)
-	if !topBar {
-		SetStyle(Default, White, Black)
-	} else {
-		term.MoveTo(termWidth-space, i+1)
-		SetStyle(Default, White, Black)
-	}
+	SetStyle(Default, White, Black)
 }
 
-func Select(active bool, style Style, color Color) {
+func ColorSelect(active bool, style Style, color Color) {
 	if active {
 		SetStyle(style, Black, color)
 	} else {
 		SetStyle(style, color, None)
 	}
-}
-
-func contains(needle int, haystack []int) bool {
-	for _, i := range haystack {
-		if needle == i {
-			return true
-		}
-	}
-	return false
 }
 
 func drawIcon(active, yesno bool, file File, i int) (tabTurn int) {

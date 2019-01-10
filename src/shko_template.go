@@ -6,8 +6,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
-	. "./dirk"
 )
 
 var template = map[string][]byte{
@@ -103,7 +101,7 @@ func makeTemplate(name string, bytes []byte) {
 }
 
 func createTemplates(folder string) {
-	CreateDirectory(folder)
+	CreateDir(folder)
 	for key, value := range template {
 		makeTemplate(key, value)
 	}

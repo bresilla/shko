@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	. "./dirk"
+	d "./dirk"
 	"github.com/mholt/archiver"
 	term "github.com/tj/go/term"
 )
@@ -26,7 +26,7 @@ func entryConditions() {
 		showSize = false
 		showDate = false
 		showMode = false
-		DiskUse = false
+		d.DiskUse = false
 		statBar = false
 		topBar = false
 		showMime = false
@@ -35,7 +35,7 @@ func entryConditions() {
 	backward = false
 }
 
-func prepList(childrens Files) (drawlist Files) {
+func prepList(childrens d.Files) (drawlist d.Files) {
 	entryConditions()
 	drawlist = childrens
 	termHeight = termHeight - topSpace
@@ -59,17 +59,17 @@ func prepList(childrens Files) (drawlist Files) {
 	return
 }
 
-func fuzzyFind(childrens Files, currentDir File) (matched Files) {
+func fuzzyFind(childrens d.Files, currentDir d.File) (matched d.Files) {
 	matched = childrens
 	pattern := ""
-	results := FindFrom(pattern, childrens)
+	results := d.FindFrom(pattern, childrens)
 	for {
 		termWidth, termHeight = term.Size()
 		drawlist = prepList(matched)
 		SelectInList(number, scroll, drawlist, matched, currentDir)
 		statusWrite("Search for:")
 		fmt.Print(pattern)
-		ascii, keycode, _ := GetChar()
+		ascii, keycode, _ := d.GetChar()
 		runeString := string(rune(ascii))
 		if ascii > 33 && ascii < 127 {
 			pattern += runeString
@@ -86,8 +86,8 @@ func fuzzyFind(childrens Files, currentDir File) (matched Files) {
 		if pattern == "" {
 			matched = childrens
 		} else {
-			matched = Files{}
-			results = FindFrom(pattern, childrens)
+			matched = d.Files{}
+			results = d.FindFrom(pattern, childrens)
 			for _, r := range results {
 				matched = append(matched, childrens[r.Index])
 			}
@@ -98,12 +98,12 @@ func fuzzyFind(childrens Files, currentDir File) (matched Files) {
 	return
 }
 
-func Loop(childrens Files, parent File) {
+func Loop(childrens d.Files) {
 	for {
 		termWidth, termHeight = term.Size()
 		drawlist := prepList(childrens)
 		SelectInList(number, scroll, drawlist, childrens, currentDir)
-		ascii, keycode, _ := GetChar()
+		ascii, keycode, _ := d.GetChar()
 		if ascii == 47 { // ------------------------------------------------	/
 			childrens = fuzzyFind(childrens, currentDir)
 		} else if keycode == 38 || ascii == 107 { // -----------------------	up
@@ -139,12 +139,12 @@ func Loop(childrens Files, parent File) {
 				}
 			}
 			continue
-		} else if keycode == 37 && !Recurrent || ascii == 104 { // ---------	left
+		} else if keycode == 37 && !d.Recurrent || ascii == 104 { // ---------	left
 			backward = false
 			foreward = false
 			oldDir := currentDir
-			currentDir, _ = MakeFile(parent.Path)
-			childrens, parent = ListFiles(currentDir)
+			currentDir, _ = d.MakeFile(currentDir.ParentPath)
+			childrens = d.ListDir(currentDir)
 			number, scroll = findFile(childrens, oldDir)
 			continue
 		} else if keycode == 39 || ascii == 108 { // -----------------------	right
@@ -153,12 +153,12 @@ func Loop(childrens Files, parent File) {
 			}
 			if drawlist[number].IsDir {
 				oldDir := currentDir
-				currentDir, _ = MakeFile(drawlist[number].Path)
-				childrens, parent = ListFiles(currentDir)
+				currentDir, _ = d.MakeFile(drawlist[number].Path)
+				childrens = d.ListDir(currentDir)
 				addToMemory(oldDir, currentDir)
 				number, scroll = findInMemory(currentDir, childrens)
 			} else {
-				Edit(drawlist[number].Path)
+				d.Edit(drawlist[number].Path)
 				fmt.Print("\033[?25l")
 			}
 			backward = false
@@ -174,8 +174,8 @@ func Loop(childrens Files, parent File) {
 		} else {
 			if ascii == 32 { // --------------------------------------------	SPACE
 				term.MoveTo(0, termHeight+1)
-				Print(HighLight, Black, White, "leader")
-				ascii, _, _ := GetChar()
+				Print(d.HighLight, d.Black, d.White, "leader")
+				ascii, _, _ := d.GetChar()
 				switch ascii {
 				case 110: //	--------------------------------------------	n
 					showChildren = !showChildren
@@ -199,7 +199,7 @@ func Loop(childrens Files, parent File) {
 				case 99: //	------------------------------------------------	c
 					center = !center
 				case 100: //	--------------------------------------------	z
-					DiskUse = true
+					d.DiskUse = true
 					showSize = true
 					topBar = true
 					statBar = true
@@ -210,29 +210,30 @@ func Loop(childrens Files, parent File) {
 					center = false
 				case 122: //	--------------------------------------------	z
 					center = false
-					DiskUse = !DiskUse
+					d.DiskUse = !d.DiskUse
 				case 105: //	--------------------------------------------	i
 					showIcons = !showIcons
 				default:
 					term.MoveTo(8, termHeight+1)
 					toPrint := "ascii: " + strconv.Itoa(ascii)
-					Print(HighLight, Black, White, toPrint)
-					GetChar()
+					Print(d.HighLight, d.Black, d.White, toPrint)
+					d.GetChar()
 				}
 				continue
 			} else if ascii == 45 { //	-------------------------------------	- (recurr)
-				Recurrent = !Recurrent
-				IncFolder = !IncFolder
-				IncHidden = false
-				DiskUse = false
-				childrens, parent = ListFiles(currentDir)
-				if Recurrent {
+				d.Recurrent = !d.Recurrent
+				d.IncFolder = !d.IncFolder
+				d.IncHidden = false
+				d.DiskUse = false
+				childrens = d.ListDir(currentDir)
+				if d.Recurrent {
 					for i := range childrens {
 						for j := range childrens[i].Ancestors {
 							if len(childrens[i].Ancestors[j]) > termWidth/4 {
 								childrens[i].Ancestors[j] = childrens[i].Ancestors[j][:termWidth/4] + "..."
 							}
 						}
+						parent, _ := d.MakeFile(currentDir.ParentPath)
 						childrens[i].Ancestors = childrens[i].Ancestors[parent.Other.Deep+1:]
 						prepName := strings.Join(childrens[i].Ancestors, "/")
 						childrens[i].Name = prepName
@@ -241,34 +242,34 @@ func Loop(childrens Files, parent File) {
 				number = 0
 				scroll = 0
 			} else if ascii == 44 { //	-------------------------------------	,
-				IncFiles = !IncFiles
-				childrens, parent = ListFiles(currentDir)
+				d.IncFiles = !d.IncFiles
+				childrens = d.ListDir(currentDir)
 			} else if ascii == 46 { //	-------------------------------------	.
-				IncHidden = !IncHidden
-				childrens, parent = ListFiles(currentDir)
+				d.IncHidden = !d.IncHidden
+				childrens = d.ListDir(currentDir)
 			} else if ascii == 35 { //	-------------------------------------	#
 				wrap = !wrap
 			} else if ascii == 9 { //	-------------------------------------	TAB
 				if dirASwitch {
 					if len(childrens) > 0 {
-						dirA, _ = MakeFile(childrens[0].Other.ParentPath)
+						dirA, _ = d.MakeFile(childrens[0].ParentPath)
 					} else {
-						dirA, _ = MakeFile(parent.Path)
+						dirA, _ = d.MakeFile(currentDir.ParentPath)
 					}
 					currentDir = dirB
-					childrens, parent = ListFiles(dirB)
+					childrens = d.ListDir(dirB)
 					number, scroll = findInMemory(currentDir, childrens)
 					dirASwitch = false
 					dirBSwitch = true
 					showIcons = !showIcons
 				} else {
 					if len(childrens) > 0 {
-						dirB, _ = MakeFile(childrens[0].Other.ParentPath)
+						dirB, _ = d.MakeFile(childrens[0].ParentPath)
 					} else {
-						dirB, _ = MakeFile(parent.Path)
+						dirB, _ = d.MakeFile(currentDir.ParentPath)
 					}
 					currentDir = dirA
-					childrens, parent = ListFiles(dirA)
+					childrens = d.ListDir(dirA)
 					number, scroll = findInMemory(currentDir, childrens)
 					dirBSwitch = false
 					dirASwitch = true
@@ -277,20 +278,20 @@ func Loop(childrens Files, parent File) {
 			} else if ascii == 122 { // ------------------------------------	z (test)
 			} else if ascii == 111 { // ------------------------------------	o (open)
 				statusWrite("Press \"o\" to OPEN or \"w\" to OPEN WITH...")
-				ascii, _, _ = GetChar()
+				ascii, _, _ = d.GetChar()
 				switch ascii {
 				case 111:
-					Start(drawlist[number].Path)
+					d.Start(drawlist[number].Path)
 				case 119:
 					toOpenWith := statusRead("Open with", "nvim")
-					StartWith(drawlist[number].Path, toOpenWith)
+					d.StartWith(drawlist[number].Path, toOpenWith)
 				}
 			} else if ascii == 100 && len(drawlist) > 0 { // ---------------	d (delete)
 				statusWrite("Press \"d\" to DELETE selected")
-				ascii, _, _ = GetChar()
+				ascii, _, _ = d.GetChar()
 				if ascii == 100 {
 					statusWrite("Are you sure you want to delete? Y/N")
-					ascii, _, _ = GetChar()
+					ascii, _, _ = d.GetChar()
 					if ascii == 121 || ascii == 89 {
 						onList := false
 						for i := range childrens {
@@ -304,11 +305,11 @@ func Loop(childrens Files, parent File) {
 						}
 					}
 				}
-				childrens, parent = ListFiles(currentDir)
+				childrens = d.ListDir(currentDir)
 				number--
 			} else if ascii == 120 { //	------------------------------------	x (archive)
 				statusWrite("Press \"x\" to EXTRACT or \"a\" to ARCHIVE")
-				ascii, _, _ = GetChar()
+				ascii, _, _ = d.GetChar()
 				if ascii == 120 {
 					err := archiver.Unarchive(childrens[number].Path, childrens[number].Path+"_E")
 					if err != nil {
@@ -330,7 +331,7 @@ func Loop(childrens Files, parent File) {
 						name = childrens[number].Name
 					}
 					statusWrite("Press \"t\" to TAR, \"z\" to ZIP or \"g\" to TGZ")
-					ascii, _, _ = GetChar()
+					ascii, _, _ = d.GetChar()
 					if ascii == 116 {
 						err := archiver.Archive(archSlice, name+".tar")
 						if err != nil {
@@ -348,46 +349,30 @@ func Loop(childrens Files, parent File) {
 						}
 					}
 				}
-				childrens, parent = ListFiles(currentDir)
+				childrens = d.ListDir(currentDir)
 			} else if ascii == 121 && len(drawlist) > 0 { //	------------	y (yank copy)
 				statusWrite("Press \"y\" to YANK selected")
-				ascii, _, _ = GetChar()
+				ascii, _, _ = d.GetChar()
 				if ascii == 121 {
-					copySlice = Files{}
-					onList := false
-					for i, file := range childrens {
-						if childrens[i].Other.Selected {
-							copySlice = append(copySlice, file)
-							onList = true
-						}
-					}
-					if !onList {
-						copySlice = append(copySlice, drawlist[number])
-					}
-					childrens, parent = ListFiles(currentDir)
+					copySlice = d.Select(childrens, number)
+					childrens = d.ListDir(currentDir)
 				}
 			} else if ascii == 112 { //	------------------------------------	p (paste copy)
 				if len(copySlice) > 0 {
 					statusWrite("Press \"p\" to PASTE or \"m\" to MOVE")
-					ascii, _, _ = GetChar()
+					ascii, _, _ = d.GetChar()
 					if ascii == 112 {
-						for _, el := range copySlice {
-							Copy(el.Path, currentDir.Path)
-						}
+						d.Copy(copySlice, currentDir.Path)
 					} else if ascii == 109 {
-						for _, el := range copySlice {
-							Copy(el.Path, currentDir.Path)
-							os.RemoveAll(el.Path)
-							copySlice = Files{}
-						}
+						d.Move(copySlice, currentDir.Path)
 					}
-					childrens, parent = ListFiles(currentDir)
+					childrens = d.ListDir(currentDir)
 				}
 			} else if ascii == 114 && len(drawlist) > 0 { //----------------	r (rename)
 				statusWrite("Press \"r\" to RENAME selected")
-				ascii, _, _ = GetChar()
+				ascii, _, _ = d.GetChar()
 				if ascii == 114 {
-					var onList Files
+					var onList d.Files
 					for i := range childrens {
 						if childrens[i].Other.Selected {
 							onList = append(onList, childrens[i])
@@ -398,44 +383,44 @@ func Loop(childrens Files, parent File) {
 						for _, file := range onList {
 							editBulk.Write([]byte(file.Name + "\n"))
 						}
-						Edit(bulkFile)
+						d.Edit(bulkFile)
 						fmt.Print("\033[?25l")
 						newNames, _ := ReadLines(bulkFile)
 						for i, name := range newNames {
-							os.Rename(onList[i].Path, onList[i].Other.ParentPath+name)
+							os.Rename(onList[i].Path, onList[i].ParentPath+name)
 						}
 					} else {
 						newname := statusRead("Rename "+childrens[number].Name+" to", childrens[number].Name)
-						os.Rename(childrens[number].Path, childrens[number].Other.ParentPath+"/"+newname)
+						os.Rename(childrens[number].Path, childrens[number].ParentPath+"/"+newname)
 					}
-					childrens, parent = ListFiles(currentDir)
+					childrens = d.ListDir(currentDir)
 				}
 			} else if ascii == 110 { //	-------------------------------------	n (new)
 				statusWrite("Press \"f\" to make new FILE, \"d\" to make new FOLDER or \"t\" to select from TEMPLATES")
-				ascii, _, _ = GetChar()
+				ascii, _, _ = d.GetChar()
 				switch ascii {
 				case 110, 102:
 					name := statusRead("Enter filename", "file")
 					newFileName := currentDir.Path + "/" + name
-					newFileName = IfExists(newFileName)
+					newFileName = d.RenameExist(newFileName)
 					newFile, _ := os.Create(newFileName)
 					newFile.Close()
 				case 100:
 					name := statusRead("Enter dirname", "dir")
 					newFolderName := currentDir.Path + "/" + name
-					newFolderName = IfExists(newFolderName)
+					newFolderName = d.RenameExist(newFolderName)
 					os.MkdirAll(newFolderName, 0777)
 				case 116:
 					number = 0
 					scroll = 0
-					childrens, parent = ListFiles(tempDir)
+					childrens = d.ListDir(tempDir)
 					for {
 						termWidth, termHeight = term.Size()
 						drawlist := prepList(childrens)
 						SelectInList(number, scroll, drawlist, childrens, tempDir)
-						ascii, keycode, _ := GetChar()
+						ascii, keycode, _ := d.GetChar()
 						if ascii == 13 { // ----	ENTER
-							Copy(drawlist[number].Path, currentDir.Path)
+							d.Copy([]string{drawlist[number].Path}, currentDir.Path)
 							break
 						} else if keycode == 38 || ascii == 107 { //up
 							if backward {
@@ -474,7 +459,7 @@ func Loop(childrens Files, parent File) {
 						}
 					}
 				}
-				childrens, parent = ListFiles(currentDir)
+				childrens = d.ListDir(currentDir)
 			} else if ascii == 118 { //	-------------------------------------	v (select)
 				drawlist[number].Other.Selected = !drawlist[number].Other.Selected
 				if foreward {
@@ -493,15 +478,15 @@ func Loop(childrens Files, parent File) {
 				continue
 			} else if ascii == 115 { // ------------------------------------	s (script)
 				statusWrite("Press any key to launch script")
-				ascii, _, _ = GetChar()
+				ascii, _, _ = d.GetChar()
 				if ascii == 32 {
 					statusWrite("Press any key to assign new script")
-					ascii, _, _ = GetChar()
+					ascii, _, _ = d.GetChar()
 					_, exists := readScripts(ascii)
 					if exists && ascii != 32 {
 						runeString := string(rune(ascii))
 						statusWrite("Script exists, press \"" + runeString + "\" again to owerwrite")
-						ascii2, _, _ := GetChar()
+						ascii2, _, _ := d.GetChar()
 						if ascii2 == ascii {
 							script := statusRead("Write script", "file @")
 							deleteScript(ascii)
@@ -509,7 +494,7 @@ func Loop(childrens Files, parent File) {
 							saveScript()
 						}
 					} else if ascii == 32 {
-						Edit(scriptsFile)
+						d.Edit(scriptsFile)
 						fmt.Print("\033[?25l")
 					} else {
 						script := statusRead("Write script", "file @")
@@ -528,27 +513,27 @@ func Loop(childrens Files, parent File) {
 				name := statusRead("Go-To:", "")
 				matched := matchFrecency(name)
 				if _, err := os.Stat(matched); err == nil {
-					currentDir, _ = MakeFile(matched)
-					childrens, parent = ListFiles(currentDir)
+					currentDir, _ = d.MakeFile(matched)
+					childrens = d.ListDir(currentDir)
 				}
 			} else if ascii == 98 { // -------------------------------------	b (bookmarks)
 				statusWrite("Press any key to go to the mark")
-				ascii, _, _ = GetChar()
+				ascii, _, _ = d.GetChar()
 				if ascii == 32 {
 					statusWrite("Press any key to mark this directory")
-					ascii, _, _ = GetChar()
+					ascii, _, _ = d.GetChar()
 					_, exists := readBookmarks(ascii)
 					if exists && ascii != 32 {
 						runeString := string(rune(ascii))
 						statusWrite("Mark exists, press \"" + runeString + "\" again to owerwrite")
-						ascii2, _, _ := GetChar()
+						ascii2, _, _ := d.GetChar()
 						if ascii2 == ascii {
 							deleteBookmark(ascii)
 							addBookmark(ascii, currentDir.Path)
 							saveBookmarks()
 						}
 					} else if ascii == 32 {
-						Edit(markFile)
+						d.Edit(markFile)
 						fmt.Print("\033[?25l")
 					} else {
 						addBookmark(ascii, currentDir.Path)
@@ -557,17 +542,17 @@ func Loop(childrens Files, parent File) {
 				} else {
 					bookdir, exists := readBookmarks(ascii)
 					if exists {
-						currentDir, _ = MakeFile(bookdir)
-						childrens, parent = ListFiles(currentDir)
+						currentDir, _ = d.MakeFile(bookdir)
+						childrens = d.ListDir(currentDir)
 					}
 				}
 			} else if ascii == 126 { //	------------------------------------	~
-				childrens, parent = ListFiles(homeDir)
+				childrens = d.ListDir(homeDir)
 			} else if ascii == 119 { //	------------------------------------	w (warps)
 				statusWrite("Pres SPACE then \"0\" to \"9\" keys to save warp")
-				ascii, _, _ = GetChar()
+				ascii, _, _ = d.GetChar()
 				if ascii == 32 {
-					ascii, _, _ = GetChar()
+					ascii, _, _ = d.GetChar()
 					switch ascii {
 					case 48:
 						dir0 = currentDir
@@ -595,71 +580,71 @@ func Loop(childrens Files, parent File) {
 				switch ascii {
 				case 48:
 					if dir0.Path != "" {
-						currentDir, _ = MakeFile(dir0.Path)
-						childrens, parent = ListFiles(currentDir)
+						currentDir, _ = d.MakeFile(dir0.Path)
+						childrens = d.ListDir(currentDir)
 					} else {
 						continue
 					}
 				case 49:
 					if dir1.Path != "" {
-						currentDir, _ = MakeFile(dir1.Path)
-						childrens, parent = ListFiles(currentDir)
+						currentDir, _ = d.MakeFile(dir1.Path)
+						childrens = d.ListDir(currentDir)
 					} else {
 						continue
 					}
 				case 50:
 					if dir2.Path != "" {
-						currentDir, _ = MakeFile(dir2.Path)
-						childrens, parent = ListFiles(currentDir)
+						currentDir, _ = d.MakeFile(dir2.Path)
+						childrens = d.ListDir(currentDir)
 					} else {
 						continue
 					}
 				case 51:
 					if dir3.Path != "" {
-						currentDir, _ = MakeFile(dir3.Path)
-						childrens, parent = ListFiles(currentDir)
+						currentDir, _ = d.MakeFile(dir3.Path)
+						childrens = d.ListDir(currentDir)
 					} else {
 						continue
 					}
 				case 52:
 					if dir4.Path != "" {
-						currentDir, _ = MakeFile(dir4.Path)
-						childrens, parent = ListFiles(currentDir)
+						currentDir, _ = d.MakeFile(dir4.Path)
+						childrens = d.ListDir(currentDir)
 					} else {
 						continue
 					}
 				case 53:
 					if dir5.Path != "" {
-						currentDir, _ = MakeFile(dir5.Path)
-						childrens, parent = ListFiles(currentDir)
+						currentDir, _ = d.MakeFile(dir5.Path)
+						childrens = d.ListDir(currentDir)
 					} else {
 						continue
 					}
 				case 54:
 					if dir6.Path != "" {
-						currentDir, _ = MakeFile(dir6.Path)
-						childrens, parent = ListFiles(currentDir)
+						currentDir, _ = d.MakeFile(dir6.Path)
+						childrens = d.ListDir(currentDir)
 					} else {
 						continue
 					}
 				case 55:
 					if dir7.Path != "" {
-						currentDir, _ = MakeFile(dir7.Path)
-						childrens, parent = ListFiles(currentDir)
+						currentDir, _ = d.MakeFile(dir7.Path)
+						childrens = d.ListDir(currentDir)
 					} else {
 						continue
 					}
 				case 56:
 					if dir8.Path != "" {
-						currentDir, _ = MakeFile(dir8.Path)
-						childrens, parent = ListFiles(currentDir)
+						currentDir, _ = d.MakeFile(dir8.Path)
+						childrens = d.ListDir(currentDir)
 					} else {
 						continue
 					}
 				case 57:
 					if dir9.Path != "" {
-						currentDir, _ = MakeFile(dir9.Path)
-						childrens, parent = ListFiles(currentDir)
+						currentDir, _ = d.MakeFile(dir9.Path)
+						childrens = d.ListDir(currentDir)
 					} else {
 						continue
 					}

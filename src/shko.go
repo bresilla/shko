@@ -22,7 +22,7 @@ var (
 	sideSpace             = 0
 	startDir, _           = MakeFile(os.Getenv("PWD"))
 	currentDir            = startDir
-	childrens, parent     = ListFiles(currentDir)
+	childrens             = ListDir(currentDir)
 	drawlist              = childrens
 	changeDir             = true
 	number                = 0
@@ -46,7 +46,7 @@ var (
 	swichero, _           = loadFromFile(tabFile)
 	scripts               = map[string]string{}
 	bookmark              = map[string]string{}
-	copySlice             Files
+	copySlice             []string
 	showIcons             = true
 	showChildren          = false
 	showSize              = false
@@ -98,15 +98,30 @@ func check(e error) {
 	}
 }
 
+func CreateDir(dirName string) bool {
+	src, err := os.Stat(dirName)
+	if os.IsNotExist(err) {
+		errDir := os.MkdirAll(dirName, 0755)
+		if errDir != nil {
+			panic(err)
+		}
+		return true
+	}
+	if src.Mode().IsRegular() {
+		return false
+	}
+	return false
+}
+
 func Main() {
-	CreateDirectory(appfolder)
+	CreateDir(appfolder)
 	createTemplates(tempfolder)
 	initializeBookmarks()
 	initializeScriptlist()
 
 	fmt.Print("\033[?25l")
 	Flags()
-	Loop(childrens, parent)
+	Loop(childrens)
 	fmt.Print("\033[?25h")
 
 	manageTabDir(currentDir.Path)
