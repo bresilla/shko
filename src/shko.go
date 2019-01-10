@@ -22,7 +22,7 @@ var (
 	sideSpace             = 0
 	startDir, _           = MakeFile(os.Getenv("PWD"))
 	currentDir            = startDir
-	childrens             = ListDir(currentDir)
+	childrens             = currentDir.ListDir()
 	drawlist              = childrens
 	changeDir             = true
 	number                = 0
@@ -46,7 +46,7 @@ var (
 	swichero, _           = loadFromFile(tabFile)
 	scripts               = map[string]string{}
 	bookmark              = map[string]string{}
-	copySlice             []string
+	copySlice             Files
 	showIcons             = true
 	showChildren          = false
 	showSize              = false
