@@ -158,7 +158,7 @@ func Loop(childrens d.Files) {
 				addToMemory(oldDir, currentDir)
 				number, scroll = findInMemory(currentDir, childrens)
 			} else {
-				d.Edit(drawlist[number].Path)
+				currentDir.Select(childrens, number).Edit()
 				fmt.Print("\033[?25l")
 			}
 			backward = false
@@ -287,10 +287,10 @@ func Loop(childrens d.Files) {
 				ascii, _, _ = d.GetChar()
 				switch ascii {
 				case 111:
-					d.Start(drawlist[number].Path)
+					currentDir.Select(childrens, number).Start()
 				case 119:
 					toOpenWith := statusRead("Open with", "nvim")
-					d.StartWith(drawlist[number].Path, toOpenWith)
+					currentDir.Select(childrens, number).StartWith(toOpenWith)
 				}
 			} else if ascii == 100 && len(drawlist) > 0 { // ---------------	d (delete)
 				statusWrite("Press \"d\" to DELETE selected")
@@ -381,6 +381,7 @@ func Loop(childrens d.Files) {
 							editBulk.Write([]byte(file.Name + "\n"))
 						}
 						d.Edit(bulkFile)
+						currentDir.Select(childrens, number).Edit()
 						fmt.Print("\033[?25l")
 						newNames, _ := ReadLines(bulkFile)
 						for i, name := range newNames {
