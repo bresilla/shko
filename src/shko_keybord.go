@@ -380,7 +380,8 @@ func Loop(childrens d.Files) {
 						for _, file := range onList {
 							editBulk.Write([]byte(file.Name + "\n"))
 						}
-						d.Edit(bulkFile)
+						bulkEdit, _ := d.MakeFiles([]string{bulkFile})
+						bulkEdit.Edit()
 						currentDir.Select(childrens, number).Edit()
 						fmt.Print("\033[?25l")
 						newNames, _ := ReadLines(bulkFile)
@@ -392,7 +393,6 @@ func Loop(childrens d.Files) {
 						os.Rename(childrens[number].Path, childrens[number].ParentPath+"/"+newname)
 					}
 					childrens = currentDir.ListDir()
-
 				}
 			} else if ascii == 110 { //	-------------------------------------	n (new)
 				statusWrite("Press \"f\" to make new FILE, \"d\" to make new FOLDER or \"t\" to select from TEMPLATES")
@@ -488,7 +488,8 @@ func Loop(childrens d.Files) {
 							saveScript()
 						}
 					} else if ascii == 32 {
-						d.Edit(scriptsFile)
+						scriptFiles, _ := d.MakeFiles([]string{scriptsFile})
+						scriptFiles.Edit()
 						fmt.Print("\033[?25l")
 					} else {
 						script := statusRead("Write script", "file @")
@@ -527,7 +528,8 @@ func Loop(childrens d.Files) {
 							saveBookmarks()
 						}
 					} else if ascii == 32 {
-						d.Edit(markFile)
+						markFiles, _ := d.MakeFiles([]string{markFile})
+						markFiles.Edit()
 						fmt.Print("\033[?25l")
 					} else {
 						addBookmark(ascii, currentDir.Path)
