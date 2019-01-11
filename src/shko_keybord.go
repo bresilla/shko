@@ -376,8 +376,8 @@ func Loop(childrens d.Files) {
 						newname := statusRead("Rename "+childrens[number].Name+" to", childrens[number].Name)
 						selected.Rename(newname)
 					}
-					childrens = currentDir.ListDir()
 				}
+				childrens = currentDir.ListDir()
 			} else if ascii == 110 { //	-------------------------------------	n (new)
 				statusWrite("Press \"f\" to make new FILE, \"d\" to make new FOLDER or \"t\" to select from TEMPLATES")
 				ascii, _, _ = d.GetChar()
@@ -398,7 +398,8 @@ func Loop(childrens d.Files) {
 						SelectInList(number, scroll, drawlist, childrens, tempDir)
 						ascii, keycode, _ := d.GetChar()
 						if ascii == 13 { // ----	ENTER
-							//currentDir.Copy(Files{drawlist[number]})
+							newFile, _ := d.MakeFiles([]string{drawlist[number].Path})
+							newFile.Paste(currentDir)
 							break
 						} else if keycode == 38 || ascii == 107 { //up
 							if backward {
