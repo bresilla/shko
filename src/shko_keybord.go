@@ -369,28 +369,12 @@ func Loop(childrens d.Files) {
 				statusWrite("Press \"r\" to RENAME selected")
 				ascii, _, _ = d.GetChar()
 				if ascii == 114 {
-					var onList d.Files
-					for i := range childrens {
-						if childrens[i].Other.Selected {
-							onList = append(onList, childrens[i])
-						}
-					}
-					if len(onList) > 0 {
-						editBulk, _ := os.Create(bulkFile)
-						for _, file := range onList {
-							editBulk.Write([]byte(file.Name + "\n"))
-						}
-						bulkEdit, _ := d.MakeFiles([]string{bulkFile})
-						bulkEdit.Edit()
-						currentDir.Select(childrens, number).Edit()
-						fmt.Print("\033[?25l")
-						newNames, _ := ReadLines(bulkFile)
-						for i, name := range newNames {
-							os.Rename(onList[i].Path, onList[i].ParentPath+name)
-						}
+					selected := currentDir.Select(childrens, number)
+					if len(selected) > 1 {
+						selected.Rename()
 					} else {
 						newname := statusRead("Rename "+childrens[number].Name+" to", childrens[number].Name)
-						os.Rename(childrens[number].Path, childrens[number].ParentPath+"/"+newname)
+						selected.Rename(newname)
 					}
 					childrens = currentDir.ListDir()
 				}
