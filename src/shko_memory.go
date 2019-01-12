@@ -10,20 +10,20 @@ import (
 	"strings"
 	"time"
 
-	. "./dirk"
+	"github.com/bresilla/shko/dirk"
 )
 
 var (
 	frequency = 1
 )
 
-func tabDir(tabfile string) (file File) {
+func tabDir(tabfile string) (file dirk.File) {
 	file = homeDir
 	if len(swichero) < 2 || len(swichero) > 2 {
 		saveToFile([]string{homeDir.Path, homeDir.Path}, tabfile)
 	} else {
 		if _, err := os.Stat(swichero[0]); err == nil {
-			file, _ = MakeFile(swichero[0])
+			file, _ = dirk.MakeFile(swichero[0])
 		}
 	}
 	return
@@ -51,7 +51,7 @@ func loadFromFile(file string) (array []string, err error) {
 	return
 }
 
-func addToMemory(parent, child File) {
+func addToMemory(parent, child dirk.File) {
 	for i, el := range memory {
 		arr := strings.Split(el, " > ")
 		if arr[0] == parent.Path {
@@ -62,11 +62,11 @@ func addToMemory(parent, child File) {
 	memory = append(memory, parent.Path+" > "+child.Path)
 }
 
-func findInMemory(parent File, child Files) (number, scroll int) {
+func findInMemory(parent dirk.File, child dirk.Files) (number, scroll int) {
 	for _, el := range memory {
 		arr := strings.Split(el, " > ")
 		if arr[0] == parent.Path {
-			file, _ := MakeFile(arr[1])
+			file, _ := dirk.MakeFile(arr[1])
 			number, scroll = findFile(child, file)
 			break
 		} else {
@@ -77,7 +77,7 @@ func findInMemory(parent File, child Files) (number, scroll int) {
 	return
 }
 
-func findFile(list Files, actual File) (number, scroll int) {
+func findFile(list dirk.Files, actual dirk.File) (number, scroll int) {
 	for i, el := range list {
 		if el.Name == actual.Name {
 			if i < termHeight/2 {
@@ -117,10 +117,10 @@ func findList(list []string, actual string) (number, scroll int) {
 	return
 }
 
-func addToFrecency(parent File) {
+func addToFrecency(parent dirk.File) {
 	for i, el := range frecency {
 		arr := strings.Split(el, " > ")
-		if len(arr) == 3 {
+		if len(arr) == 4 {
 			if arr[2] == parent.Path {
 				frequency, _ = strconv.Atoi(arr[0])
 				frecency = frecency[:i+copy(frecency[i:], frecency[i+1:])]
@@ -128,7 +128,8 @@ func addToFrecency(parent File) {
 			}
 		}
 	}
-	frecency = append(frecency, strconv.Itoa(frequency)+" > "+time.Now().String()+" > "+parent.Path)
+	timecal := int(calcFrecency(frequency, time.Now()))
+	frecency = append(frecency, strconv.Itoa(frequency)+" > "+time.Now().String()+" > "+parent.Path+" > "+strconv.Itoa(timecal))
 }
 
 func calcFrecency(hits int, attime time.Time) (frecency float64) {
@@ -147,7 +148,6 @@ func matchFrecency(toMatch string) (matchedFile string) {
 			matchedList = append(matchedList, el)
 		}
 	}
-
 	if len(matchedList) > 0 {
 		var bestScore float64
 		for _, el := range matchedList {

@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	d "./dirk"
+	colorz "github.com/bresilla/shko/colorz"
+	"github.com/bresilla/shko/dirk"
+	keyboard "github.com/bresilla/shko/keyboard"
 	"github.com/mholt/archiver"
 	term "github.com/tj/go/term"
 )
@@ -26,7 +28,7 @@ func entryConditions() {
 		showSize = false
 		showDate = false
 		showMode = false
-		d.DiskUse = false
+		dirk.DiskUse = false
 		statBar = false
 		topBar = false
 		showMime = false
@@ -35,7 +37,7 @@ func entryConditions() {
 	backward = false
 }
 
-func prepList(childrens d.Files) (drawlist d.Files) {
+func prepList(childrens dirk.Files) (drawlist dirk.Files) {
 	entryConditions()
 	drawlist = childrens
 	termHeight = termHeight - topSpace
@@ -73,17 +75,17 @@ func prepList(childrens d.Files) (drawlist d.Files) {
 	return
 }
 
-func fuzzyFind(childrens d.Files, currentDir d.File) (matched d.Files) {
+func fuzzyFind(childrens dirk.Files, currentDir dirk.File) (matched dirk.Files) {
 	matched = childrens
 	pattern := ""
-	results := d.FindFrom(pattern, childrens)
+	results := dirk.FindFrom(pattern, childrens)
 	for {
 		termWidth, termHeight = term.Size()
 		drawlist = prepList(matched)
 		SelectInList(number, scroll, drawlist, matched, currentDir)
 		statusWrite("Search for:")
 		fmt.Print(pattern)
-		ascii, keycode, _ := d.GetChar()
+		ascii, keycode, _ := keyboard.GetChar()
 		runeString := string(rune(ascii))
 		if ascii > 33 && ascii < 127 {
 			pattern += runeString
@@ -100,8 +102,8 @@ func fuzzyFind(childrens d.Files, currentDir d.File) (matched d.Files) {
 		if pattern == "" {
 			matched = childrens
 		} else {
-			matched = d.Files{}
-			results = d.FindFrom(pattern, childrens)
+			matched = dirk.Files{}
+			results = dirk.FindFrom(pattern, childrens)
 			for _, r := range results {
 				matched = append(matched, childrens[r.Index])
 			}
@@ -112,12 +114,12 @@ func fuzzyFind(childrens d.Files, currentDir d.File) (matched d.Files) {
 	return
 }
 
-func Loop(childrens d.Files) {
+func Loop(childrens dirk.Files) {
 	for {
 		termWidth, termHeight = term.Size()
 		drawlist := prepList(childrens)
 		SelectInList(number, scroll, drawlist, childrens, currentDir)
-		ascii, keycode, _ := d.GetChar()
+		ascii, keycode, _ := keyboard.GetChar()
 		if ascii == 47 { // ------------------------------------------------	/
 			childrens = fuzzyFind(childrens, currentDir)
 		} else if keycode == 38 || ascii == 107 { // -----------------------	up
@@ -150,9 +152,9 @@ func Loop(childrens d.Files) {
 				}
 			}
 			continue
-		} else if keycode == 37 && !d.Recurrent || ascii == 104 { // ---------	left
+		} else if keycode == 37 && !dirk.Recurrent || ascii == 104 { // ---------	left
 			oldDir := currentDir
-			currentDir, _ = d.MakeFile(currentDir.ParentPath)
+			currentDir, _ = dirk.MakeFile(currentDir.ParentPath)
 			childrens = currentDir.ListDir()
 			number, scroll = findFile(childrens, oldDir)
 			backward = false
@@ -164,7 +166,7 @@ func Loop(childrens d.Files) {
 			}
 			if drawlist[number].IsDir {
 				oldDir := currentDir
-				currentDir, _ = d.MakeFile(drawlist[number].Path)
+				currentDir, _ = dirk.MakeFile(drawlist[number].Path)
 				childrens = currentDir.ListDir()
 				addToMemory(oldDir, currentDir)
 				number, scroll = findInMemory(currentDir, childrens)
@@ -189,8 +191,8 @@ func Loop(childrens d.Files) {
 		} else {
 			if ascii == 32 { // --------------------------------------------	SPACE
 				term.MoveTo(0, termHeight+1)
-				Print(d.HighLight, d.Black, d.White, "leader")
-				ascii, _, _ := d.GetChar()
+				Print(colorz.HighLight, colorz.Black, colorz.White, "leader")
+				ascii, _, _ := keyboard.GetChar()
 				switch ascii {
 				case 110: //	--------------------------------------------	n
 					showChildren = !showChildren
@@ -214,7 +216,7 @@ func Loop(childrens d.Files) {
 				case 99: //	------------------------------------------------	c
 					center = !center
 				case 100: //	--------------------------------------------	z
-					d.DiskUse = true
+					dirk.DiskUse = true
 					showSize = true
 					topBar = true
 					statBar = true
@@ -225,30 +227,30 @@ func Loop(childrens d.Files) {
 					center = false
 				case 122: //	--------------------------------------------	z
 					center = false
-					d.DiskUse = !d.DiskUse
+					dirk.DiskUse = !dirk.DiskUse
 				case 105: //	--------------------------------------------	i
 					showIcons = !showIcons
 				default:
 					term.MoveTo(8, termHeight+1)
 					toPrint := "ascii: " + strconv.Itoa(ascii)
-					Print(d.HighLight, d.Black, d.White, toPrint)
-					d.GetChar()
+					Print(colorz.HighLight, colorz.Black, colorz.White, toPrint)
+					keyboard.GetChar()
 				}
 				continue
 			} else if ascii == 45 { //	-------------------------------------	- (recurr)
-				d.Recurrent = !d.Recurrent
-				d.IncFolder = !d.IncFolder
-				d.IncHidden = false
-				d.DiskUse = false
+				dirk.Recurrent = !dirk.Recurrent
+				dirk.IncFolder = !dirk.IncFolder
+				dirk.IncHidden = false
+				dirk.DiskUse = false
 				childrens = currentDir.ListDir()
-				if d.Recurrent {
+				if dirk.Recurrent {
 					for i := range childrens {
 						for j := range childrens[i].Ancestors {
 							if len(childrens[i].Ancestors[j]) > termWidth/4 {
 								childrens[i].Ancestors[j] = childrens[i].Ancestors[j][:termWidth/4] + "..."
 							}
 						}
-						parent, _ := d.MakeFile(currentDir.ParentPath)
+						parent, _ := dirk.MakeFile(currentDir.ParentPath)
 						childrens[i].Ancestors = childrens[i].Ancestors[parent.Other.Deep+1:]
 						prepName := strings.Join(childrens[i].Ancestors, "/")
 						childrens[i].Name = prepName
@@ -257,19 +259,19 @@ func Loop(childrens d.Files) {
 				number = 0
 				scroll = 0
 			} else if ascii == 44 { //	-------------------------------------	,
-				d.IncFiles = !d.IncFiles
+				dirk.IncFiles = !dirk.IncFiles
 				childrens = currentDir.ListDir()
 			} else if ascii == 46 { //	-------------------------------------	.
-				d.IncHidden = !d.IncHidden
+				dirk.IncHidden = !dirk.IncHidden
 				childrens = currentDir.ListDir()
 			} else if ascii == 35 { //	-------------------------------------	#
 				wrap = !wrap
 			} else if ascii == 9 { //	-------------------------------------	TAB
 				if dirASwitch {
 					if len(childrens) > 0 {
-						dirA, _ = d.MakeFile(childrens[0].ParentPath)
+						dirA, _ = dirk.MakeFile(childrens[0].ParentPath)
 					} else {
-						dirA, _ = d.MakeFile(currentDir.ParentPath)
+						dirA, _ = dirk.MakeFile(currentDir.ParentPath)
 					}
 					currentDir = dirB
 					childrens = dirB.ListDir()
@@ -279,9 +281,9 @@ func Loop(childrens d.Files) {
 					showIcons = !showIcons
 				} else {
 					if len(childrens) > 0 {
-						dirB, _ = d.MakeFile(childrens[0].ParentPath)
+						dirB, _ = dirk.MakeFile(childrens[0].ParentPath)
 					} else {
-						dirB, _ = d.MakeFile(currentDir.ParentPath)
+						dirB, _ = dirk.MakeFile(currentDir.ParentPath)
 					}
 					currentDir = dirA
 					childrens = dirA.ListDir()
@@ -295,7 +297,7 @@ func Loop(childrens d.Files) {
 				childrens = currentDir.ListDir()
 			} else if ascii == 111 { // ------------------------------------	o (open)
 				statusWrite("Press \"o\" to OPEN or \"w\" to OPEN WITH...")
-				ascii, _, _ = d.GetChar()
+				ascii, _, _ = keyboard.GetChar()
 				switch ascii {
 				case 111:
 					currentDir.Select(childrens, number).Start()
@@ -305,10 +307,10 @@ func Loop(childrens d.Files) {
 				}
 			} else if ascii == 100 && len(drawlist) > 0 { // ---------------	d (delete)
 				statusWrite("Press \"d\" to DELETE selected")
-				ascii, _, _ = d.GetChar()
+				ascii, _, _ = keyboard.GetChar()
 				if ascii == 100 {
 					statusWrite("Are you sure you want to delete? Y/N")
-					ascii, _, _ = d.GetChar()
+					ascii, _, _ = keyboard.GetChar()
 					if ascii == 121 || ascii == 89 {
 						currentDir.Select(childrens, number).Delete()
 					}
@@ -317,7 +319,7 @@ func Loop(childrens d.Files) {
 				number--
 			} else if ascii == 120 { //	------------------------------------	x (archive)
 				statusWrite("Press \"x\" to EXTRACT or \"a\" to ARCHIVE")
-				ascii, _, _ = d.GetChar()
+				ascii, _, _ = keyboard.GetChar()
 				if ascii == 120 {
 					err := archiver.Unarchive(childrens[number].Path, childrens[number].Path+"_E")
 					if err != nil {
@@ -339,7 +341,7 @@ func Loop(childrens d.Files) {
 						name = childrens[number].Name
 					}
 					statusWrite("Press \"t\" to TAR, \"z\" to ZIP or \"g\" to TGZ")
-					ascii, _, _ = d.GetChar()
+					ascii, _, _ = keyboard.GetChar()
 					if ascii == 116 {
 						err := archiver.Archive(archSlice, name+".tar")
 						if err != nil {
@@ -360,7 +362,7 @@ func Loop(childrens d.Files) {
 				childrens = currentDir.ListDir()
 			} else if ascii == 121 && len(drawlist) > 0 { //	------------	y (yank copy)
 				statusWrite("Press \"y\" to YANK selected")
-				ascii, _, _ = d.GetChar()
+				ascii, _, _ = keyboard.GetChar()
 				if ascii == 121 {
 					copySlice = currentDir.Select(childrens, number)
 					childrens = currentDir.ListDir()
@@ -368,7 +370,7 @@ func Loop(childrens d.Files) {
 			} else if ascii == 112 { //	------------------------------------	p (paste copy)
 				if len(copySlice) > 0 {
 					statusWrite("Press \"p\" to PASTE or \"m\" to MOVE")
-					ascii, _, _ = d.GetChar()
+					ascii, _, _ = keyboard.GetChar()
 					if ascii == 112 {
 						copySlice.Paste(currentDir)
 					} else if ascii == 109 {
@@ -378,7 +380,7 @@ func Loop(childrens d.Files) {
 				}
 			} else if ascii == 114 && len(drawlist) > 0 { //----------------	r (rename)
 				statusWrite("Press \"r\" to RENAME selected")
-				ascii, _, _ = d.GetChar()
+				ascii, _, _ = keyboard.GetChar()
 				if ascii == 114 {
 					selected := currentDir.Select(childrens, number)
 					if len(selected) > 1 {
@@ -391,7 +393,7 @@ func Loop(childrens d.Files) {
 				childrens = currentDir.ListDir()
 			} else if ascii == 110 { //	-------------------------------------	n (new)
 				statusWrite("Press \"f\" to make new FILE, \"d\" to make new FOLDER or \"t\" to select from TEMPLATES")
-				ascii, _, _ = d.GetChar()
+				ascii, _, _ = keyboard.GetChar()
 				switch ascii {
 				case 110, 102:
 					name := statusRead("Enter filename", "file")
@@ -407,9 +409,9 @@ func Loop(childrens d.Files) {
 						termWidth, termHeight = term.Size()
 						drawlist := prepList(childrens)
 						SelectInList(number, scroll, drawlist, childrens, tempDir)
-						ascii, keycode, _ := d.GetChar()
+						ascii, keycode, _ := keyboard.GetChar()
 						if ascii == 13 { // ----	ENTER
-							newFile, _ := d.MakeFiles([]string{drawlist[number].Path})
+							newFile, _ := dirk.MakeFiles([]string{drawlist[number].Path})
 							newFile.Paste(currentDir)
 							break
 						} else if keycode == 38 || ascii == 107 { //up
@@ -468,15 +470,15 @@ func Loop(childrens d.Files) {
 				continue
 			} else if ascii == 115 { // ------------------------------------	s (script)
 				statusWrite("Press any key to launch script")
-				ascii, _, _ = d.GetChar()
+				ascii, _, _ = keyboard.GetChar()
 				if ascii == 32 {
 					statusWrite("Press any key to assign new script")
-					ascii, _, _ = d.GetChar()
+					ascii, _, _ = keyboard.GetChar()
 					_, exists := readScripts(ascii)
 					if exists && ascii != 32 {
 						runeString := string(rune(ascii))
 						statusWrite("Script exists, press \"" + runeString + "\" again to owerwrite")
-						ascii2, _, _ := d.GetChar()
+						ascii2, _, _ := keyboard.GetChar()
 						if ascii2 == ascii {
 							script := statusRead("Write script", "file @")
 							deleteScript(ascii)
@@ -484,7 +486,7 @@ func Loop(childrens d.Files) {
 							saveScript()
 						}
 					} else if ascii == 32 {
-						scriptFiles, _ := d.MakeFiles([]string{scriptsFile})
+						scriptFiles, _ := dirk.MakeFiles([]string{scriptsFile})
 						scriptFiles.Edit()
 						fmt.Print("\033[?25l")
 					} else {
@@ -501,30 +503,30 @@ func Loop(childrens d.Files) {
 					}
 				}
 			} else if ascii == 103 { // ------------------------------------	g (go-to)
-				name := statusRead("Go-To:", "")
+				name := statusRead("Go-To", "")
 				matched := matchFrecency(name)
 				if _, err := os.Stat(matched); err == nil {
-					currentDir, _ = d.MakeFile(matched)
+					currentDir, _ = dirk.MakeFile(matched)
 					childrens = currentDir.ListDir()
 				}
 			} else if ascii == 98 { // -------------------------------------	b (bookmarks)
 				statusWrite("Press any key to go to the mark")
-				ascii, _, _ = d.GetChar()
+				ascii, _, _ = keyboard.GetChar()
 				if ascii == 32 {
 					statusWrite("Press any key to mark this directory")
-					ascii, _, _ = d.GetChar()
+					ascii, _, _ = keyboard.GetChar()
 					_, exists := readBookmarks(ascii)
 					if exists && ascii != 32 {
 						runeString := string(rune(ascii))
 						statusWrite("Mark exists, press \"" + runeString + "\" again to owerwrite")
-						ascii2, _, _ := d.GetChar()
+						ascii2, _, _ := keyboard.GetChar()
 						if ascii2 == ascii {
 							deleteBookmark(ascii)
 							addBookmark(ascii, currentDir.Path)
 							saveBookmarks()
 						}
 					} else if ascii == 32 {
-						markFiles, _ := d.MakeFiles([]string{markFile})
+						markFiles, _ := dirk.MakeFiles([]string{markFile})
 						markFiles.Edit()
 						fmt.Print("\033[?25l")
 					} else {
@@ -534,7 +536,7 @@ func Loop(childrens d.Files) {
 				} else {
 					bookdir, exists := readBookmarks(ascii)
 					if exists {
-						currentDir, _ = d.MakeFile(bookdir)
+						currentDir, _ = dirk.MakeFile(bookdir)
 						childrens = currentDir.ListDir()
 					}
 				}
@@ -542,9 +544,9 @@ func Loop(childrens d.Files) {
 				childrens = homeDir.ListDir()
 			} else if ascii == 119 { //	------------------------------------	w (warps)
 				statusWrite("Pres SPACE then \"0\" to \"9\" keys to save warp")
-				ascii, _, _ = d.GetChar()
+				ascii, _, _ = keyboard.GetChar()
 				if ascii == 32 {
-					ascii, _, _ = d.GetChar()
+					ascii, _, _ = keyboard.GetChar()
 					switch ascii {
 					case 48:
 						dir0 = currentDir
@@ -572,70 +574,70 @@ func Loop(childrens d.Files) {
 				switch ascii {
 				case 48:
 					if dir0.Path != "" {
-						currentDir, _ = d.MakeFile(dir0.Path)
+						currentDir, _ = dirk.MakeFile(dir0.Path)
 						childrens = currentDir.ListDir()
 					} else {
 						continue
 					}
 				case 49:
 					if dir1.Path != "" {
-						currentDir, _ = d.MakeFile(dir1.Path)
+						currentDir, _ = dirk.MakeFile(dir1.Path)
 						childrens = currentDir.ListDir()
 					} else {
 						continue
 					}
 				case 50:
 					if dir2.Path != "" {
-						currentDir, _ = d.MakeFile(dir2.Path)
+						currentDir, _ = dirk.MakeFile(dir2.Path)
 						childrens = currentDir.ListDir()
 					} else {
 						continue
 					}
 				case 51:
 					if dir3.Path != "" {
-						currentDir, _ = d.MakeFile(dir3.Path)
+						currentDir, _ = dirk.MakeFile(dir3.Path)
 						childrens = currentDir.ListDir()
 					} else {
 						continue
 					}
 				case 52:
 					if dir4.Path != "" {
-						currentDir, _ = d.MakeFile(dir4.Path)
+						currentDir, _ = dirk.MakeFile(dir4.Path)
 						childrens = currentDir.ListDir()
 					} else {
 						continue
 					}
 				case 53:
 					if dir5.Path != "" {
-						currentDir, _ = d.MakeFile(dir5.Path)
+						currentDir, _ = dirk.MakeFile(dir5.Path)
 						childrens = currentDir.ListDir()
 					} else {
 						continue
 					}
 				case 54:
 					if dir6.Path != "" {
-						currentDir, _ = d.MakeFile(dir6.Path)
+						currentDir, _ = dirk.MakeFile(dir6.Path)
 						childrens = currentDir.ListDir()
 					} else {
 						continue
 					}
 				case 55:
 					if dir7.Path != "" {
-						currentDir, _ = d.MakeFile(dir7.Path)
+						currentDir, _ = dirk.MakeFile(dir7.Path)
 						childrens = currentDir.ListDir()
 					} else {
 						continue
 					}
 				case 56:
 					if dir8.Path != "" {
-						currentDir, _ = d.MakeFile(dir8.Path)
+						currentDir, _ = dirk.MakeFile(dir8.Path)
 						childrens = currentDir.ListDir()
 					} else {
 						continue
 					}
 				case 57:
 					if dir9.Path != "" {
-						currentDir, _ = d.MakeFile(dir9.Path)
+						currentDir, _ = dirk.MakeFile(dir9.Path)
 						childrens = currentDir.ListDir()
 					} else {
 						continue

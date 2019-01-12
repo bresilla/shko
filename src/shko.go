@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	. "./dirk"
+	"github.com/bresilla/shko/dirk"
 	term "github.com/tj/go/term"
 )
 
 var (
 	termWidth, termHeight = term.Size()
-	colors                = true
 	wrap                  = true
 	shortcut              = 17
 	dirASwitch            = true
@@ -20,7 +19,7 @@ var (
 	topBar                = statBar
 	topSpace              = 0
 	sideSpace             = 0
-	startDir, _           = MakeFile(os.Getenv("PWD"))
+	startDir, _           = dirk.MakeFile(os.Getenv("PWD"))
 	currentDir            = startDir
 	childrens             = currentDir.ListDir()
 	drawlist              = childrens
@@ -46,7 +45,7 @@ var (
 	swichero, _           = loadFromFile(tabFile)
 	scripts               = map[string]string{}
 	bookmark              = map[string]string{}
-	copySlice             Files
+	copySlice             dirk.Files
 	showIcons             = true
 	showChildren          = false
 	showSize              = false
@@ -61,26 +60,25 @@ var (
 	sortType              = false
 	sortMode              = false
 	sortChildren          = false
-	homeDir, _            = MakeFile(os.Getenv("HOME"))
-	tempDir, _            = MakeFile(tempfolder)
+	homeDir, _            = dirk.MakeFile(os.Getenv("HOME"))
+	tempDir, _            = dirk.MakeFile(tempfolder)
 	dirA                  = homeDir
 	dirB                  = tabDir(tabFile)
-	dir1                  File
-	dir2                  File
-	dir3                  File
-	dir4                  File
-	dir5                  File
-	dir6                  File
-	dir7                  File
-	dir8                  File
-	dir9                  File
-	dir0                  File
+	dir1                  dirk.File
+	dir2                  dirk.File
+	dir3                  dirk.File
+	dir4                  dirk.File
+	dir5                  dirk.File
+	dir6                  dirk.File
+	dir7                  dirk.File
+	dir8                  dirk.File
+	dir9                  dirk.File
+	dir0                  dirk.File
 )
 
 func Flags() {
-	flag.BoolVar(&colors, "o", true, "disable colors - defualt enable")
-	flag.BoolVar(&DiskUse, "d", false, "")
-	flag.BoolVar(&center, "c", false, "")
+	flag.BoolVar(&dirk.DiskUse, "d", false, "")
+	flag.BoolVar(&center, "c", true, "")
 	flag.BoolVar(&showChildren, "n", false, "")
 	flag.BoolVar(&showSize, "s", false, "")
 	flag.BoolVar(&showIcons, "i", true, "")
@@ -88,8 +86,6 @@ func Flags() {
 	flag.BoolVar(&showDate, "t", false, "")
 	flag.BoolVar(&topBar, "b", false, "")
 	flag.IntVar(&shortcut, "short", 17, "")
-	flag.Parse()
-
 }
 
 func check(e error) {
