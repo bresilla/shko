@@ -3,8 +3,8 @@ package shko
 import (
 	"fmt"
 
-	colorz "github.com/bresilla/shko/colorz"
 	keyboard "github.com/bresilla/shko/keyboard"
+	t "github.com/bresilla/shko/term"
 )
 
 func DashBorder(symb string) string {
@@ -32,15 +32,15 @@ func DashBorder2(text, symb string, before int) string {
 	return toPrint
 }
 
-func Print(stl colorz.Style, fg colorz.Color, bg colorz.Color, toPrint string) {
-	colorz.SetStyle(stl, fg, bg)
+func Print(stl t.Style, fg t.Color, bg t.Color, toPrint string) {
+	t.SetStyle(stl, fg, bg)
 	fmt.Print(toPrint)
-	colorz.ResetStyle()
+	t.ResetStyle()
 }
 
 func PrintWait(toPrint string) {
-	colorz.SetStyle(colorz.HighLight, colorz.Black, colorz.White)
+	t.SetStyle(t.HighLight, t.Black, t.White)
 	fmt.Print(toPrint)
-	colorz.ResetStyle()
+	t.ResetStyle()
 	keyboard.GetChar()
 }

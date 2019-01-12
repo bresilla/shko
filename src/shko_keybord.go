@@ -8,11 +8,10 @@ import (
 	"strconv"
 	"strings"
 
-	colorz "github.com/bresilla/shko/colorz"
-	"github.com/bresilla/shko/dirk"
+	"github.com/bresilla/dirk"
 	keyboard "github.com/bresilla/shko/keyboard"
+	t "github.com/bresilla/shko/term"
 	"github.com/mholt/archiver"
-	term "github.com/tj/go/term"
 )
 
 func entryConditions() {
@@ -80,7 +79,7 @@ func fuzzyFind(childrens dirk.Files, currentDir dirk.File) (matched dirk.Files) 
 	pattern := ""
 	results := dirk.FindFrom(pattern, childrens)
 	for {
-		termWidth, termHeight = term.Size()
+		termWidth, termHeight = t.Size()
 		drawlist = prepList(matched)
 		SelectInList(number, scroll, drawlist, matched, currentDir)
 		statusWrite("Search for:")
@@ -116,7 +115,7 @@ func fuzzyFind(childrens dirk.Files, currentDir dirk.File) (matched dirk.Files) 
 
 func Loop(childrens dirk.Files) {
 	for {
-		termWidth, termHeight = term.Size()
+		termWidth, termHeight = t.Size()
 		drawlist := prepList(childrens)
 		SelectInList(number, scroll, drawlist, childrens, currentDir)
 		ascii, keycode, _ := keyboard.GetChar()
@@ -178,20 +177,20 @@ func Loop(childrens dirk.Files) {
 			foreward = false
 			continue
 		} else if ascii == 13 || ascii == shortcut { //---------------------	enter + SHORTCUT
-			term.ClearAll()
+			t.ClearAll()
 			break
 		} else if ascii == 113 { //-----------------------------------------	q
 			changeDir = false
-			term.ClearAll()
+			t.ClearAll()
 			break
 		} else if ascii == 3 { // ------------------------------------------	Ctrl+c
 			changeDir = false
-			term.ClearAll()
+			t.ClearAll()
 			break
 		} else {
 			if ascii == 32 { // --------------------------------------------	SPACE
-				term.MoveTo(0, termHeight+1)
-				Print(colorz.HighLight, colorz.Black, colorz.White, "leader")
+				t.MoveTo(0, termHeight+1)
+				Print(t.HighLight, t.Black, t.White, "leader")
 				ascii, _, _ := keyboard.GetChar()
 				switch ascii {
 				case 110: //	--------------------------------------------	n
@@ -231,9 +230,9 @@ func Loop(childrens dirk.Files) {
 				case 105: //	--------------------------------------------	i
 					showIcons = !showIcons
 				default:
-					term.MoveTo(8, termHeight+1)
+					t.MoveTo(8, termHeight+1)
 					toPrint := "ascii: " + strconv.Itoa(ascii)
-					Print(colorz.HighLight, colorz.Black, colorz.White, toPrint)
+					Print(t.HighLight, t.Black, t.White, toPrint)
 					keyboard.GetChar()
 				}
 				continue
@@ -406,7 +405,7 @@ func Loop(childrens dirk.Files) {
 					scroll = 0
 					childrens = tempDir.ListDir()
 					for {
-						termWidth, termHeight = term.Size()
+						termWidth, termHeight = t.Size()
 						drawlist := prepList(childrens)
 						SelectInList(number, scroll, drawlist, childrens, tempDir)
 						ascii, keycode, _ := keyboard.GetChar()

@@ -1,4 +1,4 @@
-package dirk
+package shko
 
 import (
 	"fmt"

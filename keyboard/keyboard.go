@@ -1,4 +1,4 @@
-package dirk
+package shko
 
 import (
 	"fmt"
@@ -6,17 +6,17 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/pkg/term"
+	t "github.com/pkg/term"
 )
 
 // Returns either an ascii code, or (if input is an arrow) a Javascript key code.
 func GetChar() (ascii int, keyCode int, err error) {
-	t, _ := term.Open("/dev/tty")
-	term.RawMode(t)
+	term, _ := t.Open("/dev/tty")
+	t.RawMode(term)
 	bytes := make([]byte, 3)
 
 	var numRead int
-	numRead, err = t.Read(bytes)
+	numRead, err = term.Read(bytes)
 	if err != nil {
 		return
 	}
@@ -43,8 +43,8 @@ func GetChar() (ascii int, keyCode int, err error) {
 	} else {
 		// Two characters read??
 	}
-	t.Restore()
-	t.Close()
+	term.Restore()
+	term.Close()
 	return
 }
 

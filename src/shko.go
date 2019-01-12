@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bresilla/shko/dirk"
-	term "github.com/tj/go/term"
+	"github.com/bresilla/dirk"
+	t "github.com/bresilla/shko/term"
 )
 
 var (
-	termWidth, termHeight = term.Size()
+	termWidth, termHeight = t.Size()
 	wrap                  = true
 	shortcut              = 17
 	dirASwitch            = true

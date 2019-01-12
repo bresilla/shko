@@ -6,10 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	colorz "github.com/bresilla/shko/colorz"
-	"github.com/bresilla/shko/dirk"
+	"github.com/bresilla/dirk"
+	term "github.com/bresilla/shko/term"
 	"github.com/peterh/liner"
-	term "github.com/tj/go/term"
 )
 
 var (
@@ -38,13 +37,13 @@ func SelectInList(selected, scroll int, drawlist, childrens dirk.Files, currentD
 	term.ClearAll()
 	if topBar {
 		topSpace = 2
-		Print(colorz.HighLight, colorz.Black, colorz.Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
-		Print(colorz.Default, colorz.Cyan, colorz.Black, DashBorder2("", "¯", 0))
+		Print(term.HighLight, term.Black, term.Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
+		Print(term.Default, term.Cyan, term.Black, DashBorder2("", "¯", 0))
 	}
 	if len(drawlist) == 0 {
 		fmt.Print("  ")
 		term.MoveTo(sideSpace+3, topSpace)
-		Print(colorz.HighLight, colorz.Black, colorz.White, "  nothing to show  ")
+		Print(term.HighLight, term.Black, term.White, "  nothing to show  ")
 	} else {
 		for i, el := range drawlist {
 			if selected+scroll == el.Number {
@@ -56,13 +55,13 @@ func SelectInList(selected, scroll int, drawlist, childrens dirk.Files, currentD
 				colorList(el, false, i+topSpace, maxSize)
 			}
 			fmt.Print("\n")
-			colorz.ResetStyle()
+			term.ResetStyle()
 		}
 	}
 	if statBar {
 		term.MoveTo(0, termHeight)
-		Print(colorz.Default, colorz.Cyan, colorz.Black, DashBorder2("", "_", 0))
-		Print(colorz.HighLight, colorz.Black, colorz.Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
+		Print(term.Default, term.Cyan, term.Black, DashBorder2("", "_", 0))
+		Print(term.HighLight, term.Black, term.Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
 	}
 }
 
@@ -70,9 +69,9 @@ func colorList(file dirk.File, active bool, i int, maxSize int64) {
 	tab = space + 2 + sideSpace
 	term.MoveTo(tab, i+1)
 	if file.IsDir {
-		ColorSelect(active, colorz.HighLight, colorz.White)
+		ColorSelect(active, term.HighLight, term.White)
 	} else {
-		ColorSelect(active, colorz.Default, colorz.Cyan)
+		ColorSelect(active, term.Default, term.Cyan)
 	}
 	tab = drawIcon(active, showIcons, file, i)
 	tab = drawName(active, file, i)
@@ -82,14 +81,14 @@ func colorList(file dirk.File, active bool, i int, maxSize int64) {
 	tab = drawSize(showSize, file, i)
 	tab = drawDate(showDate, file, i)
 	tab = drawMime(showMime, file, i)
-	colorz.SetStyle(colorz.Default, colorz.White, colorz.Black)
+	term.SetStyle(term.Default, term.White, term.Black)
 }
 
-func ColorSelect(active bool, style colorz.Style, color colorz.Color) {
+func ColorSelect(active bool, style term.Style, color term.Color) {
 	if active {
-		colorz.SetStyle(style, colorz.Black, color)
+		term.SetStyle(style, term.Black, color)
 	} else {
-		colorz.SetStyle(style, color, colorz.None)
+		term.SetStyle(style, color, term.None)
 	}
 }
 

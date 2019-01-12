@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bresilla/shko/dirk"
+	"github.com/bresilla/dirk"
 )
 
 var (
