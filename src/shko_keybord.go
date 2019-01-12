@@ -47,6 +47,9 @@ func prepList(childrens d.Files) (drawlist d.Files) {
 			backward = true
 			foreward = false
 		}
+		if len(childrens) < termHeight {
+			scroll = 0
+		}
 		if scroll <= 0 {
 			scroll = 0
 			backward = false
@@ -55,6 +58,17 @@ func prepList(childrens d.Files) (drawlist d.Files) {
 			foreward = false
 		}
 		drawlist = drawlist[0+scroll : termHeight-1-topSpace+scroll]
+	}
+	if number > len(childrens) && len(childrens) != 0 {
+		number = len(childrens)
+	} else if number < 0 {
+		number = 0
+	}
+	if len(childrens) != 0 {
+		for i := range childrens {
+			childrens[i].Other.Active = false
+		}
+		childrens[number].Other.Active = true
 	}
 	return
 }
@@ -116,9 +130,6 @@ func Loop(childrens d.Files) {
 				if wrap {
 					number = len(drawlist) - 1
 					scroll = len(childrens) - 1
-					if len(childrens) < termHeight {
-						scroll = 0
-					}
 				} else {
 					number = 0
 				}
@@ -140,12 +151,12 @@ func Loop(childrens d.Files) {
 			}
 			continue
 		} else if keycode == 37 && !d.Recurrent || ascii == 104 { // ---------	left
-			backward = false
-			foreward = false
 			oldDir := currentDir
 			currentDir, _ = d.MakeFile(currentDir.ParentPath)
 			childrens = currentDir.ListDir()
 			number, scroll = findFile(childrens, oldDir)
+			backward = false
+			foreward = false
 			continue
 		} else if keycode == 39 || ascii == 108 { // -----------------------	right
 			if len(drawlist) == 0 {
