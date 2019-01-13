@@ -6,11 +6,11 @@ import (
 	"os"
 
 	"github.com/bresilla/dirk"
-	t "github.com/bresilla/shko/term"
+	term "github.com/bresilla/shko/term"
 )
 
 var (
-	termWidth, termHeight = t.Size()
+	termWidth, termHeight = term.Size()
 	wrap                  = true
 	shortcut              = 17
 	dirASwitch            = true

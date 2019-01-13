@@ -12,8 +12,6 @@ import (
 	isatty "github.com/mattn/go-isatty"
 )
 
-// Renderer returns a function which renders strings in-place.
-//
 // The text is rendered to the current cursor position, and when
 // cleared with an empty string retains this position as if no
 // text has been rendered.

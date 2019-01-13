@@ -2,6 +2,7 @@ package shko
 
 import (
 	"io/ioutil"
+	"log"
 	"math"
 	"os"
 	"path"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/bresilla/dirk"
+	templates "github.com/bresilla/shko/templates"
 )
 
 var (
@@ -161,4 +163,148 @@ func matchFrecency(toMatch string) (matchedFile string) {
 		}
 	}
 	return
+}
+
+var bookinit = map[string]string{
+	"~": homeDir.Path,
+	"d": homeDir.Path + "/Documents",
+}
+
+func initializeBookmarks() {
+	if _, err := os.Stat(markFile); err == nil {
+		jointMem, err := ioutil.ReadFile(markFile)
+		if err != nil {
+			return
+		}
+		allBooks := strings.Split(string(jointMem), "\n")
+		for _, el := range allBooks {
+			arr := strings.Split(el, " > ")
+			if arr[0] == "" || arr[1] == "" {
+				continue
+			}
+			bookmark[arr[0]] = arr[1]
+		}
+	} else {
+		newFile, _ := os.Create(markFile)
+		for i, el := range bookinit {
+			newFile.WriteString(i + " > " + el + "\n")
+		}
+		newFile.Close()
+	}
+}
+
+func saveBookmarks() {
+	newFile, _ := os.Create(markFile)
+	for i, el := range bookmark {
+		newFile.WriteString(i + " > " + el + "\n")
+	}
+	newFile.Close()
+}
+
+func addBookmark(ascii int, path string) {
+	runeString := string(rune(ascii))
+	bookmark[runeString] = path
+}
+
+func deleteBookmark(ascii int) {
+	for i := range bookmark {
+		runeInt := rune(i[0])
+		if int(runeInt) == ascii {
+			delete(bookmark, i)
+		}
+	}
+	return
+}
+
+func readBookmarks(ascii int) (file string, exists bool) {
+	for i, el := range bookmark {
+		runeInt := rune(i[0])
+		if int(runeInt) == ascii {
+			if _, err := os.Stat(el); err == nil {
+				file = el
+				exists = true
+			}
+		}
+	}
+	return
+}
+
+var scriptinit = map[string]string{
+	"w": "wal -i @ --backend haishoku --saturate 1.0",
+	"f": "feh --bg-fill @",
+	"g": "go build @",
+}
+
+func initializeScriptlist() {
+	if _, err := os.Stat(scriptsFile); err == nil {
+		jointMem, err := ioutil.ReadFile(scriptsFile)
+		if err != nil {
+			return
+		}
+		allBooks := strings.Split(string(jointMem), "\n")
+		for _, el := range allBooks {
+			arr := strings.Split(el, " > ")
+			if arr[0] == "" || arr[1] == "" {
+				continue
+			}
+			scripts[arr[0]] = arr[1]
+		}
+	} else {
+		newFile, _ := os.Create(scriptsFile)
+		for i, el := range scriptinit {
+			newFile.WriteString(i + " > " + el + "\n")
+		}
+		newFile.Close()
+	}
+}
+
+func saveScript() {
+	newFile, _ := os.Create(scriptsFile)
+	for i, el := range scripts {
+		newFile.WriteString(i + " > " + el + "\n")
+	}
+	newFile.Close()
+}
+
+func addScript(ascii int, script string) {
+	runeString := string(rune(ascii))
+	scripts[runeString] = script
+}
+
+func deleteScript(ascii int) {
+	for i := range scripts {
+		runeInt := rune(i[0])
+		if int(runeInt) == ascii {
+			delete(scripts, i)
+		}
+	}
+	return
+}
+
+func readScripts(ascii int) (script string, exists bool) {
+	re := regexp.MustCompile(`@`)
+	for i, el := range scripts {
+		runeInt := rune(i[0])
+		if int(runeInt) == ascii {
+			if re.Match([]byte(el)) {
+				script = el
+				exists = true
+			}
+		}
+	}
+	return
+}
+
+func createTemplates(folder string) {
+	CreateDir(folder)
+	for name, bytes := range templates.Template {
+		if _, err := os.Stat(tempfolder + "/" + name); err == nil {
+			log.Print("File Exists")
+		} else {
+			newFileName := tempfolder + "/" + name
+			newFile, _ := os.Create(newFileName)
+			newFile.Write(bytes)
+			newFile.Close()
+		}
+	}
 }
