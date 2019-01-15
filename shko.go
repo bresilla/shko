@@ -1,7 +1,7 @@
 package main
 
 import (
-	shko "./src"
+	shko "./v1"
 )
 
 func main() {

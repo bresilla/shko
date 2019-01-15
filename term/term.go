@@ -8,8 +8,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	isatty "github.com/mattn/go-isatty"
 )
 
 // The text is rendered to the current cursor position, and when
@@ -148,9 +146,4 @@ func HideCursor() {
 // ShowCursor shows the cursor.
 func ShowCursor() {
 	fmt.Printf("\033[?25h")
-}
-
-// IsTerminal returns true if fd is a tty.
-func IsTerminal(fd uintptr) bool {
-	return isatty.IsTerminal(fd)
 }
