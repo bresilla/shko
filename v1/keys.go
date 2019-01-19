@@ -284,7 +284,12 @@ func Loop(childrens dirk.Files) {
 					showIcons = !showIcons
 				}
 			} else if ascii == 122 { // ------------------------------------	z (test)
-				text := StatusRead("Write string to search", "dirent")
+			} else if ascii == 117 { // ------------------------------------	u (union)
+				text := StatusRead("Enter name for union entry", "entry")
+				currentDir.Select(childrens).Union(text)
+				childrens = currentDir.ListDir()
+			} else if ascii == 105 { // ------------------------------------	i (indent)
+				text := StatusRead("Enter name for indent directory", "dir")
 				currentDir.Select(childrens).Indent(text)
 				childrens = currentDir.ListDir()
 			} else if ascii == 111 { // ------------------------------------	o (open)
