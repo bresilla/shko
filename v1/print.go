@@ -68,10 +68,3 @@ func Print(stl t.Style, fg t.Color, bg t.Color, toPrint string) {
 	fmt.Print(toPrint)
 	t.ResetStyle()
 }
-
-func PrintWait(toPrint string) {
-	t.SetStyle(t.HighLight, t.Black, t.White)
-	fmt.Print(toPrint)
-	t.ResetStyle()
-	t.GetChar()
-}

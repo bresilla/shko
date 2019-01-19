@@ -30,7 +30,6 @@ func RunScript(name string) bool {
 	err := cmd.Run()
 	if err != nil {
 		log.Println("Error:", err)
-		PrintWait(name)
 		return false
 	}
 	return true

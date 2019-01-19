@@ -48,9 +48,9 @@ func SelectInList(selected, scroll int, drawlist, childrens dirk.Files, currentD
 				el.Active = true
 			}
 			if i == selected || el.Selected == true {
-				colorList(el, true, i+topSpace, maxSize)
+				colorList(*el, true, i+topSpace, maxSize)
 			} else {
-				colorList(el, false, i+topSpace, maxSize)
+				colorList(*el, false, i+topSpace, maxSize)
 			}
 			fmt.Print("\n")
 			term.ResetStyle()
@@ -143,7 +143,7 @@ func drawChildren(yesno bool, file dirk.File, i int) (tabTurn int) {
 func drawSize(yesno bool, file dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print(file.SizeIEC + " ")
+		fmt.Print(file.GetSize() + " ")
 		tabTurn = tab + 12
 	} else {
 		tabTurn = tab

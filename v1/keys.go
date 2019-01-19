@@ -6,7 +6,6 @@ import (
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/bresilla/dirk"
 	t "github.com/bresilla/shko/term"
@@ -118,8 +117,17 @@ func Loop(childrens dirk.Files) {
 		drawlist := prepList(childrens)
 		SelectInList(number, scroll, drawlist, childrens, currentDir)
 		ascii, keycode, _ := t.GetChar()
-		if ascii == 47 { // ------------------------------------------------	/
-			childrens = fuzzyFind(childrens, currentDir)
+		if ascii == 13 || ascii == shortcut { //----------------------------	enter + SHORTCUT
+			t.ClearAll()
+			break
+		} else if ascii == 113 { //-----------------------------------------	q
+			changeDir = false
+			t.ClearAll()
+			break
+		} else if ascii == 3 { // ------------------------------------------	Ctrl+c
+			changeDir = false
+			t.ClearAll()
+			break
 		} else if keycode == 38 || ascii == 107 { // -----------------------	up
 			if backward {
 				scroll--
@@ -150,7 +158,7 @@ func Loop(childrens dirk.Files) {
 				}
 			}
 			continue
-		} else if keycode == 37 && !dirk.Recurrent || ascii == 104 { // ---------	left
+		} else if keycode == 37 && !dirk.Recurrent || ascii == 104 { // ----	left
 			oldDir := currentDir
 			currentDir, _ = dirk.MakeFile(currentDir.ParentPath)
 			childrens = currentDir.ListDir()
@@ -169,23 +177,17 @@ func Loop(childrens dirk.Files) {
 				addToMemory(oldDir, currentDir)
 				number, scroll = findInMemory(currentDir, childrens)
 			} else {
-				currentDir.Select(childrens, number).Edit()
+				currentDir.Select(childrens).Edit()
 				fmt.Print("\033[?25l")
 			}
 			backward = false
 			foreward = false
 			continue
-		} else if ascii == 13 || ascii == shortcut { //---------------------	enter + SHORTCUT
-			t.ClearAll()
-			break
-		} else if ascii == 113 { //-----------------------------------------	q
-			changeDir = false
-			t.ClearAll()
-			break
-		} else if ascii == 3 { // ------------------------------------------	Ctrl+c
-			changeDir = false
-			t.ClearAll()
-			break
+		} else if ascii == 47 { // -----------------------------------------	/ (match)
+			childrens = fuzzyFind(childrens, currentDir)
+		} else if ascii == 37 { // -----------------------------------------	% (find)
+			text := StatusRead("Write string to search", "text")
+			childrens = childrens.Find(dirk.Finder{Text: text})
 		} else {
 			if ascii == 32 { // --------------------------------------------	SPACE
 				t.MoveTo(0, termHeight+1)
@@ -237,21 +239,12 @@ func Loop(childrens dirk.Files) {
 				continue
 			} else if ascii == 45 { //	-------------------------------------	- (recurr)
 				dirk.Recurrent = !dirk.Recurrent
-				dirk.IncFolder = !dirk.IncFolder
 				dirk.IncHidden = false
 				dirk.DiskUse = false
 				childrens = currentDir.ListDir()
 				if dirk.Recurrent {
 					for i := range childrens {
-						for j := range childrens[i].Ancestors {
-							if len(childrens[i].Ancestors[j]) > termWidth/4 {
-								childrens[i].Ancestors[j] = childrens[i].Ancestors[j][:termWidth/4] + "..."
-							}
-						}
-						parent, _ := dirk.MakeFile(currentDir.ParentPath)
-						childrens[i].Ancestors = childrens[i].Ancestors[parent.AncestorNr+1:]
-						prepName := strings.Join(childrens[i].Ancestors, "/")
-						childrens[i].Name = prepName
+						childrens[i].Name = childrens[i].Path
 					}
 				}
 				number = 0
@@ -291,17 +284,18 @@ func Loop(childrens dirk.Files) {
 					showIcons = !showIcons
 				}
 			} else if ascii == 122 { // ------------------------------------	z (test)
-				currentDir.Select(childrens, number).Overite([]byte("TRIM" + "\n"))
+				text := StatusRead("Write string to search", "dirent")
+				currentDir.Select(childrens).Indent(text)
 				childrens = currentDir.ListDir()
 			} else if ascii == 111 { // ------------------------------------	o (open)
 				StatusWrite("Press \"o\" to OPEN or \"w\" to OPEN WITH...")
 				ascii, _, _ = t.GetChar()
 				switch ascii {
 				case 111:
-					currentDir.Select(childrens, number).Start()
+					currentDir.Select(childrens).Start()
 				case 119:
 					toOpenWith := StatusRead("Open with", "nvim")
-					currentDir.Select(childrens, number).StartWith(toOpenWith)
+					currentDir.Select(childrens).StartWith(toOpenWith)
 				}
 			} else if ascii == 100 && len(drawlist) > 0 { // ---------------	d (delete)
 				StatusWrite("Press \"d\" to DELETE selected")
@@ -310,7 +304,7 @@ func Loop(childrens dirk.Files) {
 					StatusWrite("Are you sure you want to delete? Y/N")
 					ascii, _, _ = t.GetChar()
 					if ascii == 121 || ascii == 89 {
-						currentDir.Select(childrens, number).Delete()
+						currentDir.Select(childrens).Delete()
 					}
 				}
 				childrens = currentDir.ListDir()
@@ -362,7 +356,7 @@ func Loop(childrens dirk.Files) {
 				StatusWrite("Press \"y\" to YANK selected")
 				ascii, _, _ = t.GetChar()
 				if ascii == 121 {
-					copySlice = currentDir.Select(childrens, number)
+					copySlice = currentDir.Select(childrens)
 					childrens = currentDir.ListDir()
 				}
 			} else if ascii == 112 { //	------------------------------------	p (paste copy)
@@ -380,7 +374,7 @@ func Loop(childrens dirk.Files) {
 				StatusWrite("Press \"r\" to RENAME selected")
 				ascii, _, _ = t.GetChar()
 				if ascii == 114 {
-					selected := currentDir.Select(childrens, number)
+					selected := currentDir.Select(childrens)
 					if len(selected) > 1 {
 						selected.Rename()
 					} else {
@@ -409,7 +403,7 @@ func Loop(childrens dirk.Files) {
 						SelectInList(number, scroll, drawlist, childrens, tempDir)
 						ascii, keycode, _ := t.GetChar()
 						if ascii == 13 { // ----	ENTER
-							newFile, _ := dirk.MakeFiles([]string{drawlist[number].Path})
+							newFile, _ := dirk.MakeFiles(drawlist[number].Path)
 							newFile.Paste(currentDir)
 							break
 						} else if keycode == 38 || ascii == 107 { //up
@@ -484,7 +478,7 @@ func Loop(childrens dirk.Files) {
 							saveScript()
 						}
 					} else if ascii == 32 {
-						scriptFiles, _ := dirk.MakeFiles([]string{scriptsFile})
+						scriptFiles, _ := dirk.MakeFiles(scriptsFile)
 						scriptFiles.Edit()
 						fmt.Print("\033[?25l")
 					} else {
@@ -524,7 +518,7 @@ func Loop(childrens dirk.Files) {
 							saveBookmarks()
 						}
 					} else if ascii == 32 {
-						markFiles, _ := dirk.MakeFiles([]string{markFile})
+						markFiles, _ := dirk.MakeFiles(markFile)
 						markFiles.Edit()
 						fmt.Print("\033[?25l")
 					} else {
