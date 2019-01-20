@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/bresilla/dirk"
 	t "github.com/bresilla/shko/term"
@@ -188,8 +189,26 @@ func Loop(childrens dirk.Files) {
 		} else if ascii == 37 { // -----------------------------------------	% (find)
 			text := StatusRead("Write string to search", "text")
 			childrens = childrens.Find(dirk.Finder{Text: text})
+		} else if ascii == 27 { //	----------------------------------------	ESC (refresh)
+			childrens = currentDir.ListDir()
+		} else if ascii == 32 { //	----------------------------------------	SPACE (select)
+			drawlist[number].Selected = !drawlist[number].Selected
+			if foreward {
+				scroll++
+			} else {
+				number++
+			}
+			if number > len(drawlist)-1 {
+				if wrap {
+					number = 0
+					scroll = 0
+				} else {
+					number = len(drawlist) - 1
+				}
+			}
+			continue
 		} else {
-			if ascii == 32 { // --------------------------------------------	SPACE
+			if ascii == 120 { // --------------------------------------------	SPACE
 				t.MoveTo(0, termHeight+1)
 				Print(t.HighLight, t.Black, t.White, "leader")
 				ascii, _, _ := t.GetChar()
@@ -215,7 +234,7 @@ func Loop(childrens dirk.Files) {
 					center = false
 				case 99: //	------------------------------------------------	c
 					center = !center
-				case 100: //	--------------------------------------------	z
+				case 100: //	--------------------------------------------	d
 					dirk.DiskUse = true
 					showSize = true
 					topBar = true
@@ -239,7 +258,6 @@ func Loop(childrens dirk.Files) {
 				continue
 			} else if ascii == 45 { //	-------------------------------------	- (recurr)
 				dirk.Recurrent = !dirk.Recurrent
-				dirk.IncHidden = false
 				dirk.DiskUse = false
 				childrens = currentDir.ListDir()
 				if dirk.Recurrent {
@@ -313,11 +331,10 @@ func Loop(childrens dirk.Files) {
 					}
 				}
 				childrens = currentDir.ListDir()
-				number--
-			} else if ascii == 120 { //	------------------------------------	x (archive)
+			} else if ascii == 97 { //	------------------------------------	x (archive)
 				StatusWrite("Press \"x\" to EXTRACT or \"a\" to ARCHIVE")
 				ascii, _, _ = t.GetChar()
-				if ascii == 120 {
+				if ascii == 97 {
 					err := archiver.Unarchive(childrens[number].Path, childrens[number].Path+"_E")
 					if err != nil {
 						log.Fatal(err)
@@ -357,14 +374,14 @@ func Loop(childrens dirk.Files) {
 					}
 				}
 				childrens = currentDir.ListDir()
-			} else if ascii == 121 && len(drawlist) > 0 { //	------------	y (yank copy)
+			} else if ascii == 121 && len(drawlist) > 0 { //	------------	y (yank)
 				StatusWrite("Press \"y\" to YANK selected")
 				ascii, _, _ = t.GetChar()
 				if ascii == 121 {
 					copySlice = currentDir.Select(childrens)
 					childrens = currentDir.ListDir()
 				}
-			} else if ascii == 112 { //	------------------------------------	p (paste copy)
+			} else if ascii == 112 { //	------------------------------------	p (paste)
 				if len(copySlice) > 0 {
 					StatusWrite("Press \"p\" to PASTE or \"m\" to MOVE")
 					ascii, _, _ = t.GetChar()
@@ -392,9 +409,21 @@ func Loop(childrens dirk.Files) {
 				StatusWrite("Press \"f\" to make new FILE, \"d\" to make new FOLDER or \"t\" to select from TEMPLATES")
 				ascii, _, _ = t.GetChar()
 				switch ascii {
+				case 78, 70:
+					read := StatusRead("Enter filenames", "file1 file2")
+					names := strings.Split(read, " ")
+					for _, name := range names {
+						currentDir.Touch(name)
+					}
 				case 110, 102:
 					name := StatusRead("Enter filename", "file")
 					currentDir.Touch(name)
+				case 68:
+					read := StatusRead("Enter dirnames", "dir1 dir2")
+					names := strings.Split(read, " ")
+					for _, name := range names {
+						currentDir.Mkdir(name)
+					}
 				case 100:
 					name := StatusRead("Enter dirname", "dir")
 					currentDir.Mkdir(name)
@@ -449,22 +478,7 @@ func Loop(childrens dirk.Files) {
 					}
 				}
 				childrens = currentDir.ListDir()
-			} else if ascii == 118 { //	-------------------------------------	v (select)
-				drawlist[number].Selected = !drawlist[number].Selected
-				if foreward {
-					scroll++
-				} else {
-					number++
-				}
-				if number > len(drawlist)-1 {
-					if wrap {
-						number = 0
-						scroll = 0
-					} else {
-						number = len(drawlist) - 1
-					}
-				}
-				continue
+
 			} else if ascii == 115 { // ------------------------------------	s (script)
 				StatusWrite("Press any key to launch script")
 				ascii, _, _ = t.GetChar()
