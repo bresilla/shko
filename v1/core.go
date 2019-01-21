@@ -118,6 +118,7 @@ func Main() {
 	fmt.Print("\033[?25l")
 	Flags()
 	Loop(childrens)
+	term.ClearAll()
 	fmt.Print("\033[?25h")
 
 	manageTabDir(currentDir.Path)
@@ -132,4 +133,137 @@ func Main() {
 	saveToFile(memory, memFile)
 	saveToFile(frecency, freqFile)
 	saveToFile(swichero, tabFile)
+}
+
+func entryConditions() {
+
+}
+
+func prepList(childrens dirk.Files) (drawlist dirk.Files) {
+	topSpace = 0
+	if topBar {
+		topSpace = 2
+		statBar = true
+	} else {
+		statBar = false
+	}
+	if center {
+		showChildren = false
+		showSize = false
+		showDate = false
+		showMode = false
+		dirk.DiskUse = false
+		statBar = false
+		topBar = false
+		showMime = false
+	}
+	foreward = false
+	backward = false
+	drawlist = childrens
+	termHeight = termHeight - topSpace
+	if len(drawlist) > termHeight-1 {
+		if number > termHeight/2 {
+			foreward = true
+			backward = false
+		} else if number < termHeight/2-2 {
+			backward = true
+			foreward = false
+		}
+		if len(childrens) < termHeight {
+			scroll = 0
+		}
+		if scroll <= 0 {
+			scroll = 0
+			backward = false
+		} else if scroll >= len(childrens)+1-termHeight {
+			scroll = len(childrens) + 1 - termHeight
+			foreward = false
+		}
+		drawlist = drawlist[0+scroll : termHeight-1-topSpace+scroll]
+	}
+	if number > len(childrens) && len(childrens) != 0 {
+		number = len(childrens)
+	} else if number < 0 {
+		number = 0
+	}
+	if len(childrens) != 0 {
+		for i := range childrens {
+			childrens[i].Active = false
+		}
+		childrens[number].Active = true
+	}
+	return
+}
+
+func Loop(childrens dirk.Files) {
+	for {
+		termWidth, termHeight = term.Size()
+		drawlist := prepList(childrens)
+		SelectInList(number, scroll, drawlist, childrens, currentDir)
+		ascii, keycode, _ := term.GetChar()
+		if ascii == 13 || ascii == shortcut { //----------------------------	enter, SHORTCUT (quit + chdir)
+			break
+		} else if ascii == 113 { //-----------------------------------------	q (quit)
+			changeDir = false
+			break
+		} else if ascii == 3 { // ------------------------------------------	Ctrl+c (quit)
+			changeDir = false
+			break
+		} else if keycode == 38 || ascii == 107 { // -----------------------	up, k (previous)
+			shkoUp(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if keycode == 40 || ascii == 106 { // -----------------------	down, j (next)
+			shkoDown(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if keycode == 37 || ascii == 104 { // -----------------------	left, h (back)
+			shkoLeft(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if keycode == 39 || ascii == 108 { // -----------------------	right, l (enter + open)
+			shkoRight(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 47 { // -----------------------------------------	/ (match)
+			shkoMatch(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 37 { // -----------------------------------------	% (find)
+			shkoFind(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 27 { //	----------------------------------------	ESC (refresh)
+			childrens = currentDir.ListDir()
+		} else if ascii == 32 { //	----------------------------------------	SPACE (select)
+			shkoSelect(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 45 { //	----------------------------------------	- (recurr)
+			shkoRecurr(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 44 { //	----------------------------------------	, (files)
+			shkoFiles(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 46 { //	----------------------------------------	. (hidden)
+			shkoHidden(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 9 { //	----------------------------------------	TAB (switch)
+			shkoSwitch(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 117 { // ----------------------------------------	u (union)
+			shkoUnion(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 105 { // ----------------------------------------	i (indent)
+			shkoIndent(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 111 { // ----------------------------------------	o (open)
+			shkoOpen(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 100 { // ----------------------------------------	d (delete)
+			shkoDelete(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 97 { //	----------------------------------------	x (archive)
+			shkoArchive(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 121 { //	----------------------------------------	y (yank)
+			shkoYank(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 112 { //	----------------------------------------	p (paste)
+			shkoPaste(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 114 { //-----------------------------------------	r (rename)
+			shkoRename(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 110 { //	----------------------------------------	n (new)
+			shkoNew(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 115 { // ----------------------------------------	s (script)
+			shkoScript(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 103 { // ----------------------------------------	g (go-to)
+			shkoGoTo(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 98 { // -----------------------------------------	b (bookmarks)
+			shkoBookIt(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 126 { //	----------------------------------------	~ (home)
+			shkoHome(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 119 { //	----------------------------------------	w (tabs)
+			shkoTabs(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 120 { // ----------------------------------------	x (menu)
+			shkoMenu(&currentDir, &childrens, &drawlist, &number, &scroll)
+		} else if ascii == 122 { // ----------------------------------------	z (test)
+		}
+	}
 }
