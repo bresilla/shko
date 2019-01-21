@@ -434,6 +434,11 @@ func shkoBookIt(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, 
 	}
 }
 
+func shkoHome(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scroll *int, key int) {
+	*currentDir = homeDir
+	*childrens = homeDir.ListDir()
+}
+
 func shkoWarp(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scroll *int, key int) {
 	StatusWrite("Pres any key \"0\" to \"9\" ot go to tab")
 	ascii, _, _ := t.GetChar()

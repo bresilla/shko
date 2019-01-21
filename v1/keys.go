@@ -184,7 +184,7 @@ func Loop(childrens dirk.Files) {
 		} else if ascii == 98 { // -----------------------------------------	b (bookmarks)
 			shkoBookIt(&currentDir, &childrens, &drawlist, &number, &scroll, 98)
 		} else if ascii == 126 { //	----------------------------------------	~ (home)
-			childrens = homeDir.ListDir()
+			shkoHome(&currentDir, &childrens, &drawlist, &number, &scroll, 126)
 		} else if ascii == 119 { //	----------------------------------------	w (warps)
 			shkoWarp(&currentDir, &childrens, &drawlist, &number, &scroll, 119)
 		} else if ascii == 120 { // ----------------------------------------	x (menu)
