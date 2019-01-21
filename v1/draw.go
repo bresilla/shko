@@ -24,7 +24,7 @@ func SelectInList(selected, scroll int, drawlist, childrens dirk.Files, currentD
 		if len(childrens[i].Name) > lenMax {
 			lenMax = len(childrens[i].Name)
 		}
-		maxSize += childrens[i].Size
+		maxSize += childrens[i].SizeINT(dirk.DiskUse)
 	}
 	if center && termHeight > len(drawlist) {
 		topSpace += termHeight/2 - (len(drawlist) / 2)
@@ -66,7 +66,7 @@ func SelectInList(selected, scroll int, drawlist, childrens dirk.Files, currentD
 func colorList(file dirk.File, active bool, i int, maxSize int64) {
 	tab = space + 2 + sideSpace
 	term.MoveTo(tab, i+1)
-	if file.IsDir {
+	if file.IsDir() {
 		ColorSelect(active, term.HighLight, term.White)
 	} else {
 		ColorSelect(active, term.Default, term.Cyan)
@@ -102,9 +102,9 @@ func drawIcon(active, yesno bool, file dirk.File, i int) (tabTurn int) {
 	}
 	before += " "
 	if yesno {
-		fmt.Print(before + file.Icon + after)
+		fmt.Print(before + file.GetIcon() + after)
 	} else {
-		if file.IsDir {
+		if file.IsDir() {
 			fmt.Print(before + ">" + after)
 		} else {
 			fmt.Print(before + "-" + after)
@@ -120,7 +120,7 @@ func drawName(active bool, file dirk.File, i int) (tabTurn int) {
 	if active {
 		spacer = " "
 	}
-	if file.IsDir {
+	if file.IsDir() {
 		fmt.Print(spacer + file.Name + spacer + "/ ")
 	} else {
 		fmt.Print(spacer + file.Name + spacer + " ")
@@ -132,7 +132,7 @@ func drawName(active bool, file dirk.File, i int) (tabTurn int) {
 func drawChildren(yesno bool, file dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print("  " + strconv.Itoa(file.ChildrenNr) + " ")
+		fmt.Print("  " + strconv.Itoa(file.ChildrenNr()) + " ")
 		tabTurn = tab + 8
 	} else {
 		tabTurn = tab
@@ -143,7 +143,7 @@ func drawChildren(yesno bool, file dirk.File, i int) (tabTurn int) {
 func drawSize(yesno bool, file dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print(file.GetSize() + " ")
+		fmt.Print(file.SizeSTR(dirk.DiskUse) + " ")
 		tabTurn = tab + 12
 	} else {
 		tabTurn = tab
@@ -154,7 +154,7 @@ func drawSize(yesno bool, file dirk.File, i int) (tabTurn int) {
 func drawDate(yesno bool, file dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print(file.BrtTime.Format(time.RFC822) + " ")
+		fmt.Print(file.File.ModTime().Format(time.RFC822) + " ")
 		tabTurn = tab + 25
 	} else {
 		tabTurn = tab
@@ -165,7 +165,7 @@ func drawDate(yesno bool, file dirk.File, i int) (tabTurn int) {
 func drawMode(yesno bool, file dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print(file.Mode)
+		fmt.Print(file.File.Mode())
 		fmt.Print(" ")
 		tabTurn = tab + 12
 	} else {
@@ -196,7 +196,7 @@ func sizeBar(maxSize, size int64) (toPrint string) {
 func drawDU(yesno bool, file dirk.File, i int, maxSize int64) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print(sizeBar(maxSize, file.Size))
+		fmt.Print(sizeBar(maxSize, file.SizeINT(dirk.DiskUse)))
 		fmt.Print(" ")
 		tabTurn = tab + 13
 	} else {
@@ -208,7 +208,7 @@ func drawDU(yesno bool, file dirk.File, i int, maxSize int64) (tabTurn int) {
 func drawMime(yesno bool, file dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print(file.Mime)
+		fmt.Print(file.GetMime())
 		fmt.Print(" ")
 		tabTurn = tab + 20
 	} else {

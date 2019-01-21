@@ -47,7 +47,7 @@ func shkoLeft(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, sc
 		return
 	}
 	oldDir := *currentDir
-	*currentDir, _ = dirk.MakeFile(currentDir.ParentPath)
+	*currentDir, _ = dirk.MakeFile(currentDir.ParentPath())
 	*childrens = currentDir.ListDir()
 	*number, *scroll = findFile(*childrens, oldDir)
 	backward = false
@@ -58,7 +58,7 @@ func shkoRight(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, s
 	if len(*drawlist) == 0 {
 		return
 	}
-	if (*drawlist)[*number].IsDir {
+	if (*drawlist)[*number].IsDir() {
 		oldDir := *currentDir
 		*currentDir, _ = dirk.MakeFile((*drawlist)[*number].Path)
 		*childrens = currentDir.ListDir()
@@ -156,9 +156,9 @@ func shkoSelect(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, 
 func shkoSwitch(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scroll *int) {
 	if dirASwitch {
 		if len(*childrens) > 0 {
-			dirA, _ = dirk.MakeFile((*childrens)[0].ParentPath)
+			dirA, _ = dirk.MakeFile((*childrens)[0].ParentPath())
 		} else {
-			dirA, _ = dirk.MakeFile(currentDir.ParentPath)
+			dirA, _ = dirk.MakeFile(currentDir.ParentPath())
 		}
 		*currentDir = dirB
 		*childrens = dirB.ListDir()
@@ -168,9 +168,9 @@ func shkoSwitch(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, 
 		showIcons = !showIcons
 	} else {
 		if len(*childrens) > 0 {
-			dirB, _ = dirk.MakeFile((*childrens)[0].ParentPath)
+			dirB, _ = dirk.MakeFile((*childrens)[0].ParentPath())
 		} else {
-			dirB, _ = dirk.MakeFile(currentDir.ParentPath)
+			dirB, _ = dirk.MakeFile(currentDir.ParentPath())
 		}
 		*currentDir = dirA
 		*childrens = dirA.ListDir()
