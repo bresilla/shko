@@ -191,7 +191,7 @@ func shkoMatch(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, s
 	for {
 		termWidth, termHeight = t.Size()
 		*drawlist = prepList(matched)
-		SelectInList(*number, *scroll, *drawlist, matched, *currentDir)
+		SelectInList(&*number, &*scroll, &*drawlist, &matched, &*currentDir)
 		StatusWrite("Search for:")
 		fmt.Print(pattern)
 		ascii, keycode, _ := t.GetChar()
@@ -252,7 +252,7 @@ func shkoNew(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scr
 		for {
 			termWidth, termHeight = t.Size()
 			drawlist := prepList(*childrens)
-			SelectInList(number, scroll, drawlist, *childrens, tempDir)
+			SelectInList(&number, &scroll, &drawlist, &*childrens, &tempDir)
 			ascii, keycode, _ := t.GetChar()
 			if ascii == 13 { // ----	ENTER
 				newFile, _ := dirk.MakeFiles(drawlist[number].Path)
@@ -384,9 +384,18 @@ func shkoOpen(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, sc
 }
 
 func shkoIndent(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scroll *int) {
-	text := StatusRead("Enter name for indent directory", "dir")
-	currentDir.Select(*childrens).Indent(text)
-	*childrens = currentDir.ListDir()
+	StatusWrite("Press \"i\" to INDENT or \"o\" to OUTDENT")
+	ascii, _, _ := t.GetChar()
+	switch ascii {
+	case 105:
+		text := StatusRead("Enter name for indent directory", "dir")
+		currentDir.Select(*childrens).Indent(text)
+		*childrens = currentDir.ListDir()
+	case 111:
+		text := StatusRead("Enter name for outdent directory", "dir")
+		currentDir.Select(*childrens).Outdent(text)
+		*childrens = currentDir.ListDir()
+	}
 }
 
 func shkoUnion(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scroll *int) {

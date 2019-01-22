@@ -199,7 +199,7 @@ func Loop(childrens dirk.Files) {
 	for {
 		termWidth, termHeight = term.Size()
 		drawlist := prepList(childrens)
-		SelectInList(number, scroll, drawlist, childrens, currentDir)
+		SelectInList(&number, &scroll, &drawlist, &childrens, &currentDir)
 		ascii, keycode, _ := term.GetChar()
 		if ascii == 13 || ascii == shortcut { //----------------------------	enter, SHORTCUT (quit + chdir)
 			break

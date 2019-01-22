@@ -14,20 +14,21 @@ var (
 	space = 1
 )
 
-func SelectInList(selected, scroll int, drawlist, childrens dirk.Files, currentDir dirk.File) {
+func SelectInList(selected, scroll *int, drawlist, childrens *dirk.Files, currentDir *dirk.File) {
 	var maxSize int64
 	lenMax := 15
 	topSpace = 0
 	sideSpace = 0
-
-	for i := range childrens {
-		if len(childrens[i].Name) > lenMax {
-			lenMax = len(childrens[i].Name)
+	if dirk.DiskUse {
+		for i := range *childrens {
+			if len((*childrens)[i].Name) > lenMax {
+				lenMax = len((*childrens)[i].Name)
+			}
+			maxSize += (*childrens)[i].SizeINT(dirk.DiskUse)
 		}
-		maxSize += childrens[i].SizeINT(dirk.DiskUse)
 	}
-	if center && termHeight > len(drawlist) {
-		topSpace += termHeight/2 - (len(drawlist) / 2)
+	if center && termHeight > len(*drawlist) {
+		topSpace += termHeight/2 - (len(*drawlist) / 2)
 		sideSpace = termWidth/2 - lenMax/2 - 5
 	}
 
@@ -38,19 +39,16 @@ func SelectInList(selected, scroll int, drawlist, childrens dirk.Files, currentD
 		Print(term.HighLight, term.Black, term.Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
 		Print(term.Default, term.Cyan, term.Black, DashBorder2("", "¯", 0))
 	}
-	if len(drawlist) == 0 {
+	if len(*drawlist) == 0 {
 		fmt.Print("  ")
 		term.MoveTo(sideSpace+3, topSpace)
 		Print(term.HighLight, term.Black, term.White, "  nothing to show  ")
 	} else {
-		for i, el := range drawlist {
-			if selected+scroll == el.Number {
-				el.Active = true
-			}
-			if i == selected || el.Selected == true {
-				colorList(*el, true, i+topSpace, maxSize)
+		for i := range *drawlist {
+			if i == *selected || (*drawlist)[i].Selected == true {
+				colorList((*drawlist)[i], true, i+topSpace, maxSize)
 			} else {
-				colorList(*el, false, i+topSpace, maxSize)
+				colorList((*drawlist)[i], false, i+topSpace, maxSize)
 			}
 			fmt.Print("\n")
 			term.ResetStyle()
@@ -63,7 +61,7 @@ func SelectInList(selected, scroll int, drawlist, childrens dirk.Files, currentD
 	}
 }
 
-func colorList(file dirk.File, active bool, i int, maxSize int64) {
+func colorList(file *dirk.File, active bool, i int, maxSize int64) {
 	tab = space + 2 + sideSpace
 	term.MoveTo(tab, i+1)
 	if file.IsDir() {
@@ -90,7 +88,7 @@ func ColorSelect(active bool, style term.Style, color term.Color) {
 	}
 }
 
-func drawIcon(active, yesno bool, file dirk.File, i int) (tabTurn int) {
+func drawIcon(active, yesno bool, file *dirk.File, i int) (tabTurn int) {
 	before := ""
 	after := "  "
 	if file.Selected && file.Active {
@@ -114,7 +112,7 @@ func drawIcon(active, yesno bool, file dirk.File, i int) (tabTurn int) {
 	return
 }
 
-func drawName(active bool, file dirk.File, i int) (tabTurn int) {
+func drawName(active bool, file *dirk.File, i int) (tabTurn int) {
 	term.MoveTo(tab, i+1)
 	spacer := ""
 	if active {
@@ -129,7 +127,7 @@ func drawName(active bool, file dirk.File, i int) (tabTurn int) {
 	return
 }
 
-func drawChildren(yesno bool, file dirk.File, i int) (tabTurn int) {
+func drawChildren(yesno bool, file *dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
 		fmt.Print("  " + strconv.Itoa(file.ChildrenNr()) + " ")
@@ -140,7 +138,7 @@ func drawChildren(yesno bool, file dirk.File, i int) (tabTurn int) {
 	return tabTurn
 }
 
-func drawSize(yesno bool, file dirk.File, i int) (tabTurn int) {
+func drawSize(yesno bool, file *dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
 		fmt.Print(file.SizeSTR(dirk.DiskUse) + " ")
@@ -151,10 +149,10 @@ func drawSize(yesno bool, file dirk.File, i int) (tabTurn int) {
 	return tabTurn
 }
 
-func drawDate(yesno bool, file dirk.File, i int) (tabTurn int) {
+func drawDate(yesno bool, file *dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print(file.File.ModTime().Format(time.RFC822) + " ")
+		fmt.Print(file.TimeBirth().Format(time.RFC822) + " ")
 		tabTurn = tab + 25
 	} else {
 		tabTurn = tab
@@ -162,7 +160,7 @@ func drawDate(yesno bool, file dirk.File, i int) (tabTurn int) {
 	return tabTurn
 }
 
-func drawMode(yesno bool, file dirk.File, i int) (tabTurn int) {
+func drawMode(yesno bool, file *dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
 		fmt.Print(file.File.Mode())
@@ -193,7 +191,7 @@ func sizeBar(maxSize, size int64) (toPrint string) {
 	return
 }
 
-func drawDU(yesno bool, file dirk.File, i int, maxSize int64) (tabTurn int) {
+func drawDU(yesno bool, file *dirk.File, i int, maxSize int64) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
 		fmt.Print(sizeBar(maxSize, file.SizeINT(dirk.DiskUse)))
@@ -205,7 +203,7 @@ func drawDU(yesno bool, file dirk.File, i int, maxSize int64) (tabTurn int) {
 	return tabTurn
 }
 
-func drawMime(yesno bool, file dirk.File, i int) (tabTurn int) {
+func drawMime(yesno bool, file *dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
 		fmt.Print(file.GetMime())
