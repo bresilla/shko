@@ -15,41 +15,27 @@ var (
 )
 
 func SelectInList(selected, scroll *int, drawlist, childrens *dirk.Files, currentDir *dirk.File) {
-	lenMax := 15
-	topSpace = 0
-	sideSpace = 0
-	if len(*childrens) > 0 {
-		lenMax = (*childrens)[len(*childrens)-1].MaxPath()
-	}
-
-	if center && termHeight > len(*drawlist) {
-		topSpace += termHeight/2 - (len(*drawlist) / 2)
-		sideSpace = termWidth/2 - lenMax/2 - 5
-	}
-
 	term.MoveTo(0, 0)
 	term.ClearAll()
-	if topBar {
-		topSpace = 2
+	if showBar {
 		Print(term.HighLight, term.Black, term.Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
 		Print(term.Default, term.Cyan, term.Black, DashBorder2("", "¯", 0))
 	}
 	if len(*drawlist) == 0 {
-		fmt.Print("  ")
-		term.MoveTo(sideSpace+3, topSpace)
+		term.MoveTo(termWidth/2-8, termHeight/2+1)
 		Print(term.HighLight, term.Black, term.White, "  nothing to show  ")
 	} else {
 		for i := range *drawlist {
 			if i == *selected || (*drawlist)[i].Selected == true {
-				colorList((*drawlist)[i], true, i+topSpace)
+				colorList((*drawlist)[i], true, i+barSpace)
 			} else {
-				colorList((*drawlist)[i], false, i+topSpace)
+				colorList((*drawlist)[i], false, i+barSpace)
 			}
 			fmt.Print("\n")
 			term.ResetStyle()
 		}
 	}
-	if statBar {
+	if showBar {
 		term.MoveTo(0, termHeight)
 		Print(term.Default, term.Cyan, term.Black, DashBorder2("", "_", 0))
 		Print(term.HighLight, term.Black, term.Cyan, DashBorder2(currentDir.Path, "-", termWidth/2-(len([]rune(currentDir.Path)))/2))
@@ -68,7 +54,7 @@ func colorList(file *dirk.File, active bool, i int) {
 	tab = drawName(active, file, i)
 	tab = drawChildren(showChildren, file, i)
 	tab = drawMode(showMode, file, i)
-	//tab = drawDU(dirk.DiskUse, file, i)
+	tab = drawDU(dirk.DiskUse, file, i)
 	tab = drawSize(showSize, file, i)
 	tab = drawDate(showDate, file, i)
 	tab = drawMime(showMime, file, i)

@@ -92,8 +92,7 @@ func shkoMenu(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, sc
 		showDate = !showDate
 		center = false
 	case 98: //	------------------------------------------------	b
-		topBar = !topBar
-		statBar = !statBar
+		showBar = !showBar
 		center = false
 	case 115: //	--------------------------------------------	s
 		showSize = !showSize
@@ -103,8 +102,7 @@ func shkoMenu(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, sc
 	case 100: //	--------------------------------------------	d
 		dirk.DiskUse = true
 		showSize = true
-		topBar = true
-		statBar = true
+		showBar = true
 		showDate = true
 		showMode = true
 		showMime = true
@@ -190,7 +188,7 @@ func shkoMatch(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, s
 	results := dirk.FindFrom(pattern, childrens)
 	for {
 		termWidth, termHeight = t.Size()
-		*drawlist = prepList(matched)
+		*drawlist = prepList(&matched)
 		SelectInList(&*number, &*scroll, &*drawlist, &matched, &*currentDir)
 		StatusWrite("Search for:")
 		fmt.Print(pattern)
@@ -251,7 +249,7 @@ func shkoNew(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scr
 		*childrens = tempDir.ListDir()
 		for {
 			termWidth, termHeight = t.Size()
-			drawlist := prepList(*childrens)
+			drawlist := prepList(&*childrens)
 			SelectInList(&number, &scroll, &drawlist, &*childrens, &tempDir)
 			ascii, keycode, _ := t.GetChar()
 			if ascii == 13 { // ----	ENTER

@@ -15,10 +15,9 @@ var (
 	shortcut              = 17
 	dirASwitch            = true
 	dirBSwitch            = false
-	statBar               = false
-	topBar                = statBar
-	topSpace              = 0
+	barSpace              = 0
 	sideSpace             = 0
+	textLen               = 15
 	startDir, _           = dirk.MakeFile(os.Getenv("PWD"))
 	currentDir            = startDir
 	childrens             = currentDir.ListDir()
@@ -60,6 +59,7 @@ var (
 	sortType              = false
 	sortMode              = false
 	sortChildren          = false
+	showBar               = false
 	homeDir, _            = dirk.MakeFile(os.Getenv("HOME"))
 	tempDir, _            = dirk.MakeFile(tempfolder)
 	dirA                  = homeDir
@@ -84,7 +84,7 @@ func Flags() {
 	flag.BoolVar(&showIcons, "i", true, "")
 	flag.BoolVar(&showMode, "m", false, "")
 	flag.BoolVar(&showDate, "t", false, "")
-	flag.BoolVar(&topBar, "b", false, "")
+	flag.BoolVar(&showBar, "b", false, "")
 	flag.IntVar(&shortcut, "short", 17, "")
 }
 
@@ -139,29 +139,40 @@ func entryConditions() {
 
 }
 
-func prepList(childrens dirk.Files) (drawlist dirk.Files) {
-	topSpace = 0
-	if topBar {
-		topSpace = 2
-		statBar = true
-	} else {
-		statBar = false
-	}
+func prepList(childrens *dirk.Files) (drawlist dirk.Files) {
+	barSpace = 0
+	sideSpace = 0
 	if center {
 		showChildren = false
 		showSize = false
 		showDate = false
 		showMode = false
 		dirk.DiskUse = false
-		statBar = false
-		topBar = false
+		showBar = false
 		showMime = false
 	}
+	if len(*childrens) > 0 {
+		textLen = (*childrens)[len(*childrens)-1].MaxPath()
+	}
+	if showBar {
+		barSpace = 2
+	}
+	termHeight = termHeight - barSpace
 	foreward = false
 	backward = false
-	drawlist = childrens
-	termHeight = termHeight - topSpace
-	if len(drawlist) > termHeight-1 {
+	if len(*childrens) != 0 {
+		for i := range *childrens {
+			(*childrens)[i].Active = false
+		}
+		if number >= len(*childrens) {
+			number = len(*childrens) - 1
+		} else if number < 0 {
+			number = 0
+		}
+		(*childrens)[number].Active = true
+		drawlist = *childrens
+	}
+	if len(*childrens) > termHeight-1 {
 		if number > termHeight/2 {
 			foreward = true
 			backward = false
@@ -169,28 +180,22 @@ func prepList(childrens dirk.Files) (drawlist dirk.Files) {
 			backward = true
 			foreward = false
 		}
-		if len(childrens) < termHeight {
+		if len(*childrens) < termHeight {
 			scroll = 0
 		}
 		if scroll <= 0 {
 			scroll = 0
 			backward = false
-		} else if scroll >= len(childrens)+1-termHeight {
-			scroll = len(childrens) + 1 - termHeight
+		} else if scroll >= len(*childrens)+1-termHeight {
+			scroll = len(*childrens) + 1 - termHeight
 			foreward = false
 		}
-		drawlist = drawlist[0+scroll : termHeight-1-topSpace+scroll]
+		drawlist = (*childrens)[0+scroll : termHeight-1-barSpace+scroll]
 	}
-	if number > len(childrens) && len(childrens) != 0 {
-		number = len(childrens)
-	} else if number < 0 {
-		number = 0
-	}
-	if len(childrens) != 0 {
-		for i := range childrens {
-			childrens[i].Active = false
-		}
-		childrens[number].Active = true
+
+	if center && termHeight > len(drawlist) {
+		barSpace += termHeight/2 - (len(drawlist) / 2)
+		sideSpace = termWidth/2 - textLen/2 - 5
 	}
 	return
 }
@@ -198,7 +203,7 @@ func prepList(childrens dirk.Files) (drawlist dirk.Files) {
 func Loop(childrens dirk.Files) {
 	for {
 		termWidth, termHeight = term.Size()
-		drawlist := prepList(childrens)
+		drawlist := prepList(&childrens)
 		SelectInList(&number, &scroll, &drawlist, &childrens, &currentDir)
 		ascii, keycode, _ := term.GetChar()
 		if ascii == 13 || ascii == shortcut { //----------------------------	enter, SHORTCUT (quit + chdir)
