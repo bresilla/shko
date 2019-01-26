@@ -370,14 +370,21 @@ func shkoDelete(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, 
 }
 
 func shkoOpen(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scroll *int) {
+	if len(currentDir.Select(*childrens)) > 1 {
+		return
+	}
 	StatusWrite("Press \"o\" to OPEN or \"w\" to OPEN WITH...")
 	ascii, _, _ := t.GetChar()
 	switch ascii {
 	case 111:
-		currentDir.Select(*childrens).Start()
+		if val, ok := openinit[currentDir.Select(*childrens)[0].GetExte()[1:]]; ok {
+			currentDir.Select(*childrens).Start(val)
+		} else {
+			currentDir.Select(*childrens).Start("xdg-open")
+		}
 	case 119:
-		toOpenWith := StatusRead("Open with", "nvim")
-		currentDir.Select(*childrens).StartWith(toOpenWith)
+		toOpenWith := StatusRead("Open with", "xdg-open")
+		currentDir.Select(*childrens).Start(toOpenWith)
 	}
 }
 

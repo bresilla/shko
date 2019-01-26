@@ -165,6 +165,20 @@ func matchFrecency(toMatch string) (matchedFile string) {
 	return
 }
 
+func createTemplates(folder string) {
+	CreateDir(folder)
+	for name, bytes := range templates.Template {
+		if _, err := os.Stat(tempfolder + "/" + name); err == nil {
+			log.Print("File Exists")
+		} else {
+			newFileName := tempfolder + "/" + name
+			newFile, _ := os.Create(newFileName)
+			newFile.Write(bytes)
+			newFile.Close()
+		}
+	}
+}
+
 var bookinit = map[string]string{
 	"~": homeDir.Path,
 	"d": homeDir.Path + "/Documents",
@@ -295,16 +309,31 @@ func readScripts(ascii int) (script string, exists bool) {
 	return
 }
 
-func createTemplates(folder string) {
-	CreateDir(folder)
-	for name, bytes := range templates.Template {
-		if _, err := os.Stat(tempfolder + "/" + name); err == nil {
-			log.Print("File Exists")
-		} else {
-			newFileName := tempfolder + "/" + name
-			newFile, _ := os.Create(newFileName)
-			newFile.Write(bytes)
-			newFile.Close()
+var openinit = map[string]string{
+	"mp4": "mpv",
+	"mkv": "mpv",
+	"pdf": "zathura",
+}
+
+func initializeOpenlist() {
+	if _, err := os.Stat(openFile); err == nil {
+		jointMem, err := ioutil.ReadFile(openFile)
+		if err != nil {
+			return
 		}
+		allXDGs := strings.Split(string(jointMem), "\n")
+		for _, el := range allXDGs {
+			arr := strings.Split(el, " > ")
+			if arr[0] == "" || arr[1] == "" {
+				continue
+			}
+			xdgopen[arr[0]] = arr[1]
+		}
+	} else {
+		newFile, _ := os.Create(openFile)
+		for i, el := range openinit {
+			newFile.WriteString(i + " > " + el + "\n")
+		}
+		newFile.Close()
 	}
 }

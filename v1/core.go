@@ -34,6 +34,7 @@ var (
 	dirFile               = setfolder + "/chdir"
 	tabFile               = setfolder + "/tabdirs"
 	scriptsFile           = setfolder + "/scripts"
+	openFile              = setfolder + "/open"
 	freqFile              = setfolder + "/frecency"
 	memFile               = setfolder + "/memory"
 	bulkFile              = setfolder + "/rename"
@@ -44,6 +45,7 @@ var (
 	swichero, _           = loadFromFile(tabFile)
 	scripts               = map[string]string{}
 	bookmark              = map[string]string{}
+	xdgopen               = map[string]string{}
 	copySlice             dirk.Files
 	showIcons             = true
 	showChildren          = false
@@ -114,6 +116,7 @@ func Main() {
 	createTemplates(tempfolder)
 	initializeBookmarks()
 	initializeScriptlist()
+	initializeOpenlist()
 
 	fmt.Print("\033[?25l")
 	Flags()
