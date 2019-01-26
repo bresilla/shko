@@ -310,9 +310,9 @@ func readScripts(ascii int) (script string, exists bool) {
 }
 
 var openinit = map[string]string{
-	"mp4": "mpv",
-	"mkv": "mpv",
-	"pdf": "zathura",
+	".mp4": "play",
+	".mkv": "play",
+	".pdf": "zathura",
 }
 
 func initializeOpenlist() {

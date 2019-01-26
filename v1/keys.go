@@ -3,6 +3,7 @@ package shko
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
@@ -65,7 +66,7 @@ func shkoRight(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, s
 		addToMemory(oldDir, *currentDir)
 		*number, *scroll = findInMemory(*currentDir, *childrens)
 	} else {
-		currentDir.Select(*childrens).Edit()
+		currentDir.Select(*childrens).Current().Edit()
 		fmt.Print("\033[?25l")
 	}
 	backward = false
@@ -370,21 +371,18 @@ func shkoDelete(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, 
 }
 
 func shkoOpen(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scroll *int) {
-	if len(currentDir.Select(*childrens)) > 1 {
-		return
-	}
 	StatusWrite("Press \"o\" to OPEN or \"w\" to OPEN WITH...")
 	ascii, _, _ := t.GetChar()
 	switch ascii {
 	case 111:
-		if val, ok := openinit[currentDir.Select(*childrens)[0].GetExte()[1:]]; ok {
+		if val, ok := xdgopen[currentDir.Select(*childrens).Current()[0].GetExte()]; ok {
 			currentDir.Select(*childrens).Start(val)
 		} else {
-			currentDir.Select(*childrens).Start("xdg-open")
+			currentDir.Select(*childrens).Current().Start("xdg-open")
 		}
 	case 119:
 		toOpenWith := StatusRead("Open with", "xdg-open")
-		currentDir.Select(*childrens).Start(toOpenWith)
+		currentDir.Select(*childrens).Current().Start(toOpenWith)
 	}
 }
 
@@ -439,8 +437,12 @@ func shkoScript(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, 
 		script, exists := readScripts(ascii)
 		if exists {
 			re := regexp.MustCompile(`@`)
-			toRun := re.ReplaceAllString(script, (*childrens)[*number].Path)
-			RunScript(toRun)
+			toRun := re.ReplaceAllString(script, currentDir.Select(*childrens).Current()[0].Path)
+			go func(name string) {
+				var cmd *exec.Cmd
+				cmd = exec.Command("bash", "-c", name)
+				go cmd.Start()
+			}(toRun)
 		}
 	}
 }
