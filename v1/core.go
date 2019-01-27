@@ -154,9 +154,6 @@ func prepList(childrens *dirk.Files) (drawlist dirk.Files) {
 		showBar = false
 		showMime = false
 	}
-	if len(*childrens) > 0 {
-		textLen = (*childrens)[len(*childrens)-1].MaxPath()
-	}
 	if showBar {
 		barSpace = 2
 	}
@@ -164,6 +161,7 @@ func prepList(childrens *dirk.Files) (drawlist dirk.Files) {
 	foreward = false
 	backward = false
 	if len(*childrens) != 0 {
+		textLen = (*childrens)[len(*childrens)-1].MaxPath()
 		for i := range *childrens {
 			(*childrens)[i].Active = false
 		}
@@ -172,7 +170,7 @@ func prepList(childrens *dirk.Files) (drawlist dirk.Files) {
 		} else if number < 0 {
 			number = 0
 		}
-		(*childrens)[number].Active = true
+		(*childrens)[scroll+number].Active = true
 		drawlist = *childrens
 	}
 	if len(*childrens) > termHeight-1 {
@@ -183,9 +181,6 @@ func prepList(childrens *dirk.Files) (drawlist dirk.Files) {
 			backward = true
 			foreward = false
 		}
-		if len(*childrens) < termHeight {
-			scroll = 0
-		}
 		if scroll <= 0 {
 			scroll = 0
 			backward = false
@@ -195,11 +190,11 @@ func prepList(childrens *dirk.Files) (drawlist dirk.Files) {
 		}
 		drawlist = (*childrens)[0+scroll : termHeight-1-barSpace+scroll]
 	}
-
 	if center && termHeight > len(drawlist) {
 		barSpace += termHeight/2 - (len(drawlist) / 2)
 		sideSpace = termWidth/2 - textLen/2 - 5
 	}
+
 	return
 }
 

@@ -54,7 +54,7 @@ func colorList(file *dirk.File, active bool, i int) {
 	tab = drawName(active, file, i)
 	tab = drawChildren(showChildren, file, i)
 	tab = drawMode(showMode, file, i)
-	tab = drawDU(dirk.DiskUse, file, i)
+	//tab = drawDU(dirk.DiskUse, file, i)
 	tab = drawSize(showSize, file, i)
 	tab = drawDate(showDate, file, i)
 	tab = drawMime(showMime, file, i)
@@ -81,7 +81,7 @@ func drawIcon(active, yesno bool, file *dirk.File, i int) (tabTurn int) {
 	}
 	before += " "
 	if yesno {
-		fmt.Print(before + file.GetIcon() + after)
+		fmt.Print(before + file.MimeIcon() + after)
 	} else {
 		if file.IsDir() {
 			fmt.Print(before + ">" + after)
@@ -111,7 +111,7 @@ func drawName(active bool, file *dirk.File, i int) (tabTurn int) {
 func drawChildren(yesno bool, file *dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print("  " + strconv.Itoa(file.ChildrenNr()) + " ")
+		fmt.Print("  " + strconv.Itoa(len(file.Childrens())) + " ")
 		tabTurn = tab + 8
 	} else {
 		tabTurn = tab
@@ -188,7 +188,7 @@ func drawDU(yesno bool, file *dirk.File, i int) (tabTurn int) {
 func drawMime(yesno bool, file *dirk.File, i int) (tabTurn int) {
 	if yesno {
 		term.MoveTo(tab, i+1)
-		fmt.Print(file.GetMime())
+		fmt.Print(file.MimeType())
 		fmt.Print(" ")
 		tabTurn = tab + 20
 	} else {

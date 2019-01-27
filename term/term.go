@@ -148,7 +148,7 @@ func ShowCursor() {
 	fmt.Printf("\033[?25h")
 }
 
-func PrintWait(toPrint string) {
+func PrintWait(toPrint interface{}) {
 	SetStyle(HighLight, Black, White)
 	fmt.Print(toPrint)
 	ResetStyle()

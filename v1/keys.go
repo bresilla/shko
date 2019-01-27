@@ -21,7 +21,7 @@ func shkoUp(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scro
 	if *number < 0 {
 		if wrap {
 			*number = len(*drawlist) - 1
-			*scroll = len(*childrens) - 1
+			*scroll = len(*childrens) - 1 - *number
 		} else {
 			*number = 0
 		}
@@ -48,7 +48,7 @@ func shkoLeft(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, sc
 		return
 	}
 	oldDir := *currentDir
-	*currentDir, _ = dirk.MakeFile(currentDir.ParentPath())
+	*currentDir, _ = dirk.MakeFile(currentDir.Parent()[0].Path)
 	*childrens = currentDir.ListDir()
 	*number, *scroll = findFile(*childrens, oldDir)
 	backward = false
@@ -101,14 +101,13 @@ func shkoMenu(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, sc
 	case 99: //	------------------------------------------------	c
 		center = !center
 	case 100: //	--------------------------------------------	d
-		dirk.DiskUse = true
+		center = false
 		showSize = true
 		showBar = true
 		showDate = true
 		showMode = true
 		showMime = true
 		showChildren = true
-		center = false
 	case 122: //	--------------------------------------------	z
 		center = false
 		dirk.DiskUse = !dirk.DiskUse
@@ -126,38 +125,21 @@ func shkoRecurr(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, 
 	dirk.Recurrent = !dirk.Recurrent
 	dirk.DiskUse = false
 	*childrens = currentDir.ListDir()
-	if dirk.Recurrent {
-		for i := range *childrens {
-			(*childrens)[i].Name = (*childrens)[i].Path
-		}
-	}
 	*number = 0
 	*scroll = 0
 }
 
 func shkoSelect(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scroll *int) {
 	(*drawlist)[*number].Selected = !(*drawlist)[*number].Selected
-	if foreward {
-		*scroll++
-	} else {
-		*number++
-	}
-	if *number > len(*drawlist)-1 {
-		if wrap {
-			*number = 0
-			*scroll = 0
-		} else {
-			*number = len(*drawlist) - 1
-		}
-	}
+	shkoDown(currentDir, childrens, drawlist, number, scroll)
 }
 
 func shkoSwitch(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scroll *int) {
 	if dirASwitch {
 		if len(*childrens) > 0 {
-			dirA, _ = dirk.MakeFile((*childrens)[0].ParentPath())
+			dirA, _ = dirk.MakeFile((*childrens)[0].Parent()[0].Path)
 		} else {
-			dirA, _ = dirk.MakeFile(currentDir.ParentPath())
+			dirA, _ = dirk.MakeFile(currentDir.Parent()[0].Path)
 		}
 		*currentDir = dirB
 		*childrens = dirB.ListDir()
@@ -167,9 +149,9 @@ func shkoSwitch(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, 
 		showIcons = !showIcons
 	} else {
 		if len(*childrens) > 0 {
-			dirB, _ = dirk.MakeFile((*childrens)[0].ParentPath())
+			dirB, _ = dirk.MakeFile((*childrens)[0].Parent()[0].Path)
 		} else {
-			dirB, _ = dirk.MakeFile(currentDir.ParentPath())
+			dirB, _ = dirk.MakeFile(currentDir.Parent()[0].Path)
 		}
 		*currentDir = dirA
 		*childrens = dirA.ListDir()
@@ -254,7 +236,7 @@ func shkoNew(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, scr
 			SelectInList(&number, &scroll, &drawlist, &*childrens, &tempDir)
 			ascii, keycode, _ := t.GetChar()
 			if ascii == 13 { // ----	ENTER
-				newFile, _ := dirk.MakeFiles(drawlist[number].Path)
+				newFile, _ := dirk.MakeFiles([]string{drawlist[number].Path})
 				newFile.Paste(*currentDir)
 				break
 			} else if keycode == 38 || ascii == 107 { //up
@@ -375,7 +357,7 @@ func shkoOpen(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, sc
 	ascii, _, _ := t.GetChar()
 	switch ascii {
 	case 111:
-		if val, ok := xdgopen[currentDir.Select(*childrens).Current()[0].GetExte()]; ok {
+		if val, ok := xdgopen[currentDir.Select(*childrens).Current()[0].MimeExte()]; ok {
 			currentDir.Select(*childrens).Start(val)
 		} else {
 			currentDir.Select(*childrens).Current().Start("xdg-open")
@@ -425,7 +407,7 @@ func shkoScript(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, 
 				saveScript()
 			}
 		} else if ascii == 32 {
-			scriptFiles, _ := dirk.MakeFiles(scriptsFile)
+			scriptFiles, _ := dirk.MakeFiles([]string{scriptsFile})
 			scriptFiles.Edit()
 			fmt.Print("\033[?25l")
 		} else {
@@ -473,7 +455,7 @@ func shkoBookIt(currentDir *dirk.File, childrens, drawlist *dirk.Files, number, 
 				saveBookmarks()
 			}
 		} else if ascii == 32 {
-			markFiles, _ := dirk.MakeFiles(markFile)
+			markFiles, _ := dirk.MakeFiles([]string{markFile})
 			markFiles.Edit()
 			fmt.Print("\033[?25l")
 		} else {
