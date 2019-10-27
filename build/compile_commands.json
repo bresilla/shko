@@ -1,0 +1,27 @@
+[
+{
+  "directory": "/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/thrd/fmt",
+  "command": "/nix/store/qy6rb8p4fg1p3xfw0g6wz6iirxbdxizp-gcc-wrapper-8.3.0/bin/g++   -I/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/fmt/include   -Wall -Wno-unknown-pragmas -Wno-sign-compare -Woverloaded-virtual -Wwrite-strings -Wno-unused --coverage -fprofile-arcs -ftest-coverage   -w -std=gnu++11 -o CMakeFiles/fmt.dir/src/format.cc.o -c /home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/fmt/src/format.cc",
+  "file": "/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/fmt/src/format.cc"
+},
+{
+  "directory": "/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/thrd/fmt",
+  "command": "/nix/store/qy6rb8p4fg1p3xfw0g6wz6iirxbdxizp-gcc-wrapper-8.3.0/bin/g++   -I/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/fmt/include   -Wall -Wno-unknown-pragmas -Wno-sign-compare -Woverloaded-virtual -Wwrite-strings -Wno-unused --coverage -fprofile-arcs -ftest-coverage   -w -std=gnu++11 -o CMakeFiles/fmt.dir/src/posix.cc.o -c /home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/fmt/src/posix.cc",
+  "file": "/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/fmt/src/posix.cc"
+},
+{
+  "directory": "/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/thrd/spdlog",
+  "command": "/nix/store/qy6rb8p4fg1p3xfw0g6wz6iirxbdxizp-gcc-wrapper-8.3.0/bin/g++  -DSPDLOG_COMPILED_LIB -I/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/spdlog/include   -Wall -Wno-unknown-pragmas -Wno-sign-compare -Woverloaded-virtual -Wwrite-strings -Wno-unused --coverage -fprofile-arcs -ftest-coverage   -Wall -Wextra -Wconversion -pedantic -Wfatal-errors -std=c++11 -o CMakeFiles/spdlog.dir/src/spdlog.cpp.o -c /home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/spdlog/src/spdlog.cpp",
+  "file": "/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/spdlog/src/spdlog.cpp"
+},
+{
+  "directory": "/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/src",
+  "command": "/nix/store/qy6rb8p4fg1p3xfw0g6wz6iirxbdxizp-gcc-wrapper-8.3.0/bin/g++  -DFMT_HEADER_ONLY=1 -I/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/src -I/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/src} -I/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/rang/include -I/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/args -I/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/fmt/include   -Wall -Wno-unknown-pragmas -Wno-sign-compare -Woverloaded-virtual -Wwrite-strings -Wno-unused --coverage -fprofile-arcs -ftest-coverage   -o CMakeFiles/CLIntacts.dir/main.cpp.o -c /home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/src/main.cpp",
+  "file": "/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/src/main.cpp"
+},
+{
+  "directory": "/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/src",
+  "command": "/nix/store/qy6rb8p4fg1p3xfw0g6wz6iirxbdxizp-gcc-wrapper-8.3.0/bin/g++   -I/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/src} -I/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/doctest/doctest -isystem /home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/thrd/fmt/include   -Wall -Wno-unknown-pragmas -Wno-sign-compare -Woverloaded-virtual -Wwrite-strings -Wno-unused --coverage -fprofile-arcs -ftest-coverage   -o CMakeFiles/contacts.dir/inc/contacts.cpp.o -c /home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/src/inc/contacts.cpp",
+  "file": "/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/src/inc/contacts.cpp"
+}
+]

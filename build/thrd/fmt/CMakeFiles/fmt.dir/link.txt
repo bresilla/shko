@@ -1,0 +1,2 @@
+/nix/store/jy6zl5dkw5rcjczm1arjqxz95l9d40i7-binutils-2.31.1/bin/ar qc ../../lib/libfmt.a  CMakeFiles/fmt.dir/src/format.cc.o CMakeFiles/fmt.dir/src/posix.cc.o
+/nix/store/jy6zl5dkw5rcjczm1arjqxz95l9d40i7-binutils-2.31.1/bin/ranlib ../../lib/libfmt.a

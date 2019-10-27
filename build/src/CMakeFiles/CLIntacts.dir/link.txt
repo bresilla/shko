@@ -1,0 +1,1 @@
+/nix/store/qy6rb8p4fg1p3xfw0g6wz6iirxbdxizp-gcc-wrapper-8.3.0/bin/g++   -Wall -Wno-unknown-pragmas -Wno-sign-compare -Woverloaded-virtual -Wwrite-strings -Wno-unused --coverage -fprofile-arcs -ftest-coverage   CMakeFiles/CLIntacts.dir/main.cpp.o  -o ../bin/CLIntacts ../lib/libcontacts.a -lcrypt ../lib/libfmt.a -Wl,-Bstatic -lyaml-cpp -Wl,-Bdynamic 

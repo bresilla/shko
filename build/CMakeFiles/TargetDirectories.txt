@@ -1,0 +1,14 @@
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/CMakeFiles/rebuild_cache.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/CMakeFiles/edit_cache.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/thrd/CMakeFiles/rebuild_cache.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/thrd/CMakeFiles/edit_cache.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/thrd/fmt/CMakeFiles/rebuild_cache.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/thrd/fmt/CMakeFiles/edit_cache.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/thrd/fmt/CMakeFiles/fmt.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/thrd/spdlog/CMakeFiles/edit_cache.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/thrd/spdlog/CMakeFiles/rebuild_cache.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/thrd/spdlog/CMakeFiles/spdlog.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/src/CMakeFiles/rebuild_cache.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/src/CMakeFiles/edit_cache.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/src/CMakeFiles/CLIntacts.dir
+/home/bresilla/DATA/CODE/PROJECTS/OTHER/CLIntacts/build/src/CMakeFiles/contacts.dir

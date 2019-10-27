@@ -1,0 +1,7 @@
+#!/usr/bin/env
+
+cd /tmp/
+git clone --recurse-submodules https://github.com/foonathan/standardese
+cd standardese && mkdir build && cd build
+cmake ..
+make && cp tool/standardese /usr/local/bin
